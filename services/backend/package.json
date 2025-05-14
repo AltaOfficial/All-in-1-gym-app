@@ -1,0 +1,12 @@
+{
+  "name": "gym-app-backend",
+  "version": "1.0.0",
+  "description": "Backend for the all in 1 gym app",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
