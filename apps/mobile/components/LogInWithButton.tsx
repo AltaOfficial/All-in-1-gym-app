@@ -12,10 +12,12 @@ const LogInWithButton = ({
 }) => {
   return (
     <Pressable
-      className={`flex flex-row bg-white text-center rounded-[2rem] ${className}`}
+      className={`flex flex-row gap-6 bg-white justify-center rounded-[2rem] py-3 w-96 ${className}`}
     >
       {children}
-      <Text className="text-black font-[HelveticaNeueMedium]">{text}</Text>
+      <Text className="text-black font-[HelveticaNeueMedium] text-center self-center">
+        {text}
+      </Text>
     </Pressable>
   );
 };

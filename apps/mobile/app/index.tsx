@@ -28,29 +28,31 @@ const Home = () => {
         onPress={() => console.log("hello")}
         className="bg-[#F84959] w-96 py-4 justify-center align-middle place-content-center place-items-center text-center rounded-[2rem]"
       >
-        <Text className="text-white text-center font-[HelveticaNueue] text-xl">
+        <Text className="text-white text-center font-[HelveticaNueue] text-lg">
           Continue
         </Text>
       </Pressable>
-      <Text className="text-white">or</Text>
-      <LogInWithButton text="Continue with Google" className="mb-10">
-        <Image
-          source={require("../assets/images/google logo.png")}
-          className="w-10 h-10"
-        />
-      </LogInWithButton>
-      <LogInWithButton text="Continue with Apple">
-        <Image
-          source={require("../assets/images/apple logo.png")}
-          className="w-10 h-10"
-        />
-      </LogInWithButton>
-      <LogInWithButton text="Continue with Facebook">
-        <Image
-          source={require("../assets/images/facebook logo.png")}
-          className="w-10 h-10"
-        />
-      </LogInWithButton>
+      <Text className="text-white my-10 text-lg font-[HelveticaNueue]">or</Text>
+      <View className="grid gap-4">
+        <LogInWithButton text="Continue with Google">
+          <Image
+            source={require("../assets/images/google logo.png")}
+            className="w-10 h-10"
+          />
+        </LogInWithButton>
+        <LogInWithButton text="Continue with Apple">
+          <Image
+            source={require("../assets/images/apple logo.png")}
+            className="w-10 h-10"
+          />
+        </LogInWithButton>
+        <LogInWithButton text="Continue with Facebook">
+          <Image
+            source={require("../assets/images/facebook logo.png")}
+            className="w-10 h-10"
+          />
+        </LogInWithButton>
+      </View>
     </View>
   );
 };
