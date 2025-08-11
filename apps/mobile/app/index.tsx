@@ -1,62 +1,46 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Pressable,
-  Image,
-} from "react-native";
-import LogInWithButton from "../components/LogInWithButton";
+import { StyleSheet, View, Text, ScrollView, Pressable } from "react-native";
 import React from "react";
+import { Link } from "expo-router";
+import DashboardHero from "../components/DashboardHero";
+import FoodlogCard from "../components/FoodlogCard";
+import DashboardMetricCard from "../components/DashboardMetricCard";
 
-const Home = () => {
+const Dashboard = () => {
   return (
-    <View className="flex-1 items-center justify-center p-28 dark:bg-black">
-      <Text className="font-[HelveticaNueueBoldItalic] text-[3.5rem] text-white mb-24">
+    <ScrollView className="bg-black flex-1">
+      <Text className="font-[HelveticaNueueBoldItalic] text-[3rem] text-white mb-12 text-center">
         strive.
       </Text>
-      <Text className="font-[HelveticaNueue] text-white text-[2rem] mb-10">
-        Login Or Signup
-      </Text>
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor={"#E0E0E0"}
-        placeholderClassName="opacity-35"
-        className="border font-[HelveticaNueue] text-white border-white rounded-[2rem] w-96 pl-8 py-4 caret-white mb-9"
-      ></TextInput>
-      <Pressable
-        onPress={() => console.log("hello")}
-        className="bg-[#F84959] w-96 py-4 justify-center align-middle place-content-center place-items-center text-center rounded-[2rem]"
-      >
-        <Text className="text-white text-center font-[HelveticaNueue] text-lg">
-          Continue
+      <DashboardHero className="mb-8 gap-6" />
+      <Pressable onPress={async () => {
+        await fetch("http://192.168.55.119:8000/hello")
+        .then(async data => {
+          console.log(await data.text());
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      }}>
+        <Text className="text-white">
+          test
         </Text>
       </Pressable>
-      <Text className="text-white my-10 text-lg font-[HelveticaNueue]">or</Text>
-      <View className="grid gap-4">
-        <LogInWithButton text="Continue with Google">
-          <Image
-            source={require("../assets/images/google logo.png")}
-            className="w-10 h-10"
-          />
-        </LogInWithButton>
-        <LogInWithButton text="Continue with Apple">
-          <Image
-            source={require("../assets/images/apple logo.png")}
-            className="w-10 h-10"
-          />
-        </LogInWithButton>
-        <LogInWithButton text="Continue with Facebook">
-          <Image
-            source={require("../assets/images/facebook logo.png")}
-            className="w-10 h-10"
-          />
-        </LogInWithButton>
+      <FoodlogCard />
+      <View className="px-3 mt-4">
+        <View className="flex-row flex-wrap justify-between">
+          <DashboardMetricCard title="Weight Trend" value="125.0" subLabel="lbs" dateFrom="2025-08-19" dateTo="2025-09-19" />
+          <DashboardMetricCard title="Muscle Gain/Loss" value="2.43" subLabel="lbs" dateFrom="2025-08-19" dateTo="2025-09-19" />
+          <DashboardMetricCard title="Fat Gain/Loss" value="1.43" subLabel="lbs" dateFrom="2025-08-19" dateTo="2025-09-19" />
+          <DashboardMetricCard title="Food Expenses" value="$19.39" dateFrom="2025-08-19" dateTo="2025-09-19" />
+          <DashboardMetricCard title="Body Metrics" value="39.0%" subLabel="Body Fat" dateFrom="2025-08-19" dateTo="2025-09-19" />
+          <DashboardMetricCard title="Avg. Sleep" value="7.23" subLabel="hrs" dateFrom="2025-08-19" dateTo="2025-09-19" />
+        </View>
       </View>
-    </View>
+    </ScrollView>
+
   );
 };
 
-export default Home;
+export default Dashboard;
 
 const styles = StyleSheet.create({});

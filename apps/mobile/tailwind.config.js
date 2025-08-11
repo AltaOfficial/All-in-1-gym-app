@@ -1,9 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/index.tsx", "./components/**/*.{ts,tsx}"],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#F43A45",
+        gray1: "#141414",
+        gray2: "#27272A",
+        protein: "#00FF4D",
+        carbs: "#FF861C",
+        fat: "#EEF43A",
+        link: "#3F7BFF",
+        fire: "#FF8000",
+        consumed: "#4CC3FF",
+      },
+    },
   },
   plugins: [],
 };
