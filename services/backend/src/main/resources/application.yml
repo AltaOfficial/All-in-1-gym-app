@@ -1,6 +1,9 @@
 spring:
   application:
-    name=app
+    name: app
+  sql:
+    init:
+      mode: always
 
 server:
-  port:8000
+  port: 8000
