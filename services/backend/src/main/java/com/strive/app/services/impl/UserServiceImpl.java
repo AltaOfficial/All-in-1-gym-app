@@ -27,6 +27,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserEntity save(Long id, UserEntity userEntity) {
+        return userRepository.findById(id).map(existingUser -> {
+            Optional.ofNullable(userEntity.getEmail()).ifPresent(existingUser::setEmail);
+            Optional.ofNullable(userEntity.getName()).ifPresent(existingUser::setName);
+            return userRepository.save(existingUser);
+        }).orElseThrow();
+    }
+
+    @Override
+    public void delete(Long id){
+        userRepository.deleteById(id);
+    }
+
+    @Override
     public Optional<UserEntity> findOne(Long id){
         return userRepository.findById(id);
     }

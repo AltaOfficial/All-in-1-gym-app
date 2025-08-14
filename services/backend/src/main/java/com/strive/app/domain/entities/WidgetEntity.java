@@ -18,4 +18,7 @@ public class WidgetEntity {
     private Long id;
     private String WidgetName;
     private String Description;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private UserEntity userEntity;
 }

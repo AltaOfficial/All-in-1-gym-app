@@ -7,6 +7,10 @@ import java.util.Optional;
 public interface UserService {
     UserEntity save(UserEntity user);
 
+    UserEntity save(Long id, UserEntity user);
+
+    void delete(Long id);
+
     Optional<UserEntity> findOne(Long id);
 
     boolean isExists(Long id);

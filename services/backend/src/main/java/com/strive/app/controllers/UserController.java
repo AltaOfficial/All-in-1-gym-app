@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping(path = "/users/create")
     public UserDto createUser(@RequestBody UserDto user) {
         UserEntity newUserEntity = userMapper.mapFrom(user);
-        UserEntity savedUserEntity =  userService.save(newUserEntity);
+        UserEntity savedUserEntity = userService.save(newUserEntity);
         return userMapper.mapTo(savedUserEntity);
     }
 
@@ -32,9 +32,8 @@ public class UserController {
         if(!userService.isExists(id)){
             return null;
         }
-        userDto.setId(id);
 
-        return userMapper.mapTo(userService.save(userMapper.mapFrom(userDto)));
+        return userMapper.mapTo(userService.save(id, userMapper.mapFrom(userDto)));
     }
 
     @GetMapping(path = "/users/{id}")

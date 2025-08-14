@@ -21,4 +21,8 @@ public class UserEntity {
 
     @Column(unique = true)
     private String email;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "widget_id")
+    private WidgetEntity widgetEntity;
 }
