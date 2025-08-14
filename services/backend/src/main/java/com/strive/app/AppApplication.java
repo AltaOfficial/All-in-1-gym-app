@@ -3,18 +3,10 @@ package com.strive.app;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-import javax.sql.DataSource;
-
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class AppApplication implements CommandLineRunner {
-    private final DataSource dataSource;
-
-    public AppApplication(final DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(AppApplication.class, args);
@@ -23,7 +15,5 @@ public class AppApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         System.out.println("hello");
-        final JdbcTemplate restTemplate = new JdbcTemplate(dataSource);
-        restTemplate.execute("select 1");
     }
 }

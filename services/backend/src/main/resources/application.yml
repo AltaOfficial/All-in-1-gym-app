@@ -1,9 +1,9 @@
 spring:
   application:
     name: app
-  sql:
-    init:
-      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 server:
   port: 8000
