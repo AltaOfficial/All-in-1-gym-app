@@ -16,9 +16,9 @@ public class WidgetEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "widget_id_seq")
     private Long id;
-    private String WidgetName;
-    private String Description;
-    @ManyToOne(cascade = CascadeType.ALL)
+    private String widgetName;
+    private String description;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 }

@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +25,11 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "widget_id")
-    private WidgetEntity widgetEntity;
+    @OneToMany(
+            cascade = CascadeType.ALL, // PERSIST, MERGE, REMOVE, REFRESH, DETACH happens to all the children as well
+            mappedBy = "userEntity",
+            orphanRemoval = true, // deletes child when no longer connected to parent
+            fetch = FetchType.LAZY
+    )
+    private List<WidgetEntity> widgets = new ArrayList<>();
 }

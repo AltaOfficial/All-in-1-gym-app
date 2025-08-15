@@ -4,10 +4,7 @@ import com.strive.app.domain.dto.WidgetDto;
 import com.strive.app.domain.entities.WidgetEntity;
 import com.strive.app.mappers.Mapper;
 import com.strive.app.services.WidgetService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -28,7 +25,7 @@ public class WidgetController {
     }
 
     @PostMapping(path = "/widget/create")
-    public WidgetDto createWidget(WidgetDto widgetDto) {
-        return null;
+    public WidgetDto createWidget(@RequestBody WidgetDto widgetDto) {
+        return widgetMapper.mapTo(widgetService.createWidget(widgetMapper.mapFrom(widgetDto)));
     }
 }

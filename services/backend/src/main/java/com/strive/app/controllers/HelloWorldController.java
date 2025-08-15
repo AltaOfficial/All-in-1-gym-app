@@ -25,8 +25,8 @@ public class HelloWorldController {
     public String helloWorld() {
 
         WidgetDto widget = WidgetDto.builder()
-                .WidgetName("Widdly widget")
-                .Description("Testing testing 123")
+                .widgetName("Widdly widget")
+                .description("Testing testing 123")
                 .build();
 
         WidgetEntity widgetEntity = widgetMapper.mapFrom(widget);

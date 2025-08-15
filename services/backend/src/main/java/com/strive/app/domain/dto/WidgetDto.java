@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WidgetDto {
     private Long id;
-    private String WidgetName;
-    private String Description;
+    private String widgetName;
+    private String description;
+    private UserDto user;
 }
