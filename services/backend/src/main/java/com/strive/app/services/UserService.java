@@ -3,15 +3,16 @@ package com.strive.app.services;
 import com.strive.app.domain.entities.UserEntity;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserService {
     UserEntity save(UserEntity user);
 
-    UserEntity save(Long id, UserEntity user);
+    UserEntity save(UUID id, UserEntity user);
 
-    void delete(Long id);
+    void delete(UUID id);
 
-    Optional<UserEntity> findOne(Long id);
+    Optional<UserEntity> findOne(UUID id);
 
-    boolean isExists(Long id);
+    boolean isExists(UUID id);
 }

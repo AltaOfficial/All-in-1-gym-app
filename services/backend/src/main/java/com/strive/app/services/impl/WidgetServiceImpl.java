@@ -3,18 +3,16 @@ package com.strive.app.services.impl;
 import com.strive.app.domain.entities.WidgetEntity;
 import com.strive.app.repositories.WidgetRepository;
 import com.strive.app.services.WidgetService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class WidgetServiceImpl implements WidgetService {
 
     private final WidgetRepository widgetRepository;
-
-    public WidgetServiceImpl(final WidgetRepository widgetRepository) {
-        this.widgetRepository = widgetRepository;
-    }
 
     @Override
     public WidgetEntity createWidget(WidgetEntity widgetEntity){

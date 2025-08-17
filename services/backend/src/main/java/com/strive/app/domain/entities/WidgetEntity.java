@@ -18,7 +18,7 @@ public class WidgetEntity {
     private Long id;
     private String widgetName;
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 }

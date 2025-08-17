@@ -3,21 +3,20 @@ package com.strive.app.services.impl;
 import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.repositories.UserRepository;
 import com.strive.app.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(final UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
-
     @Override
-    public boolean isExists(Long id) {
+    public boolean isExists(UUID id) {
         return userRepository.existsById(id);
     }
 
@@ -27,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity save(Long id, UserEntity userEntity) {
+    public UserEntity save(UUID id, UserEntity userEntity) {
         return userRepository.findById(id).map(existingUser -> {
             Optional.ofNullable(userEntity.getEmail()).ifPresent(existingUser::setEmail);
             Optional.ofNullable(userEntity.getName()).ifPresent(existingUser::setName);
@@ -36,12 +35,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(Long id){
+    public void delete(UUID id){
         userRepository.deleteById(id);
     }
 
     @Override
-    public Optional<UserEntity> findOne(Long id){
+    public Optional<UserEntity> findOne(UUID id){
         return userRepository.findById(id);
     }
 }
