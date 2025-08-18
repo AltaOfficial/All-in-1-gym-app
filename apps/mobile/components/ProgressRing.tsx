@@ -38,7 +38,7 @@ export default function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={"#FFFFFF"}
+          stroke={"#F43A45"}
           strokeWidth={strokeWidth}
           strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={strokeDashoffset}

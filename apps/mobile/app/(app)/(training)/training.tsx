@@ -1,7 +1,7 @@
 import { View } from 'react-native';
-import GenericButton from '../../components/GenericButton';
-import Seperator from '../../components/Seperator';
-import WorkoutListItem from '../../components/WorkoutListItem';
+import GenericButton from '../../../components/GenericButton';
+import Seperator from '../../../components/Seperator';
+import WorkoutListItem from '../../../components/WorkoutListItem';
 
 export default function Training() {
 

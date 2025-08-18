@@ -1,9 +1,9 @@
 import { StyleSheet, View, Text, ScrollView, Pressable } from "react-native";
 import React from "react";
 import { Link } from "expo-router";
-import DashboardHero from "../components/DashboardHero";
-import FoodlogCard from "../components/FoodlogCard";
-import DashboardMetricCard from "../components/DashboardMetricCard";
+import DashboardHero from "../../components/DashboardHero";
+import FoodlogCard from "../../components/FoodlogCard";
+import DashboardMetricCard from "../../components/DashboardMetricCard";
 
 const Dashboard = () => {
   return (
