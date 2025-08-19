@@ -33,8 +33,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         httpSecurity.authorizeHttpRequests(auth -> auth
                                 .requestMatchers(HttpMethod.GET, "/users/{id}").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
+                                .requestMatchers( "/auth/**").permitAll()
                         .anyRequest().authenticated()
         )
                 .csrf(csrf -> csrf.disable())

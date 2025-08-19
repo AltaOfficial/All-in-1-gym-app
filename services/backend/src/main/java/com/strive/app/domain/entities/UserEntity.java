@@ -30,6 +30,8 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+
+
     @OneToMany(
             cascade = CascadeType.ALL, // PERSIST, MERGE, REMOVE, REFRESH, DETACH happens to all the children as well
             mappedBy = "userEntity",

@@ -6,17 +6,18 @@ import com.strive.app.domain.dto.SignupRequestDto;
 import com.strive.app.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationService authenticationService;
+    private final UserDetailsService userDetailsService;
 
     @PostMapping(path = "/login")
     private ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
@@ -35,4 +36,27 @@ public class AuthController {
         AuthResponseDto authResponseDto = AuthResponseDto.builder().token(tokenValue).expiresIn(86400).build();
         return ResponseEntity.ok(authResponseDto);
     }
+
+    @GetMapping("/validate")
+    public ResponseEntity<AuthResponseDto> validateToken(@RequestHeader("Authorization") String jwtToken) {
+        if (jwtToken.startsWith("Bearer ")) {
+            UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+            authenticationService.generateToken(userDetails);
+            AuthResponseDto authResponseDto = AuthResponseDto.builder().token(authenticationService.generateToken(userDetails)).expiresIn(86400).build();
+            return ResponseEntity.ok(authResponseDto);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/validate/email")
+    public ResponseEntity<Boolean> validateEmail(@RequestBody LoginRequestDto loginRequestDto) {
+        System.out.println(loginRequestDto.getEmail().toLowerCase());
+        try{
+            userDetailsService.loadUserByUsername(loginRequestDto.getEmail().toLowerCase());
+            return ResponseEntity.ok(true);
+        }catch (UsernameNotFoundException exception){
+            return ResponseEntity.ok(false);
+        }
+    }
+
 }
