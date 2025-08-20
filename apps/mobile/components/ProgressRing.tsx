@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -8,6 +7,11 @@ type ProgressRingProps = {
   progress: number; // 0..1
   valueLabel: string | number;
   subtitle?: string;
+  color?: string;
+  valueTextSize?: string;
+  subtitleTextSize?: string;
+  valueTextColor?: string;
+  subtitleTextColor?: string;
 };
 
 export default function ProgressRing({
@@ -16,6 +20,11 @@ export default function ProgressRing({
   progress,
   valueLabel,
   subtitle = 'Remaining',
+  color = '#F43A45',
+  valueTextSize = 'text-2xl',
+  subtitleTextSize = 'text-xs',
+  valueTextColor = 'text-white',
+  subtitleTextColor = 'text-white',
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -38,7 +47,7 @@ export default function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={"#F43A45"}
+          stroke={color}
           strokeWidth={strokeWidth}
           strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={strokeDashoffset}
@@ -48,12 +57,12 @@ export default function ProgressRing({
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
-      <View className="absolute items-center justify-center">
-        <Text className="text-white text-6xl font-bold">{valueLabel}</Text>
-        {subtitle ? (
-          <Text className="text-white text-sm">{subtitle}</Text>
-        ) : null}
-      </View>
+             <View className="absolute items-center justify-center">
+         <Text className={`${valueTextColor} font-bold ${valueTextSize}`}>{valueLabel}</Text>
+         {subtitle ? (
+           <Text className={`${subtitleTextColor} ${subtitleTextSize}`}>{subtitle}</Text>
+         ) : null}
+       </View>
     </View>
   );
 }

@@ -5,11 +5,13 @@ const GenericButton = ({
   onPress,
   icon,
   className,
+  textClassName,
 }: {
   text?: string;
   onPress: () => void;
   icon?: React.ReactNode;
   className?: string;
+  textClassName?: string;
 }) => {
   return (
     <Pressable
@@ -18,7 +20,7 @@ const GenericButton = ({
     >
       {icon}
       {text && (
-        <Text className="text-white text-center font-[HelveticaNeue]">
+        <Text className={`text-center font-[HelveticaNeue] text-white ${textClassName}`}>
           {text}
         </Text>
       )}

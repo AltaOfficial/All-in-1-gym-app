@@ -28,7 +28,7 @@ export default function UsernameFlow() {
           if (email.trim().length == 0) {
             return;
           }
-          await fetch("http://192.168.55.212:8000/auth/validate/email", {
+          await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/validate/email`, {
             method: "POST",
             body: JSON.stringify({
               email: email,

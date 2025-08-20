@@ -8,7 +8,7 @@ import { AuthContext } from "../../context/AuthContext";
 export default function PasswordFlow() {
   const [password, setPassword] = useState("");
   const { createAccount, email } = useLocalSearchParams();
-  const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
+  const { setIsSignedIn } = useContext(AuthContext);
 
   return (
     <View className="flex-1 items-center p-28 dark:bg-black">
@@ -28,7 +28,7 @@ export default function PasswordFlow() {
       ></TextInput>
       <Pressable
         onPress={async () => {
-          await fetch("http://192.168.55.212:8000/auth/login", {
+          await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/login`, {
             method: "POST",
             body: JSON.stringify({
               email: email.toString().toLowerCase(),

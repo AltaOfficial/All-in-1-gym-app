@@ -1,4 +1,3 @@
-import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import FastFoodIcon from '../assets/icons/FastFoodIcon'
 import ChevronRightIcon from '../assets/icons/ChevronRightIcon'

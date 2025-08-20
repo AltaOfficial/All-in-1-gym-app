@@ -1,10 +1,28 @@
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import React from 'react'
+import GenericButton from '../../../components/GenericButton'
+import MacrosBreakdown from '../../../components/MacrosBreakdown'
+import TodaysMealBreakdown from '../../../components/TodaysMealBreakdown'
+import GroceryListCard from '../../../components/GroceryListCard'
 
 export default function Nutrition() {
   return (
-    <View>
-      <Text>nutrition</Text>
-    </View>
+    <ScrollView className="flex-1">
+      <View className="flex-row justify-between items-center px-4 pt-2 pb-6">
+        <Text className="font-[HelveticaNeueBoldItalic] text-[2.7rem] text-white">
+          strive.
+        </Text>
+        <GenericButton
+          text="+ Log Food"
+          onPress={() => {}}
+          className="w-44 py-3"
+        />
+      </View>
+      <MacrosBreakdown />
+      <TodaysMealBreakdown />
+      <GroceryListCard />
+
+      {/* this weeks grocery list */}
+    </ScrollView>
   )
 }

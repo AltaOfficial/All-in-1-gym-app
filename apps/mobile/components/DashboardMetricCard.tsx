@@ -1,5 +1,4 @@
 import { Text, View } from 'react-native'
-import React from 'react'
 import ChevronRightIcon from '../assets/icons/ChevronRightIcon'
 import ArrowDownIcon from '../assets/icons/ArrowDownIcon'
 import ArrowUpIcon from '../assets/icons/ArrowUpIcon'

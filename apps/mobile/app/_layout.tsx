@@ -31,7 +31,7 @@ export default function RootLayout() {
         (async () => {
           let token = await SecureStore.getItemAsync("jwtToken");
           if (token) {
-            await fetch("http://192.168.55.212:8000/auth/validate", {
+            await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/validate`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },

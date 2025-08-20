@@ -1,4 +1,3 @@
-import React from 'react'
 import { View, Text } from 'react-native'
 import TargetIcon from '../assets/icons/TargetIcon'
 import UtensilsIcon from '../assets/icons/UtensilsIcon'
