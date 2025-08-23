@@ -10,9 +10,13 @@ public interface UserService {
 
     UserEntity save(UUID id, UserEntity user);
 
+    UserEntity save(String email, UserEntity user);
+
     void delete(UUID id);
 
     Optional<UserEntity> findOne(UUID id);
+
+    UserEntity findByEmail(String email);
 
     boolean isExists(UUID id);
 }

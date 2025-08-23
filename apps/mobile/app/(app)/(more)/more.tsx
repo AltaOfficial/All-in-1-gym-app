@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
 
 export default function More() {
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
@@ -13,6 +14,7 @@ export default function More() {
         onPress={() => {
           setIsSignedIn(false);
           SecureStore.deleteItemAsync("jwtToken");
+          router.push("/(loginFlow)/usernameFlow");
         }}
       >
         <Text className="text-white font-[HelveticaNeue]">signout</Text>

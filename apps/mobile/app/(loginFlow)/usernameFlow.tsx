@@ -28,15 +28,18 @@ export default function UsernameFlow() {
           if (email.trim().length == 0) {
             return;
           }
-          await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/validate/email`, {
-            method: "POST",
-            body: JSON.stringify({
-              email: email,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }).then(async (res) => {
+          await fetch(
+            `${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/validate/email`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email: email.trim(),
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          ).then(async (res) => {
             if (res.ok) {
               const bodyText = await res.text();
               router.push(

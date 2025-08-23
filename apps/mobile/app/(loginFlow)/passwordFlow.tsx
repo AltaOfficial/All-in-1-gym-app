@@ -4,8 +4,13 @@ import * as SecureStore from "expo-secure-store";
 import { useContext, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { AuthContext } from "../../context/AuthContext";
+import {
+  checkAccountNeedsOnboarding,
+  OnboardingContext,
+} from "../../context/OnboardingContext";
 
 export default function PasswordFlow() {
+  const { setOnboardingStepCategory } = useContext(OnboardingContext);
   const [password, setPassword] = useState("");
   const { createAccount, email } = useLocalSearchParams();
   const { setIsSignedIn } = useContext(AuthContext);
@@ -15,7 +20,7 @@ export default function PasswordFlow() {
       <Text className="font-[HelveticaNeueBoldItalic] text-[3.5rem] text-white mb-24 mt-[2rem]">
         strive.
       </Text>
-      <Text className="font-[HelveticaNeue] text-center  text-white text-[2rem] mb-10">
+      <Text className="font-[HelveticaNeue] text-center text-white text-[2rem] mb-10 w-96">
         {createAccount == "true" ? "Create Password" : "Enter Password"}
       </Text>
       <TextInput
@@ -28,26 +33,38 @@ export default function PasswordFlow() {
       ></TextInput>
       <Pressable
         onPress={async () => {
-          await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/login`, {
-            method: "POST",
-            body: JSON.stringify({
-              email: email.toString().toLowerCase(),
-              password: password,
-            }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-            .then((res) => {
-              if (res.ok) {
-                return res.json();
-              }
-              throw new Error("Failed to login");
+          if (createAccount == "false") {
+            await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/login`, {
+              method: "POST",
+              body: JSON.stringify({
+                email: email.toString().toLowerCase(),
+                password: password,
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
             })
-            .then((data) => {
-              SecureStore.setItemAsync("jwtToken", data.token);
-              setIsSignedIn(true);
-            });
+              .then((res) => {
+                if (res.ok) {
+                  return res.json();
+                }
+                throw new Error("Failed to login");
+              })
+              .then(async (data) => {
+                console.log(data);
+                SecureStore.setItemAsync("jwtToken", data.token);
+                await checkAccountNeedsOnboarding(
+                  data.user,
+                  setOnboardingStepCategory,
+                  true
+                );
+                setIsSignedIn(true);
+              });
+          } else {
+            router.push(
+              `/(loginFlow)/(onboardingFlow)/nameFlow?email=${email.toString().toLowerCase()}&password=${password}`
+            );
+          }
         }}
         className="bg-[#F84959] w-96 py-4 justify-center align-middle place-content-center place-items-center text-center rounded-[2rem]"
       >

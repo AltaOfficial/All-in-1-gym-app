@@ -1,13 +1,15 @@
 package com.strive.app.domain.entities;
 
+import com.strive.app.enums.GenderType;
+import com.strive.app.enums.MainGoal;
+import com.strive.app.enums.TrainingExperience;
+import com.strive.app.enums.WeightType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -22,6 +24,9 @@ public class UserEntity {
     private UUID id;
 
     @Column(nullable = false)
+    private Integer onBoardingStep = 1;
+
+    @Column(nullable = false)
     private String name;
 
     @Column(unique = true, nullable = false)
@@ -30,13 +35,35 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+    private Integer weight;
 
+    private Integer age;
 
-    @OneToMany(
-            cascade = CascadeType.ALL, // PERSIST, MERGE, REMOVE, REFRESH, DETACH happens to all the children as well
-            mappedBy = "userEntity",
-            orphanRemoval = true, // deletes child when no longer connected to parent
-            fetch = FetchType.LAZY
-    )
-    private List<WidgetEntity> widgets = new ArrayList<>();
+    private WeightType weightType;
+
+    private Integer heightInInches;
+
+    private GenderType sexType;
+
+    private TrainingExperience trainingExperience;
+
+    private MainGoal mainGoal;
+
+    private Double weightChangeAmount;
+
+    private Integer goalCalories;
+
+    private Integer goalProtein;
+    private Integer goalCarbohydrates;
+    private Integer goalFat;
+
+    private Integer goalFiber;
+    private Integer goalSugar;
+    private Integer goalSaturatedFat;
+    private Integer goalPolyunsaturatedFat = 0;
+    private Integer goalMonounsaturatedFat = 0;
+    private Integer goalTransFat = 0;
+    private Integer goalCholesterol;
+    private Integer goalSodium;
+    private Integer goalPotassium;
 }

@@ -79,6 +79,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .name(name)
+                .onBoardingStep(1)
                 .build();
         userRepository.save(user);
         return userDetailsService.loadUserByUsername(email);

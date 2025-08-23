@@ -1,47 +1,16 @@
 package com.strive.app.domain.dto;
 
-import com.strive.app.enums.GenderType;
-import com.strive.app.enums.MainGoal;
-import com.strive.app.enums.TrainingExperience;
-import com.strive.app.enums.WeightType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto {
-    private UUID Id;
-
-    private Integer onBoardingStep = 1;
-
-    private Integer age;
-
-    private Integer weight;
-
-    private WeightType weightType;
-
-    private Integer heightInInches;
-
-    private GenderType sexType;
-
-    private TrainingExperience trainingExperience;
-
-    private MainGoal mainGoal;
-
-    private Double weightChangeAmount;
-
-    private String name;
-
-    private String email;
-
-    private String password;
-
+public class NutrientGoalsDto {
     private Integer goalCalories;
 
     private Integer goalProtein;

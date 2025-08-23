@@ -4,6 +4,7 @@ import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.repositories.UserRepository;
 import com.strive.app.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -26,10 +27,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserEntity save(String email, UserEntity userEntity) {
+        return userRepository.findByEmail(email).map(existingUser -> {
+            Optional.ofNullable(userEntity.getEmail()).ifPresent(existingUser::setEmail);
+            Optional.ofNullable(userEntity.getName()).ifPresent(existingUser::setName);
+
+            return userRepository.save(existingUser);
+        }).orElseThrow();
+    }
+
+    @Override
     public UserEntity save(UUID id, UserEntity userEntity) {
         return userRepository.findById(id).map(existingUser -> {
             Optional.ofNullable(userEntity.getEmail()).ifPresent(existingUser::setEmail);
             Optional.ofNullable(userEntity.getName()).ifPresent(existingUser::setName);
+
             return userRepository.save(existingUser);
         }).orElseThrow();
     }
@@ -42,5 +54,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserEntity> findOne(UUID id){
         return userRepository.findById(id);
+    }
+
+    @Override
+    public UserEntity findByEmail(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 }
