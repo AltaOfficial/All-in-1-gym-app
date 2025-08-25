@@ -6,6 +6,7 @@ import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.OnboardingService;
 import com.strive.app.services.UserService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/onboarding")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OnboardingController {
-    OnboardingService onboardingService;
-    AuthenticationService authenticationService;
+    private final OnboardingService onboardingService;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/update")
     public ResponseEntity<String> updateFlow(@RequestBody OnboardingUpdateRequestDto onboardingUpdateRequestDto, @RequestHeader(name = "Authorization")  String jwtToken) {

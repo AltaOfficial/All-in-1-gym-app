@@ -1,7 +1,8 @@
 import { View } from 'react-native';
 import GenericButton from '../../../components/GenericButton';
-import Seperator from '../../../components/Seperator';
+import Seperator from '../../../components/Separator';
 import WorkoutListItem from '../../../components/WorkoutListItem';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Training() {
 
@@ -17,6 +18,7 @@ export default function Training() {
   ];
 
   return (
+    <SafeAreaView edges={['top']} className="flex-1 bg-black">
     <View className='p-2'>
       <GenericButton text='+ New Workout' className='w-52 h-13 mt-2 ml-2 py-3' onPress={() => {}} />
       <Seperator className='h-[0.5px] mt-6' />
@@ -31,5 +33,6 @@ export default function Training() {
         />
       ))}
     </View>
+    </SafeAreaView>
   )
 }

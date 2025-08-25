@@ -1,9 +1,13 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import ProgressRing from "./ProgressRing";
 import { useLayoutEffect, useState } from "react";
 import { getCurrentUser } from "../services/getCurrentUser";
+import { MetricsContext } from "../context/MetricsContext";
+import { useContext } from "react";
+import { router } from "expo-router";
 
 export default function MacrosBreakdown() {
+  const { metrics, refreshMetrics } = useContext(MetricsContext);
   const [protein, setProtein] = useState(0);
   const [carbs, setCarbs] = useState(0);
   const [fat, setFat] = useState(0);
@@ -13,24 +17,25 @@ export default function MacrosBreakdown() {
 
   useLayoutEffect(() => {
     const fetchData = async () => {
-      const currentUser = await getCurrentUser();
-      setProteinGoal(currentUser?.goalProtein || 0);
-      setCarbsGoal(currentUser?.goalCarbohydrates || 0);
-      setFatGoal(currentUser?.goalFat || 0);
-      setProtein(21);
-      setCarbs(43);
-      setFat(66);
+      setProteinGoal(metrics?.goalProtein || 0);
+      setCarbsGoal(metrics?.goalCarbohydrates || 0);
+      setFatGoal(metrics?.goalFat || 0);
+      setProtein(metrics?.protein || 0);
+      setCarbs(metrics?.carbohydrates || 0);
+      setFat(metrics?.fat || 0);
     };
     fetchData();
-  }, []);
+  }, [metrics]);
 
   return (
     <View className=" px-4 pb-6">
       <View className="flex-row justify-between items-center mb-6">
         <Text className="text-white font-[HelveticaNeue] text-2xl">Macros</Text>
-        <Text className="text-white font-[HelveticaNeue] text-base">
-          See all macros
-        </Text>
+        <Pressable onPress={() => router.push('/allMacros')}>
+          <Text className="text-white font-[HelveticaNeue] text-base">
+            See all macros
+          </Text>
+        </Pressable>
       </View>
 
       <View className="flex-row justify-between">

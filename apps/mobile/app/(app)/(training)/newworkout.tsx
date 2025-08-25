@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const newworkout = () => {
+const newWorkout = () => {
   return (
     <View>
       <Text>newworkout</Text>
@@ -9,6 +9,6 @@ const newworkout = () => {
   );
 };
 
-export default newworkout;
+export default newWorkout;
 
 const styles = StyleSheet.create({});

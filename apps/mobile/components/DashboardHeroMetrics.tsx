@@ -2,21 +2,8 @@ import { View, Text } from "react-native";
 import TargetIcon from "../assets/icons/TargetIcon";
 import UtensilsIcon from "../assets/icons/UtensilsIcon";
 import FireIcon from "../assets/icons/FireIcon";
-import { useEffect, useState } from "react";
-import { getCurrentUser } from "../services/getCurrentUser";
 
-export default function DashboardHeroMetrics() {
-  const [goal, setGoal] = useState(2416);
-  const [consumed, setConsumed] = useState(1800);
-  const [burned, setBurned] = useState(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = await getCurrentUser();
-      setGoal(currentUser?.goalCalories || 2416);
-    };
-    fetchData();
-  }, []);
+export default function DashboardHeroMetrics({ goal, consumed, burned }: { goal: number, consumed: number, burned: number }) {
 
   return (
     <View className="gap-4 pr-4">
@@ -25,7 +12,7 @@ export default function DashboardHeroMetrics() {
         <View className="flex-col">
           <Text className="text-white">Goal</Text>
           <Text className="text-white text-lg text-start font-semibold">
-            {(goal ?? 2416).toLocaleString()}
+            {goal.toLocaleString()}
           </Text>
         </View>
       </View>
@@ -34,7 +21,7 @@ export default function DashboardHeroMetrics() {
         <View className="flex-col">
           <Text className="text-white">Consumed</Text>
           <Text className="text-white text-lg text-start font-semibold">
-            {(consumed ?? 1800).toLocaleString()}
+            {consumed.toLocaleString()}
           </Text>
         </View>
       </View>
@@ -43,7 +30,7 @@ export default function DashboardHeroMetrics() {
         <View className="flex-col">
           <Text className="text-white">Burned</Text>
           <Text className="text-white text-lg text-start font-semibold">
-            {(burned ?? 214).toLocaleString()}
+            {burned.toLocaleString()}
           </Text>
         </View>
       </View>

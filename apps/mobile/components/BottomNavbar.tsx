@@ -3,18 +3,20 @@ import MoreIcon from "../assets/icons/MoreIcon";
 import ChefHatIcon from "../assets/icons/ChefHatIcon";
 import DumbbellIcon from "../assets/icons/DumbbellIcon";
 import HomeIcon from "../assets/icons/HomeIcon";
-import Seperator from "./Seperator";
+import Seperator from "./Separator";
 import { router } from "expo-router";
 import { usePathname } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BottomNavbar = () => {
   const pathname = usePathname();
+
   return (
     (pathname == "/" ||
       pathname == "/training" ||
       pathname == "/nutrition" ||
       pathname == "/more") && (
-      <View className={`bg-black`}>
+      <SafeAreaView className={`bg-black`} edges={['bottom']}>
         <Seperator />
         <View className={`flex-row items-center justify-between px-4 mt-4`}>
           <Pressable
@@ -66,7 +68,7 @@ const BottomNavbar = () => {
             </Text>
           </Pressable>
         </View>
-      </View>
+      </SafeAreaView>
     )
   );
 };

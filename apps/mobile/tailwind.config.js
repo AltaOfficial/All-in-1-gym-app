@@ -8,6 +8,7 @@ module.exports = {
         primary: "#F43A45",
         gray1: "#141414",
         gray2: "#27272A",
+        gray3: "#828282",
         protein: "#00FF4D",
         carbs: "#FF861C",
         fat: "#EEF43A",

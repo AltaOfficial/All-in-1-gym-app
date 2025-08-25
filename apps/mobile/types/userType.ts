@@ -11,6 +11,7 @@ export default interface User {
   name?: string | null;
   email?: string | null;
   password?: string | null;
+  
   goalCalories?: number | null;
   goalProtein?: number | null;
   goalCarbohydrates?: number | null;

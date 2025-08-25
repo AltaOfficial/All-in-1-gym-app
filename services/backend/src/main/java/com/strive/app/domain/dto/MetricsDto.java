@@ -1,28 +1,21 @@
-package com.strive.app.domain.entities;
+package com.strive.app.domain.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.UUID;
 
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "metrics")
-public class MetricsEntity {
+public class MetricsDto {
 
-    @EmbeddedId
-    private MetricsId id;
-
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
+    private UUID userId;
+    private LocalDate date;
 
     private Integer currentCalories;
     private Integer goalCalories;
@@ -47,16 +40,13 @@ public class MetricsEntity {
     private Integer goalSaturatedFat;
 
     private Integer polyunsaturatedFat;
-    @Builder.Default
-    private Integer goalPolyunsaturatedFat = 0;
+    private Integer goalPolyunsaturatedFat;
 
     private Integer monounsaturatedFat;
-    @Builder.Default
-    private Integer goalMonounsaturatedFat = 0;
+    private Integer goalMonounsaturatedFat;
 
     private Integer transFat;
-    @Builder.Default
-    private Integer goalTransFat = 0;
+    private Integer goalTransFat;
 
     private Integer cholesterol;
     private Integer goalCholesterol;

@@ -1,14 +1,15 @@
-import { View, Text, Pressable } from "react-native";
+import { Text, Pressable } from "react-native";
 import { useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function More() {
   const { isSignedIn, setIsSignedIn } = useContext(AuthContext);
 
   return (
-    <View>
+    <SafeAreaView edges={['top']} className="flex-1 bg-black">
       <Pressable
         className="text-white font-[HelveticaNeue]"
         onPress={() => {
@@ -19,6 +20,6 @@ export default function More() {
       >
         <Text className="text-white font-[HelveticaNeue]">signout</Text>
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
