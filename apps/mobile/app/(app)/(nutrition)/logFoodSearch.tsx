@@ -4,10 +4,15 @@ import { useState } from 'react';
 import BarcodeIcon from '../../../assets/icons/BarcodeIcon';
 import FoodSearchItem from '../../../components/FoodSearchItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
+import { FoodSearchResult } from '../../../types/searchResultType';
 
 export default function LogFoodSearch() {
-
     const [selectedTab, setSelectedTab] = useState('all');
+    const [searchResults, setSearchResults] = useState([]);
+    const [noResults, setNoResults] = useState(false);
+
   return (
     <SafeAreaView edges={['bottom']} className="flex-1">
       <View className="bg-gray1 px-10">
@@ -16,7 +21,28 @@ export default function LogFoodSearch() {
             <TextInput
             placeholder={selectedTab === 'all' ? "Search foods" : selectedTab === 'myMeals' ? "Search My Meals" : "Search My Foods"}
             placeholderTextColor="#828282"
-            className="text-white font-[HelveticaNeue]"
+            className="text-white font-[HelveticaNeue] w-full"
+            returnKeyType='search'
+            onChangeText={(text) => {
+                if(text.length == 0) {
+                    setSearchResults([]);
+                    setNoResults(false);
+                }
+            }}
+            onSubmitEditing={async (e) => {
+                const searchQuery = e.nativeEvent.text;
+                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/search?query=${searchQuery}`, {
+                    headers: {
+                        'Authorization': `Bearer ${await SecureStore.getItemAsync('jwtToken')}`
+                    }
+                });
+                const data = await response.json();
+                console.log(data);
+                setSearchResults(data);
+                if(data.length == 0) {
+                    setNoResults(true);
+                }
+            }}
             />
         </View>
         <View className="flex-row items-center justify-evenly px-6 gap-14 mt-4">
@@ -40,7 +66,7 @@ export default function LogFoodSearch() {
         </View>
       </View>
 
-     <ScrollView className="flex-1">
+     {(searchResults.length == 0  && !noResults) && <ScrollView className="flex-1">
             <View className="px-6 mt-8">
                 <View className="flex-row items-center gap-4 bg-gray1 rounded-xl py-3 px-4">
                     <BarcodeIcon height={80} width={80} fill="white" />
@@ -63,7 +89,102 @@ export default function LogFoodSearch() {
                     <FoodSearchItem foodName="Greek yogurt" calories={130} brandName="Chobani" servingSize={170} servingSizeUnit="g" onPress={() => {}} />
                 </ScrollView>
             </ScrollView>
-        </ScrollView>
+        </ScrollView>} 
+        {searchResults.length > 0 && !noResults && <ScrollView className="flex-1 px-2 pt-8">
+            {searchResults.map((result: FoodSearchResult, index) => (
+                <FoodSearchItem 
+                    key={index} 
+                    foodName={result.foodName || 'Unknown Food'} 
+                    calories={Number((result.servingSize && result.servingUnit) ? calculateCalories(result.servingSize, normalizeUnit(result.servingUnit), result.calories).toFixed(2) : (result.calories || 0).toFixed(2))}
+                    brandName={result.foodBrandName || result.foodBrandOwner || ''}
+                    servingSize={Number(result.householdServingText && !(result.householdServingText.length > 20) ? "" : (result.servingSize || 1))}
+                    servingSizeUnit={normalizeUnit(result.householdServingText && !(result.householdServingText.length > 20) ? result.householdServingText : result.servingUnit)}
+                    onPress={() => {
+                        router.push({
+                        pathname: "/(app)/(nutrition)/logFood",
+                        params: {
+                            foodName: result.foodName,
+                            brandName: result.foodBrandName,
+                            servingSize: result.servingSize,
+                            servingSizeUnit: result.servingUnit,
+                            calories: result.calories,
+                            protein: result.protein,
+                            carbohydrates: result.carbohydrates,
+                            fat: result.fat,
+                            fiber: result.fiber,
+                            sugar: result.sugar,
+                            saturatedFat: result.saturatedFat,
+                            polyunsaturatedFat: result.polyunsaturatedFat,
+                            monounsaturatedFat: result.monounsaturatedFat,
+                            transFat: result.transFat,
+                            cholesterol: result.cholesterol,
+                            sodium: result.sodium,
+                            potassium: result.potassium
+                            
+                        }
+                    })}} 
+                />
+            ))}
+        </ScrollView>}
+        {noResults && <View className="flex-1 px-2 mt-8">
+            <Text className="text-white font-[HelveticaNeue] text-center text-xl">{"No results found :("}</Text>
+        </View>}
     </SafeAreaView>
   )
 }
+
+function normalizeUnit(unit: string | null | undefined) {
+    if (!unit) return "g"; // default to grams if unit is null/undefined
+    
+    switch (unit.toLowerCase()) {
+      case "g":
+      case "gr":
+      case "grm":
+      case "gram":
+      case "grams":
+        return "g";
+      case "kg":
+      case "kilogram":
+      case "kilograms":
+        return "kg";
+      case "oz":
+      case "ounce":
+      case "ounces":
+        return "oz";
+      case "lb":
+      case "lbs":
+      case "pound":
+      case "pounds":
+        return "lb";
+      default:
+        return unit.toLowerCase();
+    }
+  }
+
+function toGrams(servingSize: number, unit: string) {
+    switch (unit.toLowerCase()) {
+        case "g":
+            return servingSize;
+        case "kg":
+            return servingSize * 1000;
+        case "mg":
+            return servingSize / 1000;
+        case "mcg":
+            return servingSize / 1_000_000;
+        case "lb":
+            return servingSize * 453.592;
+        case "oz":
+            return servingSize * 28.3495;
+        case "ml":
+            return servingSize; // assumes 1ml ≈ 1g (only true for water-like foods)
+        case "cup":
+            return servingSize * 240; // rough average, can vary by food
+        default:
+            return servingSize; // fallback, assume it's grams
+    }
+}
+  
+  function calculateCalories(servingSize: number, servingSizeUnit: string, caloriesPerGram: number) {
+    const grams = toGrams(servingSize, servingSizeUnit);
+    return grams * caloriesPerGram;
+  }

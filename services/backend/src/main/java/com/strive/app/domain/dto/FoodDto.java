@@ -1,27 +1,17 @@
-package com.strive.app.domain.entities;
+package com.strive.app.domain.dto;
 
-import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "foods")
-public class FoodEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Builder
+public class FoodDto {
     private UUID id;
-
-    @JoinColumn(name = "user_id")
-    private UserEntity userCreatedBy;
-
-    @Column(nullable = false)
+    private UUID userId;            // instead of UserEntity
     private String foodName;
     private String foodBrandName;
     private String foodBrandOwner;
@@ -40,9 +30,7 @@ public class FoodEntity {
     private Double sodium;
     private Double potassium;
 
-    @ElementCollection
-    @CollectionTable(name = "food_portions", joinColumns = @JoinColumn(name = "food_id"))
-    private List<PortionEmb> portions = new ArrayList<>();
+    private List<PortionDto> portions;
 
     private Double servingSize;
     private String servingUnit;

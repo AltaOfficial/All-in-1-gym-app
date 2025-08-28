@@ -17,7 +17,6 @@ const AllMacros = () => {
   return (
     <SafeAreaView edges={['bottom']} className="flex-1 bg-black">
       <CalandarNavbar onDateSelect={async (date) => {
-        console.log(date.toISOString().split('T')[0])
         fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/metrics/date`, {
           method: 'POST',
           headers: {

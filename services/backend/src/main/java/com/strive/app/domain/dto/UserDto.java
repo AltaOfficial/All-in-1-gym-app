@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -41,6 +42,8 @@ public class UserDto {
     private String email;
 
     private String password;
+
+    private List<UUID> recentFoods;
 
     private Integer goalCalories;
 

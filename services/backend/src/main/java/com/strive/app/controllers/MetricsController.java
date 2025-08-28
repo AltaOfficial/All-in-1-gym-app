@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -33,8 +32,8 @@ public class MetricsController {
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
             try {
                 // find existing metrics for today
-                System.out.println(metricsService.findById(MetricsId.builder().userId(userEntity.getId()).build()));
-                MetricsEntity metricsEntity = metricsService.findById(MetricsId.builder().userId(userEntity.getId()).build());
+                System.out.println(metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).build()));
+                MetricsEntity metricsEntity = metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).build());
                 MetricsDto metricsDto = metricsMapper.mapTo(metricsEntity);
                 return ResponseEntity.ok(metricsDto);
             }
@@ -70,7 +69,7 @@ public class MetricsController {
         UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
         UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
         try{
-            MetricsEntity metricsEntity = metricsService.findById(MetricsId.builder().date(metricRequestDto.getDate()).userId(userEntity.getId()).build());
+            MetricsEntity metricsEntity = metricsService.findOne(MetricsId.builder().date(metricRequestDto.getDate()).userId(userEntity.getId()).build());
             MetricsDto metricsDto = metricsMapper.mapTo(metricsEntity);
             return ResponseEntity.ok(metricsDto);
         }catch(NoSuchElementException exception) {

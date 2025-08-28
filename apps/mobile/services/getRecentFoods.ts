@@ -1,10 +1,10 @@
 import * as SecureStore from "expo-secure-store";
-import { NutritionMetrics } from "../types/metricsType";
+import { FoodLogItemType } from "../types/foodLogItemType";
 
-export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
+export async function getRecentFoods(): Promise<FoodLogItemType[]> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/metrics/daily`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/recent`,
       {
         headers: {
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
@@ -14,13 +14,13 @@ export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
 
     if (response.ok) {
       const data = await response.json();
-      return data as NutritionMetrics;
+      return data as FoodLogItemType[];
     } else {
       console.log("error", response.status, response.statusText);
-      return null;
+      return [];
     }
   } catch (error) {
-    console.error("Error fetching daily metrics:", error);
-    return null;
+    console.error("Error fetching recent foods:", error);
+    return [];
   }
 }
