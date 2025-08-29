@@ -1,40 +1,53 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, TouchableOpacity } from "react-native";
 import CalendarIcon from "../assets/icons/CalendarIcon";
 import GenericButton from "./GenericButton";
 import MealBreakdownCard from "./MealBreakdownCard";
+import { useState } from "react";
+import { router } from "expo-router";
 
 export default function TodaysMealBreakdown() {
+  const [mealType, setMealType] = useState("Breakfast");
+  
   return (
     <View className="px-4 pb-12 pt-2">
       <View className="flex-row justify-between items-center mb-5">
         <Text className="text-white font-[HelveticaNeue] text-2xl">
           Todays Meal Plan
         </Text>
-        <CalendarIcon height={28} width={28} fill="white" />
+        <Pressable onPress={() => {
+          router.push("/(app)/(nutrition)/mealPlanner");
+        }}>
+          <CalendarIcon height={28} width={28} fill="white" />
+        </Pressable>
       </View>
       <View className="flex-row text-pretty gap-3 items-center">
         <GenericButton
-          className="py-2 px-1 flex-1"
-          onPress={() => {}}
+          className={`py-2 px-1 flex-1 ${mealType == "Breakfast" ? "!bg-primary" : "!bg-[#27272A]"}`}
+          onPress={() => {setMealType("Breakfast")}}
           text="Breakfast"
+          textClassName={`${mealType == "Breakfast" ? "!text-white" : "!text-white/70"}`}
+          opacityEnabled={false}
         />
         <GenericButton
-          className="py-2 px-1 flex-1 !bg-[#27272A]"
-          onPress={() => {}}
+          className={`py-2 px-1 flex-1 ${mealType == "Lunch" ? "!bg-primary" : "!bg-[#27272A]"}`}
+          onPress={() => {setMealType("Lunch")}}
           text="Lunch"
-          textClassName="!text-white/70"
+          opacityEnabled={false}
+          textClassName={`${mealType == "Lunch" ? "!text-white" : "!text-white/70"}`}
         />
         <GenericButton
-          className="py-2 px-1 flex-1 !bg-[#27272A]"
-          onPress={() => {}}
+          className={`py-2 px-1 flex-1 ${mealType == "Dinner" ? "!bg-primary" : "!bg-[#27272A]"}`}
+          onPress={() => {setMealType("Dinner")}}
           text="Dinner"
-          textClassName="!text-white/70"
+          textClassName={`${mealType == "Dinner" ? "!text-white" : "!text-white/70"}`}
+          opacityEnabled={false}
         />
         <GenericButton
-          className="py-2 px-1 flex-1 !bg-[#27272A]"
-          onPress={() => {}}
+          className={`py-2 px-1 flex-1 ${mealType == "Snacks" ? "!bg-primary" : "!bg-[#27272A]"}`}
+          onPress={() => {setMealType("Snacks")}}
           text="Snacks"
-          textClassName="!text-white/70"
+          textClassName={`${mealType == "Snacks" ? "!text-white" : "!text-white/70"}`}
+          opacityEnabled={false}
         />
       </View>
 
@@ -58,11 +71,15 @@ export default function TodaysMealBreakdown() {
         />
       </View>
 
-      <View className="flex-row items-center justify-center mt-4 border-gray2 border rounded-xl py-3">
-        <Text className="text-white font-[HelveticaNeue] text-base">
-          + Add Item
-        </Text>
-      </View>
+      <TouchableOpacity onPress={() => {
+          router.push("/(app)/(nutrition)/mealPlanner");
+        }}>
+        <View className="flex-row items-center justify-center mt-4 border-gray2 border rounded-xl py-3">
+            <Text className="text-white font-[HelveticaNeue] text-base">
+              + Add Item
+            </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }

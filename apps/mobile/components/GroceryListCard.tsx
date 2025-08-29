@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
 import Checkbox from './Checkbox'
 
@@ -31,9 +31,9 @@ export default function GroceryListCard() {
                 </View>
             </View>
 
-            <Pressable onPress={() => router.push('/groceryList')} className='flex-row items-center justify-center mt-4 border-gray2 border rounded-xl py-3 w-full'>
+            <TouchableOpacity onPress={() => router.push('/groceryList')} className='flex-row items-center justify-center mt-4 border-gray2 border rounded-xl py-3 w-full'>
                 <Text className='text-white font-[HelveticaNeue]'>View Grocery List</Text>
-            </Pressable>
+            </TouchableOpacity>
         </View>
     </View>
   )

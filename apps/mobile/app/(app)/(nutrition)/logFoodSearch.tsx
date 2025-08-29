@@ -7,6 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { FoodSearchResult } from '../../../types/searchResultType';
+import MealIcon from '../../../assets/icons/MealIcon';
+import ChickenWingIcon from '../../../assets/icons/ChickenWingIcon';
 
 export default function LogFoodSearch() {
     const [selectedTab, setSelectedTab] = useState('all');
@@ -30,14 +32,13 @@ export default function LogFoodSearch() {
                 }
             }}
             onSubmitEditing={async (e) => {
-                const searchQuery = e.nativeEvent.text;
+                const searchQuery = encodeURIComponent(e.nativeEvent.text);
                 const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/search?query=${searchQuery}`, {
                     headers: {
                         'Authorization': `Bearer ${await SecureStore.getItemAsync('jwtToken')}`
                     }
                 });
                 const data = await response.json();
-                console.log(data);
                 setSearchResults(data);
                 if(data.length == 0) {
                     setNoResults(true);
@@ -67,15 +68,15 @@ export default function LogFoodSearch() {
       </View>
 
      {(searchResults.length == 0  && !noResults) && <ScrollView className="flex-1">
-            <View className="px-6 mt-8">
-                <View className="flex-row items-center gap-4 bg-gray1 rounded-xl py-3 px-4">
-                    <BarcodeIcon height={80} width={80} fill="white" />
+            <Pressable className="px-6 mt-8" onPress={() => router.push(selectedTab === 'all' ? '/(app)/(nutrition)/scanBarcode' : selectedTab === 'myMeals' ? '/createMeal' : '/(createFood)/createFoodBasic')}>
+                <View className="flex-row items-center gap-6 bg-gray1 rounded-xl py-3 px-4 h-28">
+                    {selectedTab === 'all' ? <BarcodeIcon height={80} width={80} fill="white" /> : selectedTab === 'myMeals' ? <MealIcon height={80} width={80} fill="white" /> : <ChickenWingIcon height={80} width={80} fill="white" />}
                     <View>
-                        <Text className="text-white text-2xl font-[HelveticaNeue]">Scan Barcode</Text>
-                        <Text className="text-white text-xs font-[HelveticaNeue]">{"Find your food instantly by scanning \nthe barcode on it"}</Text>
+                        <Text className="text-white text-2xl font-[HelveticaNeue]">{selectedTab === 'all' ? "Scan Barcode" : selectedTab === 'myMeals' ? "Create New Meal" : "Create New Food"}</Text>
+                        <Text className="text-white text-xs font-[HelveticaNeue]">{selectedTab === 'all' ? "Find your food instantly by scanning \nthe barcode on it" : selectedTab === 'myMeals' ? "Create a new meal by\nadding foods to it" : "Create a new food by\nadding nutrient details"}</Text>
                     </View>
                 </View>
-            </View>
+            </Pressable>
 
             <ScrollView className="px-6 mt-16">
                 <Text className="text-white font-[HelveticaNeue] mb-4">Recent Foods</Text>

@@ -49,10 +49,8 @@ public class MetricsServiceImpl implements MetricsService {
                                 .round(logFoodRequestDto.getCalories() != null ? logFoodRequestDto.getCalories() : 0));
         metricsEntity.setProtein((metricsEntity.getProtein() != null ? metricsEntity.getProtein() : 0) +
                 (int) Math.round(logFoodRequestDto.getProtein() != null ? logFoodRequestDto.getProtein() : 0));
-        metricsEntity.setCarbohydrates((metricsEntity.getCarbohydrates() != null ? metricsEntity.getCarbohydrates() : 0)
-                +
-                (int) Math.round(
-                        logFoodRequestDto.getCarbohydrates() != null ? logFoodRequestDto.getCarbohydrates() : 0));
+        metricsEntity.setCarbohydrates((metricsEntity.getCarbohydrates() != null ? metricsEntity.getCarbohydrates() : 0) +
+                (int) Math.round(logFoodRequestDto.getCarbohydrates() != null ? logFoodRequestDto.getCarbohydrates() : 0));
         metricsEntity.setFat((metricsEntity.getFat() != null ? metricsEntity.getFat() : 0) +
                 (int) Math.round(logFoodRequestDto.getFat() != null ? logFoodRequestDto.getFat() : 0));
         metricsEntity.setFiber((metricsEntity.getFiber() != null ? metricsEntity.getFiber() : 0) +
@@ -60,16 +58,13 @@ public class MetricsServiceImpl implements MetricsService {
         metricsEntity.setSugar((metricsEntity.getSugar() != null ? metricsEntity.getSugar() : 0) +
                 (int) Math.round(logFoodRequestDto.getSugar() != null ? logFoodRequestDto.getSugar() : 0));
         metricsEntity.setSaturatedFat((metricsEntity.getSaturatedFat() != null ? metricsEntity.getSaturatedFat() : 0) +
-                (int) Math
-                        .round(logFoodRequestDto.getSaturatedFat() != null ? logFoodRequestDto.getSaturatedFat() : 0));
+                (int) Math.round(logFoodRequestDto.getSaturatedFat() != null ? logFoodRequestDto.getSaturatedFat() : 0));
         metricsEntity.setPolyunsaturatedFat(
                 (metricsEntity.getPolyunsaturatedFat() != null ? metricsEntity.getPolyunsaturatedFat() : 0) +
-                        (int) Math.round(
-                                logFoodRequestDto.getPolyunsaturatedFat() != null
+                        (int) Math.round(logFoodRequestDto.getPolyunsaturatedFat() != null
                                         ? logFoodRequestDto.getPolyunsaturatedFat()
                                         : 0));
-        metricsEntity.setMonounsaturatedFat(
-                (metricsEntity.getMonounsaturatedFat() != null ? metricsEntity.getMonounsaturatedFat() : 0) +
+        metricsEntity.setMonounsaturatedFat((metricsEntity.getMonounsaturatedFat() != null ? metricsEntity.getMonounsaturatedFat() : 0) +
                         (int) Math.round(
                                 logFoodRequestDto.getMonounsaturatedFat() != null
                                         ? logFoodRequestDto.getMonounsaturatedFat()

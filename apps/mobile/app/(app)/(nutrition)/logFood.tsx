@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,8 +7,12 @@ import * as SecureStore from 'expo-secure-store';
 import Separator from '../../../components/Separator';
 import ProgressRing from '../../../components/ProgressRing';
 import GenericButton from '../../../components/GenericButton';
+import { useContext } from 'react';
+import { MetricsContext } from '../../../context/MetricsContext';
 
 export default function LogFood() {
+    const { refreshMetrics } = useContext(MetricsContext);
+
     const { foodName, calories, protein, carbohydrates, fat, fiber, sugar, saturatedFat, polyunsaturatedFat, monounsaturatedFat, transFat, cholesterol, sodium, potassium, brandName, servingSize, servingSizeUnit } = useLocalSearchParams();
     
     // Function to format to 2 significant figures
@@ -58,8 +62,16 @@ export default function LogFood() {
     // Function to handle serving size change
     const handleServingSizeChange = (value: string) => {
         setSelectedServingSize(value);
-        const multiplier = value === '1g' ? 1 : (servingSize ? Number(servingSize) : 1);
-        const newTotalMultiplier = multiplier * numberOfServingsValue;
+        
+        // Parse the new serving size to get the multiplier
+        let newServingSizeMultiplier = 1;
+        if (value === '1g') {
+            newServingSizeMultiplier = 1;
+        } else if (servingSize && value === `${servingSize} ${servingSizeUnit}`) {
+            newServingSizeMultiplier = Number(servingSize);
+        }
+        
+        const newTotalMultiplier = newServingSizeMultiplier * numberOfServingsValue;
         
         setCaloriesLabel((Number(calories) * newTotalMultiplier).toFixed(0));
         setCarbsLabel(toSignificantFigures(Number(carbohydrates) * newTotalMultiplier));
@@ -71,8 +83,16 @@ export default function LogFood() {
     const handleNumberOfServingsChange = (value: string) => {
         setNumberOfServings(value);
         const newNumberOfServings = Number(value);
-        const multiplier = selectedServingSize === '1g' ? 1 : (servingSize ? Number(servingSize) : 1);
-        const newTotalMultiplier = multiplier * newNumberOfServings;
+        
+        // Get current serving size multiplier based on selected serving size
+        let currentServingSizeMultiplier = 1;
+        if (selectedServingSize === '1g') {
+            currentServingSizeMultiplier = 1;
+        } else if (servingSize && selectedServingSize === `${servingSize} ${servingSizeUnit}`) {
+            currentServingSizeMultiplier = Number(servingSize);
+        }
+        
+        const newTotalMultiplier = currentServingSizeMultiplier * newNumberOfServings;
         
         setCaloriesLabel((Number(calories) * newTotalMultiplier).toFixed(0));
         setCarbsLabel(toSignificantFigures(Number(carbohydrates) * newTotalMultiplier));
@@ -248,36 +268,53 @@ export default function LogFood() {
              
          </View>
         </ScrollView>
-                 <GenericButton text="+ Log food" onPress={async () => {
+            <GenericButton text="+ Log food" onPress={async () => {
              const token = await SecureStore.getItemAsync("jwtToken");
+             
+             // Calculate the current total multiplier based on selected serving size and number of servings
+             let currentServingSizeMultiplier = 1;
+             if (selectedServingSize === '1g') {
+                 currentServingSizeMultiplier = 1;
+             } else if (servingSize && selectedServingSize === `${servingSize} ${servingSizeUnit}`) {
+                 currentServingSizeMultiplier = Number(servingSize);
+             }
+             const currentTotalMultiplier = currentServingSizeMultiplier * Number(numberOfServings);
+             
+             console.log(foodName, brandName, selectedServingSize, Number(numberOfServings), selectedMeal.toUpperCase(), new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }), Number(calories) * currentTotalMultiplier, Number(protein) * currentTotalMultiplier, Number(carbohydrates) * currentTotalMultiplier, Number(fat) * currentTotalMultiplier, Number(fiber) * currentTotalMultiplier, Number(sugar) * currentTotalMultiplier, Number(saturatedFat) * currentTotalMultiplier, Number(polyunsaturatedFat) * currentTotalMultiplier, Number(monounsaturatedFat) * currentTotalMultiplier, Number(transFat) * currentTotalMultiplier, Number(cholesterol) * currentTotalMultiplier, Number(sodium) * currentTotalMultiplier, Number(potassium) * currentTotalMultiplier);
+             
              fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                     'Authorization': `Bearer ${token}`
-                 },
-                 body: JSON.stringify({
-                     foodName: foodName,
-                     brandName: brandName,
-                     servingSize: selectedServingSize,
-                     servings: Number(numberOfServings),
-                     mealType: selectedMeal.toUpperCase(),
-                     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-                     calories: adjustedCalories,
-                     protein: adjustedProtein,
-                     carbohydrates: adjustedCarbohydrates,
-                     fat: adjustedFat,
-                     fiber: Number(fiber) * totalMultiplier,
-                     sugar: Number(sugar) * totalMultiplier,
-                     saturatedFat: Number(saturatedFat) * totalMultiplier,
-                     polyunsaturatedFat: Number(polyunsaturatedFat) * totalMultiplier,
-                     monounsaturatedFat: Number(monounsaturatedFat) * totalMultiplier,
-                     transFat: Number(transFat) * totalMultiplier,
-                     cholesterol: Number(cholesterol) * totalMultiplier,
-                     sodium: Number(sodium) * totalMultiplier,
-                     potassium: Number(potassium) * totalMultiplier
-                 }),
-             });
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    foodName: foodName,
+                    brandName: brandName,
+                    servingSize: selectedServingSize,
+                    servings: Number(numberOfServings),
+                    mealType: selectedMeal.toUpperCase(),
+                    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                    calories: Number(calories) * currentTotalMultiplier,
+                    protein: Number(protein) * currentTotalMultiplier,
+                    carbohydrates: Number(carbohydrates) * currentTotalMultiplier,
+                    fat: Number(fat) * currentTotalMultiplier,
+                    fiber: Number(fiber) * currentTotalMultiplier,
+                    sugar: Number(sugar) * currentTotalMultiplier,
+                    saturatedFat: Number(saturatedFat) * currentTotalMultiplier,
+                    polyunsaturatedFat: Number(polyunsaturatedFat) * currentTotalMultiplier,
+                    monounsaturatedFat: Number(monounsaturatedFat) * currentTotalMultiplier,
+                    transFat: Number(transFat) * currentTotalMultiplier,
+                    cholesterol: Number(cholesterol) * currentTotalMultiplier,
+                    sodium: Number(sodium) * currentTotalMultiplier,
+                    potassium: Number(potassium) * currentTotalMultiplier
+                }),
+            }).then(res => {
+                if (res.ok) {
+                    refreshMetrics();
+                    router.back();
+                }
+            });
              
          }} className="self-center absolute bottom-20" textClassName="text-lg" />
     </SafeAreaView>

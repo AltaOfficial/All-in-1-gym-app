@@ -9,6 +9,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class FoodLogsServiceImpl implements FoodLogsService {
@@ -38,5 +41,10 @@ public class FoodLogsServiceImpl implements FoodLogsService {
         FoodLogEntity foodLogEntity = foodLogsRepository.findById(foodLogId).orElseThrow();
         foodLogEntity.removeItem(foodLogItemEntity);
         return foodLogEntity;
+    }
+
+    @Override
+    public List<FoodLogItemEntity> getRecentFoods(UUID userId) {
+        return List.of();
     }
 }
