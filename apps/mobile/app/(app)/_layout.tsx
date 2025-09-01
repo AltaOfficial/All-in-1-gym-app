@@ -70,7 +70,11 @@ export default function AppLayout() {
                   return (
                     <Pressable
                       className="w-28 h-14 items-center justify-center z-20"
-                      onPress={() => router.push("/(app)/(nutrition)/(grocery)/addToGroceryList")}
+                      onPress={({ nativeEvent }) => {
+                        console.log("Native event:", nativeEvent.locationX);
+                        console.log("Adding item to grocery list");
+                        router.push("/(app)/(nutrition)/(grocery)/addToGroceryList")
+                      }}
                     >
                       <Text className="text-white text-lg font-[HelveticaNeue]">+ Add Item</Text> 
                     </Pressable>

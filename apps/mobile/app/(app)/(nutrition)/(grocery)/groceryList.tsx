@@ -9,14 +9,15 @@ import { GroceryListContext } from '../../../../context/GroceryListContext';
 import * as SecureStore from 'expo-secure-store';
 import { GroceryListItemType } from '../../../../types/groceryListItemType';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import {runOnJS, useSharedValue, withSpring} from 'react-native-reanimated';
+import { runOnJS, useSharedValue, withSpring } from 'react-native-reanimated';
 import Animated from "react-native-reanimated";
 import { useAnimatedStyle } from 'react-native-reanimated';
 import { deleteGroceryItem } from '../../../../services/deleteGroceryItem';
+import { useIsFocused } from '@react-navigation/native';
 
 const GroceryList = () => {
   const { dateFrom, setDateFrom, dateTo, setDateTo, groceryList, setGroceryList } = useContext(GroceryListContext);
-
+  const isFocused = useIsFocused();
   useEffect(() => {
     fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/grocerylist`, {
       method: 'POST',
@@ -54,10 +55,10 @@ const GroceryList = () => {
     };
     
     const panGestureHandler = Gesture.Pan()
-      .onUpdate((event) => {
+      .onChange((event) => {
         translateX.value = event.translationX;
       })
-      .onEnd((event) => {
+      .onFinalize((event) => {
         if (event.translationX < -100 || event.translationX > 100) {
           // Animate off screen
           const direction = event.translationX < 0 ? -200 : 200;
@@ -72,12 +73,11 @@ const GroceryList = () => {
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateX: translateX.value }],
-      pointerEvents: 'none',
     }));
 
     return (
       <GestureDetector gesture={panGestureHandler}>
-        <Animated.View className="flex-row justify-between items-center bg-gray1 rounded-xl p-4 mb-3 mx-4" pointerEvents='none' style={animatedStyle}>
+        <Animated.View className="flex-row justify-between items-center bg-gray1 rounded-xl p-4 mb-3 mx-4" style={animatedStyle}>
           <View className="flex-1">
             <Text className="text-white text-base font-[HelveticaNeue] mb-1">{item.itemName}</Text>
             <Text className="text-gray3 text-sm font-[HelveticaNeue]">{item.quantity} item{item.quantity > 1 ? 's' : ''}, ${(item.cost * item.quantity).toFixed(2)} total</Text>
@@ -181,13 +181,14 @@ const GroceryList = () => {
           </View>
         </View>
         <Separator className='h-[0.4px] mb-6'/>
-        <FlatList
+        {/* we need isFocused because, the animation view stays active when navigating to addToGroceryList, and prevents button presses from registering */}
+        {isFocused && <FlatList
           data={groceryList}
           renderItem={renderGroceryItem}
+          className='flex-1'
           keyExtractor={(item) => item.id}
-          className="flex-1"
           showsVerticalScrollIndicator={false}
-        />
+        />}
       </View>
     </SafeAreaView>
   )

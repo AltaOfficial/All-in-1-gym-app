@@ -12,9 +12,6 @@ const AddToGroceryList = () => {
     const [cost, setCost] = useState('');
     const [quantity, setQuantity] = useState('');
 
-    console.log(itemName, cost, quantity);
-
-
     return (
         <SafeAreaView edges={['bottom']} className="flex-1">
             <View className="px-4">
@@ -32,7 +29,6 @@ const AddToGroceryList = () => {
                 </View>
             </View>
             <GenericButton text="+ Add Item" onPress={async () => {
-                console.log(itemName, cost, quantity);
                 if (itemName === '' || cost === '' || quantity === '') {
                     console.error("Please fill in all fields");
                     return;
