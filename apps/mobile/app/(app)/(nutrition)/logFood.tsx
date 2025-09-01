@@ -313,6 +313,7 @@ export default function LogFood() {
                 if (res.ok) {
                     refreshMetrics();
                     router.back();
+                    router.back();
                 }
             });
              

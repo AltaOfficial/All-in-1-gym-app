@@ -1,11 +1,12 @@
 import { View, Text, ScrollView } from 'react-native'
-import React from 'react'
 import GenericButton from '../../../components/GenericButton'
 import MacrosBreakdown from '../../../components/MacrosBreakdown'
 import TodaysMealBreakdown from '../../../components/TodaysMealBreakdown'
 import GroceryListCard from '../../../components/GroceryListCard'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useContext, useEffect } from 'react'
+import { GroceryListContext } from '../../../context/GroceryListContext'
 
 export default function Nutrition() {
 

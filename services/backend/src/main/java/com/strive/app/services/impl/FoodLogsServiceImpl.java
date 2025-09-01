@@ -1,10 +1,12 @@
 package com.strive.app.services.impl;
 
+import com.strive.app.domain.dto.LogFoodRequestDto;
 import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
 import com.strive.app.repositories.FoodLogsRepository;
 import com.strive.app.services.FoodLogsService;
+import com.strive.app.services.MetricsService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FoodLogsServiceImpl implements FoodLogsService {
     private final FoodLogsRepository foodLogsRepository;
+    private final MetricsService metricsService;
 
     @Override
     public FoodLogEntity findById(FoodLogId id) {
@@ -46,5 +49,31 @@ public class FoodLogsServiceImpl implements FoodLogsService {
     @Override
     public List<FoodLogItemEntity> getRecentFoods(UUID userId) {
         return List.of();
+    }
+
+    @Override
+    @Transactional
+    public FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto) {
+        // Create FoodLogItemEntity from the DTO
+        FoodLogItemEntity foodLogItemEntity = FoodLogItemEntity.builder()
+                .foodName(logFoodRequestDto.getFoodName())
+                .brandName(logFoodRequestDto.getBrandName())
+                .fat(logFoodRequestDto.getFat())
+                .carbs(logFoodRequestDto.getCarbohydrates())
+                .protein(logFoodRequestDto.getProtein())
+                .time(logFoodRequestDto.getTime())
+                .calories(logFoodRequestDto.getCalories())
+                .servingSize(logFoodRequestDto.getServingSize())
+                .mealType(logFoodRequestDto.getMealType())
+                .servings(logFoodRequestDto.getServings())
+                .build();
+
+        // Log the food
+        FoodLogEntity foodLogEntity = logFood(FoodLogId.builder().userId(userId).build(), foodLogItemEntity);
+
+        // Update metrics
+        metricsService.updateDailyMetricsWithFood(userId, logFoodRequestDto);
+
+        return foodLogEntity;
     }
 }

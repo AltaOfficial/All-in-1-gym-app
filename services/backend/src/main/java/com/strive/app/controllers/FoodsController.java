@@ -9,7 +9,6 @@ import com.strive.app.mappers.Mapper;
 import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.FoodLogsService;
 import com.strive.app.services.FoodsService;
-import com.strive.app.services.MetricsService;
 import com.strive.app.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,6 @@ public class FoodsController {
     private final AuthenticationService authenticationService;
     private final FoodLogsService foodLogsService;
     private final UserService userService;
-    private final MetricsService metricsService;
 
     // create a meal
 
@@ -66,22 +64,8 @@ public class FoodsController {
             @RequestHeader("Authorization") String jwtToken) {
         UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
         UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
-        FoodLogItemEntity foodLogItemEntity = FoodLogItemEntity.builder()
-                .foodName(logFoodRequestDto.getFoodName())
-                .brandName(logFoodRequestDto.getBrandName())
-                .fat(logFoodRequestDto.getFat())
-                .carbs(logFoodRequestDto.getCarbohydrates())
-                .protein(logFoodRequestDto.getProtein())
-                .time(logFoodRequestDto.getTime())
-                .calories(logFoodRequestDto.getCalories())
-                .servingSize(logFoodRequestDto.getServingSize())
-                .mealType(logFoodRequestDto.getMealType())
-                .servings(logFoodRequestDto.getServings())
-                .build();
-        foodLogsService.logFood(FoodLogId.builder().userId(userEntity.getId()).build(), foodLogItemEntity);
 
-        // Update daily metrics with the food macros
-        metricsService.updateDailyMetricsWithFood(userEntity.getId(), logFoodRequestDto);
+        foodLogsService.logFoodAndUpdateMetrics(userEntity.getId(), logFoodRequestDto);
 
         return ResponseEntity.ok(true);
     }

@@ -4,6 +4,7 @@ import DashboardHero from "../../components/DashboardHero";
 import FoodlogCard from "../../components/FoodlogCard";
 import DashboardMetricCard from "../../components/DashboardMetricCard";
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { router } from "expo-router"
 
 const Dashboard = () => {
   return (
@@ -22,6 +23,7 @@ const Dashboard = () => {
               subLabel="lbs"
               dateFrom="2025-08-19"
               dateTo="2025-09-19"
+              onPress={() => router.push('/bodyMetrics/metricDataDates?page=weightTrend')}
             />
             <DashboardMetricCard
               title="Muscle Gain/Loss"
@@ -29,6 +31,7 @@ const Dashboard = () => {
               subLabel="lbs"
               dateFrom="2025-08-19"
               dateTo="2025-09-19"
+              onPress={() => router.push('/bodyMetrics/metricDataInfo?page=muscleGainLoss')}
             />
             <DashboardMetricCard
               title="Fat Gain/Loss"
@@ -36,26 +39,34 @@ const Dashboard = () => {
               subLabel="lbs"
               dateFrom="2025-08-19"
               dateTo="2025-09-19"
+              onPress={() => router.push('/bodyMetrics/metricDataInfo?page=fatGainLoss')}
             />
             <DashboardMetricCard
               title="Food Expenses"
               value="$19.39"
               dateFrom="2025-08-19"
               dateTo="2025-09-19"
+              onPress={() => router.push('/bodyMetrics/metricDataDates?page=foodExpenses')}
             />
-            <DashboardMetricCard
-              title="Body Metrics"
-              value="39.0%"
-              subLabel="Body Fat"
-              dateFrom="2025-08-19"
-              dateTo="2025-09-19"
-            />
+            <View className="w-full">
+              <DashboardMetricCard
+                title="Body Metrics"
+                value="39.0%"
+                subLabel="Body Fat"
+                dateFrom="2025-08-19"
+                dateTo="2025-08-31"
+                className="!w-full"
+                isPositive={true}
+                onPress={() => router.push('/bodyMetrics')}
+              />
+            </View>
             <DashboardMetricCard
               title="Avg. Sleep"
               value="7.23"
               subLabel="hrs"
               dateFrom="2025-08-19"
               dateTo="2025-09-19"
+              onPress={() => router.push('/bodyMetrics/metricDataInfo?page=sleep')}
             />
           </View>
         </View>

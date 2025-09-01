@@ -1,5 +1,6 @@
 package com.strive.app.services;
 
+import com.strive.app.domain.dto.LogFoodRequestDto;
 import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
@@ -17,4 +18,7 @@ public interface FoodLogsService {
     FoodLogEntity removeFood(FoodLogId foodLogId, FoodLogItemEntity foodLogItemEntity);
 
     List<FoodLogItemEntity> getRecentFoods(UUID userId);
+
+    // Combined method to log food and update metrics in a single transaction
+    FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto);
 }

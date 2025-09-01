@@ -10,6 +10,7 @@ import {
   checkAccountNeedsOnboarding,
   OnboardingContext,
 } from "../context/OnboardingContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.setOptions({
   duration: 1000,
@@ -117,7 +118,9 @@ export default function RootLayout() {
 
   return (
     <AuthContextProvider>
-      <RootNavigator />
+      <GestureHandlerRootView>
+        <RootNavigator />
+      </GestureHandlerRootView>
     </AuthContextProvider>
   );
 }
