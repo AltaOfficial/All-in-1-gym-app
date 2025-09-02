@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,4 +61,10 @@ public class UserDto {
     private Integer goalCholesterol;
     private Integer goalSodium;
     private Integer goalPotassium;
+
+    @Builder.Default
+    private List<MealDto> meals = new ArrayList<>();
+
+    @Builder.Default
+    private List<FoodDto> foods = new ArrayList<>();
 }

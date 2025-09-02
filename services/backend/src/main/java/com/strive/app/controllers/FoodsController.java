@@ -34,8 +34,6 @@ public class FoodsController {
 
     // search for user meals
 
-    // create food
-
     // remove food from the food log
     @PostMapping("/removelogfood")
     public ResponseEntity<Boolean> removeLogFood(@RequestBody LogFoodRequestDto logFoodRequestDto,
@@ -90,7 +88,28 @@ public class FoodsController {
         }
     }
 
-    // search for user foods
+    @PostMapping("/updateuserfood")
+    public void updateUserFood(@RequestBody FoodDto foodDto) {
+
+    }
+
+    // get all user foods
+    @GetMapping("/userfoods")
+    public ResponseEntity<List<FoodDto>> userFoods(@RequestHeader("Authorization") String jwtToken) {
+        UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+        UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+        return ResponseEntity.ok(foodsService.findAllByUserCreatedBy_Id(userEntity.getId()).stream()
+                .map(foodsMapper::mapTo).toList());
+    }
+
+    // create user food
+    @PostMapping("/createfood")
+    public ResponseEntity<FoodDto> createFood(@RequestHeader("Authorization") String jwtToken, @RequestBody FoodDto foodDto) {
+        UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+        UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+        foodDto.setUserCreatedById(userEntity.getId());
+        return ResponseEntity.ok(foodsMapper.mapTo(foodsService.save(foodsMapper.mapFrom(foodDto))));
+    }
 
     // search for global foods
 

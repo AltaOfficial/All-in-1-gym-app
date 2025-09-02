@@ -10,7 +10,11 @@ import { router } from 'expo-router';
 
 const FoodLog = () => {
 
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    // Create date in local timezone to avoid timezone issues
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  });
   const [foodLog, setFoodLog] = useState<FoodLogItemType[]>([]);
 
   useEffect(() => {
@@ -51,7 +55,7 @@ const FoodLog = () => {
                 <Text className='text-white text-xl font-[HelveticaNeue] font-bold'>Breakfast</Text>
                 {breakfastCalories != 0 && <Text className='text-white text-lg font-[HelveticaNeue]'>{breakfastCalories.toFixed(0)} cal</Text>}
             </View>
-            {date.toISOString().split('T')[0] == new Date().toISOString().split('T')[0] && <TouchableOpacity onPress={() => router.push('/(app)/(nutrition)/logfoodsearch')}>
+            {date.toDateString() === new Date().toDateString() && <TouchableOpacity onPress={() => router.push('/(app)/(nutrition)/logfoodsearch')}>
                 <Text className='text-primary text-lg font-[HelveticaNeue]'>Add Food</Text>
             </TouchableOpacity>}
         </View>
@@ -76,7 +80,7 @@ const FoodLog = () => {
                 <Text className='text-white text-xl font-[HelveticaNeue] font-bold'>Lunch</Text>
                 {lunchCalories != 0 && <Text className='text-white text-lg font-[HelveticaNeue]'>{lunchCalories.toFixed(0)} cal</Text>}
             </View>
-            {date.toISOString().split('T')[0] == new Date().toISOString().split('T')[0] && <TouchableOpacity onPress={() => router.push('/(nutrition)/logFoodSearch')}>
+            {date.toDateString() === new Date().toDateString() && <TouchableOpacity onPress={() => router.push('/(nutrition)/logFoodSearch')}>
                 <Text className='text-primary text-lg font-[HelveticaNeue]'>Add Food</Text>
             </TouchableOpacity>}
         </View>
@@ -101,7 +105,7 @@ const FoodLog = () => {
                 <Text className='text-white text-xl font-[HelveticaNeue] font-bold'>Dinner</Text>
                 {dinnerCalories != 0 && <Text className='text-white text-lg font-[HelveticaNeue]'>{dinnerCalories.toFixed(0)} cal</Text>}
             </View>
-            {date.toISOString().split('T')[0] == new Date().toISOString().split('T')[0] && <TouchableOpacity onPress={() => router.push('/(nutrition)/logFoodSearch')}>
+            {date.toDateString() === new Date().toDateString() && <TouchableOpacity onPress={() => router.push('/(nutrition)/logFoodSearch')}>
                 <Text className='text-primary text-lg font-[HelveticaNeue]'>Add Food</Text>
             </TouchableOpacity>}
         </View>

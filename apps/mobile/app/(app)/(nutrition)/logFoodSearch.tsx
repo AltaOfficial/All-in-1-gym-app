@@ -1,19 +1,47 @@
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import SearchIcon from '../../../assets/icons/SearchIcon'
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import BarcodeIcon from '../../../assets/icons/BarcodeIcon';
 import FoodSearchItem from '../../../components/FoodSearchItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { FoodSearchResult } from '../../../types/searchResultType';
+import { FoodType } from '../../../types/foodType';
+import { FoodLogItemType } from '../../../types/foodLogItemType';
 import MealIcon from '../../../assets/icons/MealIcon';
 import ChickenWingIcon from '../../../assets/icons/ChickenWingIcon';
+import { getRecentFoods } from '../../../services/getRecentFoods';
+import { getUserFoods } from '../../../services/getUserFoods';
+import { CreateFoodContext } from '../../../context/CreateFoodContext';
 
 export default function LogFoodSearch() {
     const [selectedTab, setSelectedTab] = useState('all');
     const [searchResults, setSearchResults] = useState([]);
     const [noResults, setNoResults] = useState(false);
+    const [recentFoods, setRecentFoods] = useState<FoodLogItemType[]>([]);
+    const [userFoods, setUserFoods] = useState<FoodType[]>([]);
+    const { clearContext } = useContext(CreateFoodContext);
+
+    // Fetch data based on selected tab
+    useEffect(() => {
+        const fetchData = async () => {
+            if (selectedTab === 'all') {
+                const foods = await getRecentFoods();
+                console.log("recent foods", foods);
+                setRecentFoods(foods);
+            } else if (selectedTab === 'myFoods') {
+                const foods = await getUserFoods();
+                setUserFoods(foods);
+                console.log("user foods", foods);
+            }
+        };
+
+        fetchData();
+    }, [selectedTab, clearContext]);
+
+    // Get the appropriate food list based on selected tab
+    const displayFoods = selectedTab === 'all' ? recentFoods : selectedTab === 'myFoods' ? userFoods : [];
 
   return (
     <SafeAreaView edges={['bottom']} className="flex-1">
@@ -79,15 +107,93 @@ export default function LogFoodSearch() {
             </Pressable>
 
             <ScrollView className="px-6 mt-16">
-                <Text className="text-white font-[HelveticaNeue] mb-4">Recent Foods</Text>
+                <Text className="text-white font-[HelveticaNeue] mb-4">
+                    {selectedTab === 'all' ? 'Recent Foods' : selectedTab === 'myFoods' ? 'My Foods' : 'My Meals'}
+                </Text>
                 <ScrollView>
-                    <FoodSearchItem foodName="Frootloops, cereal" calories={153} brandName="Kellogg's" servingSize={0.5} servingSizeUnit="cup" onPress={() => {}} />
-                    <FoodSearchItem foodName="Banana" calories={89} brandName="Fresh" servingSize={1} servingSizeUnit="medium" onPress={() => {}} />
-                    <FoodSearchItem foodName="Chicken breast" calories={165} brandName="Organic" servingSize={100} servingSizeUnit="g" onPress={() => {}} />
-                    <FoodSearchItem foodName="Greek yogurt" calories={130} brandName="Chobani" servingSize={170} servingSizeUnit="g" onPress={() => {}} />
-                    <FoodSearchItem foodName="Greek yogurt" calories={130} brandName="Chobani" servingSize={170} servingSizeUnit="g" onPress={() => {}} />
-                    <FoodSearchItem foodName="Greek yogurt" calories={130} brandName="Chobani" servingSize={170} servingSizeUnit="g" onPress={() => {}} />
-                    <FoodSearchItem foodName="Greek yogurt" calories={130} brandName="Chobani" servingSize={170} servingSizeUnit="g" onPress={() => {}} />
+                    {displayFoods.length > 0 ? (
+                        displayFoods.map((food, index) => {
+                            if (selectedTab === 'all') {
+                                const recentFood = food as FoodLogItemType;
+                                return (
+                                    <FoodSearchItem 
+                                        key={index}
+                                        foodName={recentFood.foodName || 'Unknown Food'}
+                                        calories={recentFood.calories || 0}
+                                        brandName={recentFood.brandName || ''}
+                                        servingSize={parseFloat(recentFood.servingSize) || 1}
+                                        servingSizeUnit="g"
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/(app)/(nutrition)/logFood",
+                                                params: {
+                                                    foodName: recentFood.foodName,
+                                                    brandName: recentFood.brandName,
+                                                    servingSize: parseFloat(recentFood.servingSize),
+                                                    servingSizeUnit: "g",
+                                                    calories: recentFood.calories,
+                                                    protein: recentFood.protein,
+                                                    carbohydrates: recentFood.carbs,
+                                                    fat: recentFood.fat,
+                                                    fiber: 0,
+                                                    sugar: 0,
+                                                    saturatedFat: 0,
+                                                    polyunsaturatedFat: 0,
+                                                    monounsaturatedFat: 0,
+                                                    transFat: 0,
+                                                    cholesterol: 0,
+                                                    sodium: 0,
+                                                    potassium: 0
+                                                }
+                                            });
+                                        }}
+                                    />
+                                );
+                            } else if (selectedTab === 'myFoods') {
+                                const userFood = food as FoodType;
+                                return (
+                                    <FoodSearchItem 
+                                        key={index}
+                                        foodName={userFood.foodName || 'Unknown Food'}
+                                        calories={userFood.calories || 0}
+                                        brandName={userFood.foodBrandName || ''}
+                                        servingSize={userFood.servingSize || 1}
+                                        servingSizeUnit={userFood.servingUnit || 'g'}
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/(app)/(nutrition)/logFood",
+                                                params: {
+                                                    foodName: userFood.foodName,
+                                                    userId: userFood.userCreatedById,
+                                                    brandName: userFood.foodBrandName,
+                                                    servingSize: userFood.servingSize,
+                                                    servingSizeUnit: userFood.servingUnit,
+                                                    calories: userFood.calories,
+                                                    protein: userFood.protein,
+                                                    carbohydrates: userFood.carbohydrates,
+                                                    fat: userFood.fat,
+                                                    fiber: userFood.fiber,
+                                                    sugar: userFood.sugar,
+                                                    saturatedFat: userFood.saturatedFat,
+                                                    polyunsaturatedFat: userFood.polyunsaturatedFat,
+                                                    monounsaturatedFat: userFood.monounsaturatedFat,
+                                                    transFat: userFood.transFat,
+                                                    cholesterol: userFood.cholesterol,
+                                                    sodium: userFood.sodium,
+                                                    potassium: userFood.potassium
+                                                }
+                                            });
+                                        }}
+                                    />
+                                );
+                            }
+                            return null;
+                        })
+                    ) : (
+                        <Text className="text-white text-center py-4">
+                            {selectedTab === 'all' ? 'No recent foods found' : selectedTab === 'myFoods' ? 'No foods created yet' : 'No meals created yet'}
+                        </Text>
+                    )}
                 </ScrollView>
             </ScrollView>
         </ScrollView>} 

@@ -1,12 +1,12 @@
 package com.strive.app.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
+@Entity
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,11 +15,20 @@ import java.util.UUID;
 public class FoodEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ToString.Exclude
     private UserEntity userCreatedBy;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_id")
+    @JsonBackReference
+    @ToString.Exclude
+    private MealEntity mealConnectedTo;
 
     @Column(nullable = false)
     private String foodName;
@@ -39,10 +48,6 @@ public class FoodEntity {
     private Double cholesterol;
     private Double sodium;
     private Double potassium;
-
-    @ElementCollection
-    @CollectionTable(name = "food_portions", joinColumns = @JoinColumn(name = "food_id"))
-    private List<PortionEmb> portions = new ArrayList<>();
 
     private Double servingSize;
     private String servingUnit;

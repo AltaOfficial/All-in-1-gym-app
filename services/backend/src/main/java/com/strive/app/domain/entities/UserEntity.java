@@ -1,5 +1,6 @@
 package com.strive.app.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.strive.app.enums.GenderType;
 import com.strive.app.enums.MainGoal;
 import com.strive.app.enums.TrainingExperience;
@@ -9,7 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,4 +72,16 @@ public class UserEntity {
     private Integer goalCholesterol;
     private Integer goalSodium;
     private Integer goalPotassium;
+
+    @OneToMany(mappedBy = "userCreatedBy", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @ToString.Exclude
+    @Builder.Default
+    private List<MealEntity> meals = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userCreatedBy", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @ToString.Exclude
+    @Builder.Default
+    private List<FoodEntity> foods = new ArrayList<>();
 }

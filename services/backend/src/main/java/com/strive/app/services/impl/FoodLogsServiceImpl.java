@@ -35,6 +35,7 @@ public class FoodLogsServiceImpl implements FoodLogsService {
     public FoodLogEntity logFood(FoodLogId foodLogId, FoodLogItemEntity foodLogItemEntity) {
         FoodLogEntity foodLogEntity = foodLogsRepository.findById(foodLogId).orElseThrow();
         foodLogEntity.addItem(foodLogItemEntity);
+        System.out.println("FoodLogEntity: " + foodLogEntity);
         return foodLogEntity;
     }
 
@@ -70,6 +71,7 @@ public class FoodLogsServiceImpl implements FoodLogsService {
 
         // Log the food
         FoodLogEntity foodLogEntity = logFood(FoodLogId.builder().userId(userId).build(), foodLogItemEntity);
+        System.out.println("FoodLogItemEntity: " + foodLogItemEntity);
 
         // Update metrics
         metricsService.updateDailyMetricsWithFood(userId, logFoodRequestDto);

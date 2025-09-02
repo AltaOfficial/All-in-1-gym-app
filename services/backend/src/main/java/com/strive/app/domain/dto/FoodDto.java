@@ -2,7 +2,6 @@ package com.strive.app.domain.dto;
 
 import lombok.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -11,7 +10,7 @@ import java.util.UUID;
 @Builder
 public class FoodDto {
     private UUID id;
-    private UUID userId;            // instead of UserEntity
+    private UUID userCreatedById;          // instead of UserEntity
     private String foodName;
     private String foodBrandName;
     private String foodBrandOwner;
@@ -29,8 +28,6 @@ public class FoodDto {
     private Double cholesterol;
     private Double sodium;
     private Double potassium;
-
-    private List<PortionDto> portions;
 
     private Double servingSize;
     private String servingUnit;

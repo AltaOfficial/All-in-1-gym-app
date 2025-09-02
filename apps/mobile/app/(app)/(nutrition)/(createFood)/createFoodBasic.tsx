@@ -1,29 +1,49 @@
 import { Text, TextInput, View } from 'react-native'
 import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import { useContext } from 'react';
+import { CreateFoodContext } from '../../../../context/CreateFoodContext';
 
-const CreateFood = () => {
-  const [selectedUnit, setSelectedUnit] = useState('g');
+const CreateFoodBasic = () => {
+  const { setBrandName, setDescription, setServingSize, setServingUnit, brandName, description, servingSize, servingUnit } = useContext(CreateFoodContext);
 
   return (
-    <View>
+    <View className="flex-1">
         <View className="px-4">
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Brand Name</Text>
-                <TextInput placeholder="ex. Campbell's" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" />
+                <TextInput 
+                    value={brandName}
+                    onChangeText={(text) => setBrandName(text)} 
+                    placeholder="ex. Campbell's" 
+                    placeholderTextColor="#828282" 
+                    className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" 
+                />
             </View>
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Description (Required)</Text>
-                <TextInput placeholder="ex. Chicken soup" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" />
+                <TextInput 
+                    value={description}
+                    onChangeText={(text) => setDescription(text)} 
+                    placeholder="ex. Chicken soup" 
+                    placeholderTextColor="#828282" 
+                    className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" 
+                />
             </View>
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Serving Size (Required)</Text>
                 <View className="flex-row gap-4 justify-between w-full">
-                    <TextInput placeholder="1" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-44 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" />
+                    <TextInput 
+                        value={servingSize}
+                        onChangeText={(text) => setServingSize(text)} 
+                        placeholder="1" 
+                        keyboardType="numeric"
+                        placeholderTextColor="#828282" 
+                        className="text-white text-lg h-[3.7rem] w-44 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" 
+                    />
                     <View className="border-gray2 border rounded-2xl overflow-hidden h-[3.7rem] w-44 justify-center">
                         <Picker
-                            selectedValue={selectedUnit}
-                            onValueChange={(itemValue) => setSelectedUnit(itemValue)}
+                            selectedValue={servingUnit}
+                            onValueChange={(itemValue) => setServingUnit(itemValue)}
                             style={{ 
                                 backgroundColor: 'black',
                                 color: 'white',
@@ -54,4 +74,4 @@ const CreateFood = () => {
     </View>
   )
 }
-export default CreateFood
+export default CreateFoodBasic

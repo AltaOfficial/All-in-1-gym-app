@@ -7,6 +7,7 @@ export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
       `${process.env.EXPO_PUBLIC_BACKEND_URL}/metrics/daily`,
       {
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
       }
@@ -16,6 +17,7 @@ export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
       const data = await response.json();
       return data as NutritionMetrics;
     } else {
+      console.log("error", await response.text());
       console.log("error", response.status, response.statusText);
       return null;
     }

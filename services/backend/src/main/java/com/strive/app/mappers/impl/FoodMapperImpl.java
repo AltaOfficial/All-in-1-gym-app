@@ -7,7 +7,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +17,8 @@ public class FoodMapperImpl implements Mapper<FoodEntity, FoodDto> {
     @PostConstruct
     public void init() {
         // ignore null values during mapping
-        // modelMapper.getConfiguration().setPropertyCondition(ctx -> ctx.getSource() != null);
+        // modelMapper.getConfiguration().setPropertyCondition(ctx -> ctx.getSource() !=
+        // null);
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
     }
 

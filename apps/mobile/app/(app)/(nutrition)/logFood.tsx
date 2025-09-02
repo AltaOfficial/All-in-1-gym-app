@@ -13,8 +13,8 @@ import { MetricsContext } from '../../../context/MetricsContext';
 export default function LogFood() {
     const { refreshMetrics } = useContext(MetricsContext);
 
-    const { foodName, calories, protein, carbohydrates, fat, fiber, sugar, saturatedFat, polyunsaturatedFat, monounsaturatedFat, transFat, cholesterol, sodium, potassium, brandName, servingSize, servingSizeUnit } = useLocalSearchParams();
-    
+    const { foodName, calories, protein, carbohydrates, fat, fiber, sugar, saturatedFat, polyunsaturatedFat, monounsaturatedFat, transFat, cholesterol, sodium, potassium, brandName, servingSize, servingSizeUnit, userId } = useLocalSearchParams();
+
     // Function to format to 2 significant figures
     const toSignificantFigures = (num: number, sigFigs: number = 2) => {
         if (num === 0 || num === null || num === undefined || isNaN(num)) return 0;
@@ -28,7 +28,7 @@ export default function LogFood() {
     const [numberOfServings, setNumberOfServings] = useState('1');
     
     // Calculate serving size multiplier (if servingSize is provided, use it, otherwise use 1g)
-    const servingSizeMultiplier = servingSize ? Number(servingSize) : 1;
+    const servingSizeMultiplier = servingSize && !userId ? Number(servingSize) : 1;
     const numberOfServingsValue = Number(numberOfServings);
     const totalMultiplier = servingSizeMultiplier * numberOfServingsValue;
     
@@ -65,7 +65,11 @@ export default function LogFood() {
         
         // Parse the new serving size to get the multiplier
         let newServingSizeMultiplier = 1;
-        if (value === '1g') {
+        if (userId && value === '1g') {
+            newServingSizeMultiplier = 1 / Number(servingSize);
+        } else if (userId && value !== '1g') {
+            newServingSizeMultiplier = 1
+        } else if (value === '1g') {
             newServingSizeMultiplier = 1;
         } else if (servingSize && value === `${servingSize} ${servingSizeUnit}`) {
             newServingSizeMultiplier = Number(servingSize);
@@ -86,7 +90,11 @@ export default function LogFood() {
         
         // Get current serving size multiplier based on selected serving size
         let currentServingSizeMultiplier = 1;
-        if (selectedServingSize === '1g') {
+        if (userId && selectedServingSize === '1g') {
+            currentServingSizeMultiplier = 1 / Number(servingSize);
+        } else if (userId && selectedServingSize !== '1g') {
+            currentServingSizeMultiplier = 1;
+        } else if (selectedServingSize === '1g') {
             currentServingSizeMultiplier = 1;
         } else if (servingSize && selectedServingSize === `${servingSize} ${servingSizeUnit}`) {
             currentServingSizeMultiplier = Number(servingSize);
@@ -273,14 +281,17 @@ export default function LogFood() {
              
              // Calculate the current total multiplier based on selected serving size and number of servings
              let currentServingSizeMultiplier = 1;
-             if (selectedServingSize === '1g') {
+             if (userId && selectedServingSize === '1g') {
+                 currentServingSizeMultiplier = 1 / Number(servingSize);
+             } else if (userId && selectedServingSize !== '1g') {
+                 currentServingSizeMultiplier = 1
+             } else if (selectedServingSize === '1g') {
                  currentServingSizeMultiplier = 1;
              } else if (servingSize && selectedServingSize === `${servingSize} ${servingSizeUnit}`) {
                  currentServingSizeMultiplier = Number(servingSize);
              }
              const currentTotalMultiplier = currentServingSizeMultiplier * Number(numberOfServings);
              
-             console.log(foodName, brandName, selectedServingSize, Number(numberOfServings), selectedMeal.toUpperCase(), new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }), Number(calories) * currentTotalMultiplier, Number(protein) * currentTotalMultiplier, Number(carbohydrates) * currentTotalMultiplier, Number(fat) * currentTotalMultiplier, Number(fiber) * currentTotalMultiplier, Number(sugar) * currentTotalMultiplier, Number(saturatedFat) * currentTotalMultiplier, Number(polyunsaturatedFat) * currentTotalMultiplier, Number(monounsaturatedFat) * currentTotalMultiplier, Number(transFat) * currentTotalMultiplier, Number(cholesterol) * currentTotalMultiplier, Number(sodium) * currentTotalMultiplier, Number(potassium) * currentTotalMultiplier);
              
              fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
                 method: 'POST',

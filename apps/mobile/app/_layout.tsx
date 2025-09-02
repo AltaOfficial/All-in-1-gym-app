@@ -10,6 +10,7 @@ import {
   checkAccountNeedsOnboarding,
   OnboardingContext,
 } from "../context/OnboardingContext";
+import { CreateFoodProvider } from "../context/CreateFoodContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.setOptions({
@@ -118,9 +119,11 @@ export default function RootLayout() {
 
   return (
     <AuthContextProvider>
-      <GestureHandlerRootView>
-        <RootNavigator />
-      </GestureHandlerRootView>
+      <CreateFoodProvider>
+        <GestureHandlerRootView>
+          <RootNavigator />
+        </GestureHandlerRootView>
+      </CreateFoodProvider>
     </AuthContextProvider>
   );
 }

@@ -13,13 +13,15 @@ export default function BodyMetrics() {
   const bodyMetrics: BodyMetric[] = [
     { name: 'Body Fat', value: '39.0%' },
     { name: 'Shoulders', value: '17 in' },
+    { name: 'Chest', value: '28 in' },
     { name: 'Waist', value: '37 in' },
+    { name: 'Hips', value: '37 in' },
     { name: 'Left Bicep', value: '37 in' },
     { name: 'Right Bicep', value: '37 in' },
     { name: 'Right Calf', value: '37 in' },
     { name: 'Left Calf', value: '37 in' },
-    { name: 'Right Ankle', value: '37 in' },
-    { name: 'Left Ankle', value: '37 in' },
+    { name: 'Right Thigh', value: '37 in' },
+    { name: 'Left Thigh', value: '37 in' },
     { name: 'Neck', value: '14 in' },
   ]
 
