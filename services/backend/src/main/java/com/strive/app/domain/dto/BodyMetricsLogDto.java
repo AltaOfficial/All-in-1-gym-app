@@ -1,39 +1,34 @@
-package com.strive.app.domain.entities;
+package com.strive.app.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import com.strive.app.domain.entities.BodyMetricsId;
+import com.strive.app.domain.entities.UserEntity;
 import lombok.*;
 
-@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bodymetricslogs")
-public class BodyMetricsLogEntity {
+public class BodyMetricsLogDto {
 
-    @EmbeddedId
     private BodyMetricsId id;
 
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     @ToString.Exclude
     private UserEntity user;
 
-    // Photos
+    // photos
     private String frontPhotoUrl;
     private String sidePhotoUrl;
 
     // basic body metrics
-    private Double weight; // in kg or lbs (decide based on your app units)
-    private Double bodyFat; // percentage
+    private Double weight;
+    private Double bodyFat;
     private Double shouldersCircumference;
     private Double neckCircumference;
-    private Double waistCircumference; // cm/in
-    private Double chestCircumference; // cm/in
-    private Double hipCircumference; // cm/in
+    private Double waistCircumference;
+    private Double chestCircumference;
+    private Double hipCircumference;
     private Double leftBicepCircumference;
     private Double rightBicepCircumference;
     private Double rightCalfCircumference;

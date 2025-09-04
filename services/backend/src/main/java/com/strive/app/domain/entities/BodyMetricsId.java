@@ -15,7 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class BodyMetricsId {
+
     private UUID userId;
+
     @Builder.Default
     private LocalDate date = LocalDate.now();
 }
