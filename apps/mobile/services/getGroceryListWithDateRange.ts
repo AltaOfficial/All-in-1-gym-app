@@ -2,26 +2,26 @@ import * as SecureStore from "expo-secure-store";
 import { GroceryListItemType } from "../types/groceryListItemType";
 import { format } from "date-fns";
 
-export async function getGroceryList({
-  dateFrom,
-  dateTo,
+export async function getGroceryListWithDateRange({
+  startDate,
+  endDate,
 }: {
-  dateFrom: string;
-  dateTo: string;
+  startDate: string;
+  endDate: string;
 }): Promise<GroceryListItemType[] | null> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/grocerylist`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/grocerylist/logsByDateRange`,
       {
         method: "POST",
-        body: JSON.stringify({
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        }),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
+        body: JSON.stringify({
+          dateFrom: startDate,
+          dateTo: endDate,
+        }),
       }
     );
 
@@ -33,7 +33,6 @@ export async function getGroceryList({
       return null;
     }
   } catch (error) {
-    console.error("Error fetching grocery list:", error);
     return null;
   }
 }

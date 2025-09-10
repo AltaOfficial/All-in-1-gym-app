@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getGroceryList } from "../services/getGroceryList";
 import { GroceryListItemType } from "../types/groceryListItemType";
+import { startOfWeek, endOfWeek } from "date-fns";
+import { format } from "date-fns";
 
 export const GroceryListContext = createContext({
   groceryList: null as GroceryListItemType[] | null,
@@ -22,37 +24,45 @@ export function GroceryListContextProvider({
 }) {
   const getCurrentWeek = () => {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust for Monday start
-    
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + mondayOffset);
-    monday.setHours(0, 0, 0, 0);
-    
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-        
-    return { weekFrom: monday, weekTo: sunday };
+    const weekFrom = startOfWeek(today);
+    const weekTo = endOfWeek(today);
+
+    return { weekFrom, weekTo };
   };
-  const [dateFrom, setDateFrom] = useState<Date | null>(getCurrentWeek().weekFrom);
+  const [dateFrom, setDateFrom] = useState<Date | null>(
+    getCurrentWeek().weekFrom
+  );
   const [dateTo, setDateTo] = useState<Date | null>(getCurrentWeek().weekTo);
   const [groceryList, setGroceryList] = useState<GroceryListItemType[]>([]);
-  
+
   const refreshGroceryList = () => {
-    getGroceryList({ dateFrom: dateFrom ?? getCurrentWeek().weekFrom, dateTo: dateTo ?? getCurrentWeek().weekTo }).then((groceryList) => {
+    getGroceryList({
+      dateFrom: format(dateFrom ?? getCurrentWeek().weekFrom, "yyyy-MM-dd"),
+      dateTo: format(dateTo ?? getCurrentWeek().weekTo, "yyyy-MM-dd"),
+    }).then((groceryList) => {
       setGroceryList(groceryList ?? []);
       setDateFrom(dateFrom ?? getCurrentWeek().weekFrom);
       setDateTo(dateTo ?? getCurrentWeek().weekTo);
     });
-  }
+  };
 
   useEffect(() => {
     refreshGroceryList();
   }, [dateFrom, dateTo]);
 
   return (
-    <GroceryListContext.Provider value={{ groceryList, setGroceryList, dateFrom, setDateFrom, dateTo, setDateTo, refreshGroceryList, getCurrentWeek }}>
+    <GroceryListContext.Provider
+      value={{
+        groceryList,
+        setGroceryList,
+        dateFrom,
+        setDateFrom,
+        dateTo,
+        setDateTo,
+        refreshGroceryList,
+        getCurrentWeek,
+      }}
+    >
       {children}
     </GroceryListContext.Provider>
   );

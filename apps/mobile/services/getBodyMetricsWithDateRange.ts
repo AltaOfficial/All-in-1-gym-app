@@ -1,39 +1,37 @@
 import * as SecureStore from "expo-secure-store";
-import { GroceryListItemType } from "../types/groceryListItemType";
-import { format } from "date-fns";
+import { BodyMetricsLogType } from "../types/BodyMetricsLogType";
 
-export async function getGroceryList({
-  dateFrom,
-  dateTo,
+export async function getBodyMetricsWithDateRange({
+  startDate,
+  endDate,
 }: {
-  dateFrom: string;
-  dateTo: string;
-}): Promise<GroceryListItemType[] | null> {
+  startDate: string;
+  endDate: string;
+}): Promise<BodyMetricsLogType[] | null> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/grocerylist`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/bodymetrics/logsByDateRange`,
       {
         method: "POST",
-        body: JSON.stringify({
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        }),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
+        body: JSON.stringify({
+          startDate: startDate,
+          endDate: endDate,
+        }),
       }
     );
 
     if (response.ok) {
       const data = await response.json();
-      return data as GroceryListItemType[];
+      return data as BodyMetricsLogType[];
     } else {
       console.log("error", response.status, response.statusText);
       return null;
     }
   } catch (error) {
-    console.error("Error fetching grocery list:", error);
     return null;
   }
 }

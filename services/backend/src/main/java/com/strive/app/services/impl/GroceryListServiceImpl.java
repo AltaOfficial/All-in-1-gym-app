@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -24,6 +26,11 @@ public class GroceryListServiceImpl implements GroceryListService {
     @Override
     public GroceryListItemEntity findById(UUID id) {
         return groceryListItemRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<GroceryListItemEntity> findAllByUserIdAndDateRange(UUID id, LocalDate dateFrom, LocalDate dateTo) {
+        return groceryListItemRepository.findAllByUserIdAndDateRange(id, dateFrom, dateTo);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.strive.app.controllers;
 
-import com.strive.app.domain.dto.GroceryListItemDto;
-import com.strive.app.domain.dto.GroceryListRequestDto;
+import com.strive.app.domain.dto.*;
 import com.strive.app.domain.entities.*;
 import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.GroceryListService;
@@ -9,6 +8,7 @@ import com.strive.app.services.UserService;
 import com.strive.app.mappers.Mapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -110,5 +110,33 @@ public class GroceryListController {
                     .build());
             return false;
         }
+    }
+
+    @PostMapping("/logsByDateRange")
+    public ResponseEntity<List<GroceryListItemDto>> getGrocerListItemsByDateRange(
+            @RequestHeader("Authorization") String jwtToken,
+            @RequestBody GroceryListRequestDto requestDto) {
+
+        if (jwtToken.startsWith("Bearer ")) {
+            UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+            UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+
+            List<GroceryListItemEntity> groceryListItemEntities;
+
+            if (requestDto.getDateFrom() != null && requestDto.getDateTo() != null) {
+                groceryListItemEntities = groceryListService.findAllByUserIdAndDateRange(
+                        userEntity.getId(), requestDto.getDateFrom(), requestDto.getDateTo());
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+
+            List<GroceryListItemDto> responseDtos = groceryListItemEntities.stream()
+                    .map(groceryListItemMapper::mapTo)
+                    .toList();
+
+            return ResponseEntity.ok(responseDtos);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 }

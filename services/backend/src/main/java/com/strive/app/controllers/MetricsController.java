@@ -32,7 +32,6 @@ public class MetricsController {
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
             try {
                 // find existing metrics for today
-                System.out.println(metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).build()));
                 MetricsEntity metricsEntity = metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).build());
                 MetricsDto metricsDto = metricsMapper.mapTo(metricsEntity);
                 return ResponseEntity.ok(metricsDto);

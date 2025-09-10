@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -23,6 +25,6 @@ public class GroceryListItemDto {
     private Double quantity;
     private Double cost;
 
-    @JsonIgnore
-    private GroceryListEntity groceryListEntity;
+    private LocalDate groceryListEntityIdDateFrom;
+    private LocalDate groceryListEntityIdDateTo;
 }

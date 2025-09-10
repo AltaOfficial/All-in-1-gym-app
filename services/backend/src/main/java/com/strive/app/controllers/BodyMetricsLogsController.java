@@ -107,6 +107,9 @@ public class BodyMetricsLogsController {
             if(latest != null && latest){
                 try {
                     BodyMetricsLogEntity bodyMetricsLogEntity = bodyMetricsService.findFirstByIdUserIdOrderByIdDateDesc(userEntity.getId());
+                    if(bodyMetricsLogEntity == null){
+                        throw new NoSuchElementException();
+                    }
                     BodyMetricsLogDto responseDto = bodyMetricsMapper.mapTo(bodyMetricsLogEntity);
 
                     return ResponseEntity.ok(responseDto);
