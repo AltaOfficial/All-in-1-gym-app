@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 public class FoodDto {
     private UUID id;
-    private UUID userCreatedById;          // instead of UserEntity
+    private UUID userCreatedById;
     private String foodName;
     private String foodBrandName;
     private String foodBrandOwner;
@@ -32,4 +32,6 @@ public class FoodDto {
     private Double servingSize;
     private String servingUnit;
     private String householdServingText;
+
+    private Integer servingsAmount;
 }

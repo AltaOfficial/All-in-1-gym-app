@@ -1,5 +1,6 @@
 package com.strive.app.services;
 
+import com.strive.app.domain.entities.FoodEntity;
 import com.strive.app.domain.entities.UserEntity;
 
 import java.util.Optional;
@@ -11,6 +12,8 @@ public interface UserService {
     UserEntity save(UUID id, UserEntity user);
 
     UserEntity save(String email, UserEntity user);
+
+    void addToRecentFoods(FoodEntity food, UserEntity userEntity);
 
     void delete(UUID id);
 

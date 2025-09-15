@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
-import { FoodLogItemType } from "../types/foodLogItemType";
+import { FoodType } from "../types/foodType";
 
-export async function getRecentFoods(): Promise<FoodLogItemType[]> {
+export async function getRecentFoods(): Promise<FoodType[]> {
   try {
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/recent`,
@@ -14,7 +14,7 @@ export async function getRecentFoods(): Promise<FoodLogItemType[]> {
 
     if (response.ok) {
       const data = await response.json();
-      return data as FoodLogItemType[];
+      return data.reverse() as FoodType[];
     } else {
       console.log("error", response.status, response.statusText);
       return [];

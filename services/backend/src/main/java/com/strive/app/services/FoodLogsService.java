@@ -17,8 +17,6 @@ public interface FoodLogsService {
 
     FoodLogEntity removeFood(FoodLogId foodLogId, FoodLogItemEntity foodLogItemEntity);
 
-    List<FoodLogItemEntity> getRecentFoods(UUID userId);
-
     // Combined method to log food and update metrics in a single transaction
     FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto);
 }

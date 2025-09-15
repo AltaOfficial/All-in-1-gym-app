@@ -20,23 +20,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class MealEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @EmbeddedId
+    private MealId id;
 
     private URL mealImageUrl;
-
-    @JoinColumn(name = "user_id", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
-    @ToString.Exclude
-    private UserEntity userCreatedBy;
 
     @Column(nullable = false)
     private String mealName;
 
-    @OneToMany(mappedBy = "mealConnectedTo", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "mealConnectedTo", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<FoodEntity> foodItems;
 }

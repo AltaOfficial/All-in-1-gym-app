@@ -180,7 +180,10 @@ const GroceryList = () => {
           >
             <ChevronLeftIcon height={20} width={20} fill="white" />
           </Pressable>
-          <Text className="text-white font-[HelveticaNeue] text-lg font-bold">
+          <Text
+            numberOfLines={1}
+            className="text-white font-[HelveticaNeue] text-lg font-bold"
+          >
             {formatDateRange(dateFrom || new Date(), dateTo || new Date())}
           </Text>
           <Pressable

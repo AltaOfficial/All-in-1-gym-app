@@ -1,13 +1,12 @@
 import * as SecureStore from "expo-secure-store";
-import User from "../types/userType";
+import { RecipeType } from "../types/recipeType";
 
-export async function getCurrentUser(): Promise<User | null> {
+export async function getUserRecipes(): Promise<RecipeType[]> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/users/me`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/recipes/userrecipes`,
       {
         headers: {
-          Date: new Date().toISOString().split("T")[0],
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
       }
@@ -15,13 +14,13 @@ export async function getCurrentUser(): Promise<User | null> {
 
     if (response.ok) {
       const data = await response.json();
-      return data as User;
+      return data as RecipeType[];
     } else {
       console.log("error", response.status, response.statusText);
-      return null;
+      return [];
     }
   } catch (error) {
-    console.error("Error fetching current user:", error);
-    return null;
+    console.error("Error fetching user foods:", error);
+    return [];
   }
 }

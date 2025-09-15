@@ -1,15 +1,19 @@
 package com.strive.app.domain.dto;
 
+import com.strive.app.domain.entities.FoodEntity;
+import com.strive.app.domain.entities.MealEntity;
+import com.strive.app.domain.entities.RecipeEntity;
 import com.strive.app.enums.GenderType;
 import com.strive.app.enums.MainGoal;
 import com.strive.app.enums.TrainingExperience;
 import com.strive.app.enums.WeightType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,7 +48,7 @@ public class UserDto {
 
     private String password;
 
-    private List<UUID> recentFoods;
+    private LinkedList<FoodDto> recentFoods;
 
     private Integer goalCalories;
 
@@ -67,4 +71,7 @@ public class UserDto {
 
     @Builder.Default
     private List<FoodDto> foods = new ArrayList<>();
+
+    @Builder.Default
+    private List<RecipeDto> recipes = new ArrayList<>();
 }

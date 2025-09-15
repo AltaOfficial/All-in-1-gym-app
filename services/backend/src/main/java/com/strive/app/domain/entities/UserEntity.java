@@ -55,7 +55,10 @@ public class UserEntity {
 
     private Double weightChangeAmount;
 
-    private List<UUID> recentFoods;
+    @OneToMany(mappedBy = "inUserRecents", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    @OrderBy("createdAt ASC")
+    private List<FoodEntity> recentFoods = new ArrayList<>();
 
     private Integer goalCalories;
 
@@ -73,15 +76,21 @@ public class UserEntity {
     private Integer goalSodium;
     private Integer goalPotassium;
 
-    @OneToMany(mappedBy = "userCreatedBy", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meals")
     @ToString.Exclude
     @Builder.Default
     private List<MealEntity> meals = new ArrayList<>();
 
-    @OneToMany(mappedBy = "userCreatedBy", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "foods")
     @ToString.Exclude
     @Builder.Default
     private List<FoodEntity> foods = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipes")
+    @ToString.Exclude
+    @Builder.Default
+    private List<RecipeEntity> recipes = new ArrayList<>();
 }

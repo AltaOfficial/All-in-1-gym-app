@@ -10,6 +10,7 @@ import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.FoodLogsService;
 import com.strive.app.services.FoodsService;
 import com.strive.app.services.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -58,12 +59,36 @@ public class FoodsController {
 
     // add food to the food log
     @PostMapping("/logfood")
+    @Transactional
     public ResponseEntity<Boolean> logFood(@RequestBody LogFoodRequestDto logFoodRequestDto,
             @RequestHeader("Authorization") String jwtToken) {
         UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
         UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+        FoodEntity foodEntity = FoodEntity.builder()
+                .foodName(logFoodRequestDto.getFoodName())
+                .foodBrandName(logFoodRequestDto.getBrandName())
+                .calories(logFoodRequestDto.getCalories())
+                .protein(logFoodRequestDto.getProtein())
+                .carbohydrates(logFoodRequestDto.getCarbohydrates())
+                .fat(logFoodRequestDto.getFat())
+                .fiber(logFoodRequestDto.getFiber())
+                .sugar(logFoodRequestDto.getSugar())
+                .saturatedFat(logFoodRequestDto.getSaturatedFat())
+                .polyunsaturatedFat(logFoodRequestDto.getPolyunsaturatedFat())
+                .monounsaturatedFat(logFoodRequestDto.getMonounsaturatedFat())
+                .transFat(logFoodRequestDto.getTransFat())
+                .cholesterol(logFoodRequestDto.getCholesterol())
+                .sodium(logFoodRequestDto.getSodium())
+                .potassium(logFoodRequestDto.getPotassium())
+                .servingSize(logFoodRequestDto.getServings())
+                .servingsAmount(logFoodRequestDto.getServings() != null
+                        ? logFoodRequestDto.getServings().intValue()
+                        : null)
+                .servingUnit(logFoodRequestDto.getServingSize())
+                .build();
 
         foodLogsService.logFoodAndUpdateMetrics(userEntity.getId(), logFoodRequestDto);
+        userService.addToRecentFoods(foodEntity, userEntity);
 
         return ResponseEntity.ok(true);
     }
@@ -120,12 +145,12 @@ public class FoodsController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<List<FoodLogItemDto>> getRecentFoods(@RequestHeader("Authorization") String jwtToken) {
+    public ResponseEntity<List<FoodDto>> getRecentFoods(@RequestHeader("Authorization") String jwtToken) {
         UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
         UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
 
-        List<FoodLogItemEntity> recentFoods = foodLogsService.getRecentFoods(userEntity.getId());
+        List<FoodEntity> recentFoods = foodsService.getRecentFoods(userEntity.getId());
 
-        return ResponseEntity.ok(recentFoods.stream().map(foodLogItemMapper::mapTo).toList());
+        return ResponseEntity.ok(recentFoods.stream().map(foodsMapper::mapTo).toList());
     }
 }

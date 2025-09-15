@@ -1,9 +1,12 @@
 package com.strive.app.controllers;
 
 import com.strive.app.domain.dto.UserDto;
+import com.strive.app.domain.entities.FoodLogEntity;
+import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.mappers.Mapper;
 import com.strive.app.services.AuthenticationService;
+import com.strive.app.services.FoodLogsService;
 import com.strive.app.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +28,7 @@ public class UserController {
     private final UserDetailsService userDetailsService;
     private final Mapper<UserEntity, UserDto> userMapper;
     private final AuthenticationService authenticationService;
+    private final FoodLogsService foodLogsService;
 
     @PostMapping(path = "/create")
     public UserDto createUser(@RequestBody UserDto user) {
@@ -49,11 +55,22 @@ public class UserController {
     }
 
     @GetMapping(path = "/me")
-    public ResponseEntity<UserDto> getUserByJwt(@RequestHeader(name = "Authorization") String jwtToken){
+    public ResponseEntity<UserDto> getUserByJwt(@RequestHeader(name = "Authorization") String jwtToken, @RequestHeader(name = "Date") LocalDate date){
         if(jwtToken.startsWith("Bearer ")){
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+            UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
             UserDto userDto = userMapper.mapTo(userService.findByEmail(userDetails.getUsername()));
             userDto.setPassword(null);
+
+            // making sure a food log exists for today
+            try {
+                foodLogsService.findById(
+                        FoodLogId.builder().userId(userEntity.getId()).date(date).build());
+            } catch (NoSuchElementException exception) {
+                foodLogsService.save(FoodLogEntity.builder().user(userEntity)
+                        .id(FoodLogId.builder().userId(userEntity.getId()).date(date).build())
+                        .build());
+            }
             return ResponseEntity.ok(userDto);
         }
         return null;

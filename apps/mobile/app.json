@@ -19,14 +19,23 @@
       "icon": {
         "dark": "./assets/icons/icon-dark.png",
         "light": "./assets/icons/icon-light.png"
+      },
+      "bundleIdentifier": "com.anonymous.Strive",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/icon-adaptive-dark.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.Strive"
     },
     "plugins": [
       "expo-router",
@@ -44,8 +53,14 @@
         {
           "cameraPermission": "Allow Strive to access your camera"
         }
-      ]
+      ],
+      "expo-font"
     ],
-    "backgroundColor": "#000000"
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a8428fd4-cb6d-47d9-97d1-7698077026d6"
+      }
+    }
   }
 }

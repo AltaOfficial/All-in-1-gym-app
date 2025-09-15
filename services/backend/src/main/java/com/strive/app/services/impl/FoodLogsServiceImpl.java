@@ -5,6 +5,7 @@ import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
 import com.strive.app.repositories.FoodLogsRepository;
+import com.strive.app.repositories.FoodRepository;
 import com.strive.app.services.FoodLogsService;
 import com.strive.app.services.MetricsService;
 import jakarta.transaction.Transactional;
@@ -45,11 +46,6 @@ public class FoodLogsServiceImpl implements FoodLogsService {
         FoodLogEntity foodLogEntity = foodLogsRepository.findById(foodLogId).orElseThrow();
         foodLogEntity.removeItem(foodLogItemEntity);
         return foodLogEntity;
-    }
-
-    @Override
-    public List<FoodLogItemEntity> getRecentFoods(UUID userId) {
-        return List.of();
     }
 
     @Override

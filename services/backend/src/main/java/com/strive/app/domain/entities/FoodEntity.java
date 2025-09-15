@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -24,11 +25,27 @@ public class FoodEntity {
     @ToString.Exclude
     private UserEntity userCreatedBy;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meal_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "meal_id"),
+            @JoinColumn(name = "meal_user_id")
+    })
     @JsonBackReference
     @ToString.Exclude
     private MealEntity mealConnectedTo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "recipe_id"),
+            @JoinColumn(name = "recipe_user_id")
+    })
+    @JsonBackReference
+    @ToString.Exclude
+    private RecipeEntity recipeConnectedTo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "in_user_recents_id")
+    private UserEntity inUserRecents;
 
     @Column(nullable = false)
     private String foodName;
@@ -52,4 +69,12 @@ public class FoodEntity {
     private Double servingSize;
     private String servingUnit;
     private String householdServingText;
+
+    private LocalDateTime createdAt;
+    private Integer servingsAmount;
+
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

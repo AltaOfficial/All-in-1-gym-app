@@ -41,9 +41,13 @@ public class FoodsServiceImpl implements FoodsService {
     }
 
     @Override
+    public List<FoodEntity> getRecentFoods(UUID userId) {
+        return foodRepository.findAllByInUserRecents_Id(userId);
+    }
+
+    @Override
     public FoodEntity save(FoodEntity foodEntity) {
         if (foodEntity.getId() == null) {
-            // New entity → just insert
             return foodRepository.save(foodEntity);
         }
 

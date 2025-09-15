@@ -24,4 +24,5 @@ export interface FoodType {
   servingSize?: number;
   servingUnit?: string;
   householdServingText?: string;
+  servingsAmount?: number;
 }
