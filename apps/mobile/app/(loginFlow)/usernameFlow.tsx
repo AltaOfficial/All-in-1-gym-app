@@ -28,6 +28,7 @@ export default function UsernameFlow() {
           if (email.trim().length == 0) {
             return;
           }
+          console.log("email", email);
           await fetch(
             `${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/validate/email`,
             {

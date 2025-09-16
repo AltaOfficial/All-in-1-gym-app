@@ -1,6 +1,0 @@
-spring:
-  datasource:
-    username: postgres
-    password: password
-  jpa:
-    show-sql: true
