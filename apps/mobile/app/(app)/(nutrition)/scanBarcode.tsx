@@ -1,14 +1,24 @@
-import { Text, View } from 'react-native'
-import { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Camera, useCameraPermissions, CameraType, CameraView, BarcodeScanningResult } from 'expo-camera';
-import GenericButton from '../../../components/GenericButton';
-import * as SecureStore from 'expo-secure-store';
-import { router } from 'expo-router';
+import { Text, View } from "react-native";
+import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Camera,
+  useCameraPermissions,
+  CameraType,
+  CameraView,
+  BarcodeScanningResult,
+} from "expo-camera";
+import GenericButton from "../../../components/GenericButton";
+import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 export default function ScanBarcode() {
   const [permission, requestPermission] = useCameraPermissions();
   const [fetching, setFetching] = useState(false);
+  const { searchType } = useLocalSearchParams();
+
+  console.log("searchType", searchType);
 
   const handleBarcodeScanned = async (event: BarcodeScanningResult) => {
     // Prevent multiple scans while fetching
@@ -18,70 +28,84 @@ export default function ScanBarcode() {
 
     console.log("Barcode scanned: " + event.data);
     setFetching(true);
-    
-    await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/search?query=${event.data}`, {
+
+    await fetch(
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/search?query=${event.data}`,
+      {
         headers: {
-            'Authorization': `Bearer ${SecureStore.getItem('jwtToken')}`
+          Authorization: `Bearer ${SecureStore.getItem("jwtToken")}`,
+        },
+      }
+    ).then(async (response) => {
+      if (
+        response.status == 200 &&
+        response.headers.get("Content-Type") == "application/json"
+      ) {
+        const data = await response.json();
+        if (data.length == 0) {
+          console.log("No results found");
+          return router.back();
         }
-    }).then(async (response) => {
-        if(response.status == 200 && response.headers.get('Content-Type') == 'application/json') {
-            const data = await response.json();
-            if(data.length == 0) {
-                console.log("No results found");
-                return router.back();
-            }
-            if(data.length > 0) {
-                const food = data[0];
-                return router.push({
-                    pathname: "/(app)/(nutrition)/logFood",
-                    params: {
-                        foodName: food.foodName,
-                        brandName: food.foodBrandName,
-                        servingSize: food.servingSize,
-                        servingSizeUnit: food.servingUnit,
-                        calories: food.calories,
-                        protein: food.protein,
-                        carbohydrates: food.carbohydrates,
-                        fat: food.fat,
-                        fiber: food.fiber,
-                        sugar: food.sugar,
-                        saturatedFat: food.saturatedFat,
-                        polyunsaturatedFat: food.polyunsaturatedFat,
-                        monounsaturatedFat: food.monounsaturatedFat,
-                        transFat: food.transFat,
-                        cholesterol: food.cholesterol,
-                        sodium: food.sodium,
-                        potassium: food.potassium
-                        
-                    }
-                })
-            }
-        } else {
-            setFetching(false);
-            return;
+        if (data.length > 0) {
+          const food = data[0];
+          return router.push({
+            pathname: "/(app)/(nutrition)/logFood",
+            params: {
+              addType: searchType,
+              foodName: food.foodName,
+              brandName: food.foodBrandName,
+              servingSize: food.servingSize,
+              servingSizeUnit: food.servingUnit,
+              calories: food.calories,
+              protein: food.protein,
+              carbohydrates: food.carbohydrates,
+              fat: food.fat,
+              fiber: food.fiber,
+              sugar: food.sugar,
+              saturatedFat: food.saturatedFat,
+              polyunsaturatedFat: food.polyunsaturatedFat,
+              monounsaturatedFat: food.monounsaturatedFat,
+              transFat: food.transFat,
+              cholesterol: food.cholesterol,
+              sodium: food.sodium,
+              potassium: food.potassium,
+            },
+          });
         }
-    })
-  }
+      } else {
+        setFetching(false);
+        return;
+      }
+    });
+  };
 
   if (!permission) {
-    return <View>
+    return (
+      <View>
         <Text>No permission</Text>
-    </View>
+      </View>
+    );
   }
 
   if (!permission.granted) {
     return (
-      <View className='flex-1 items-center justify-center'>
-        <Text className='text-white text-lg font-[HelveticaNeue]'>We need your permission to access your camera</Text>
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-white text-lg font-[HelveticaNeue]">
+          We need your permission to access your camera
+        </Text>
         <GenericButton text="Grant Permission" onPress={requestPermission} />
       </View>
-    )
+    );
   }
 
   return (
-    <SafeAreaView edges={['bottom']} className='flex-1'>
-      <CameraView style={{ flex: 1 }} facing={'back'} onBarcodeScanned={handleBarcodeScanned} />
-      
+    <SafeAreaView edges={["bottom"]} className="flex-1">
+      <CameraView
+        style={{ flex: 1 }}
+        facing={"back"}
+        onBarcodeScanned={handleBarcodeScanned}
+      />
+
       {/* Barcode scanning frame */}
       <View className="absolute inset-0 justify-center items-center">
         <View className="w-64 h-40 rounded-lg">
@@ -104,5 +128,5 @@ export default function ScanBarcode() {
         </View>
       )}
     </SafeAreaView>
-  )
+  );
 }

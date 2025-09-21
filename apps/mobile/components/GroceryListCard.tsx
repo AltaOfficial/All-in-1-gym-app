@@ -46,10 +46,9 @@ export default function GroceryListCard() {
             <Text className="text-white font-[HelveticaNeue]">Est. Cost:</Text>
             <Text className="text-white font-[HelveticaNeue]">
               $
-              {groceryList?.reduce(
-                (acc, item) => acc + item.cost * item.quantity,
-                0
-              ) ?? 0}
+              {groceryList
+                ?.reduce((acc, item) => acc + item.cost * item.quantity, 0)
+                .toFixed(2) ?? 0}
             </Text>
           </View>
         </View>

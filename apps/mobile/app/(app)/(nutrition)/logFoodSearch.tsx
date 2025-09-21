@@ -153,10 +153,12 @@ export default function LogFoodSearch() {
             <Pressable
               className="px-6 mt-8"
               onPress={() => {
-                clearRecipeContext();
+                if (selectedTab == "myRecipes") {
+                  clearRecipeContext();
+                }
                 router.push(
                   selectedTab === "all"
-                    ? "/(app)/(nutrition)/scanBarcode"
+                    ? "/(app)/(nutrition)/scanBarcode?searchType=" + searchType
                     : selectedTab === "myMeals"
                       ? "/createMeal"
                       : selectedTab === "myRecipes"
@@ -270,13 +272,15 @@ export default function LogFoodSearch() {
                       <FoodSearchItem
                         key={index}
                         foodName={userRecipe.recipeName || "Unknown Recipe"}
-                        calories={
-                          userRecipe.ingredients.reduce(
-                            (acc, ingredient) =>
-                              acc + (ingredient.calories || 0),
-                            0
-                          ) / (userRecipe.servingsAmount || 0)
-                        }
+                        calories={Number(
+                          (
+                            userRecipe.ingredients.reduce(
+                              (acc, ingredient) =>
+                                acc + (ingredient.calories || 0),
+                              0
+                            ) / (userRecipe.servingsAmount || 0)
+                          ).toFixed(2)
+                        )}
                         servingSize={1}
                         servingSizeUnit={"serving"}
                         onPress={() =>

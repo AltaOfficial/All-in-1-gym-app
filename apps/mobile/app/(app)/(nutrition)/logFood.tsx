@@ -11,6 +11,20 @@ import { useContext } from "react";
 import { MetricsContext } from "../../../context/MetricsContext";
 import { RecipeContext } from "../../../context/RecipeContext";
 import { FoodType } from "../../../types/foodType";
+import { format } from "date-fns";
+
+// Function to determine meal type based on current time
+const getMealTypeByTime = () => {
+  const currentHour = new Date().getHours();
+
+  if (currentHour == 0 || currentHour < 11) {
+    return "Breakfast";
+  } else if (currentHour == 11 || currentHour < 16) {
+    return "Lunch";
+  } else {
+    return "Dinner";
+  }
+};
 
 export default function LogFood() {
   const { refreshMetrics } = useContext(MetricsContext);
@@ -37,8 +51,6 @@ export default function LogFood() {
     userId,
   } = useLocalSearchParams();
 
-  console.log("addType", addType);
-
   // Function to format to 2 significant figures
   const toSignificantFigures = (num: number, sigFigs: number = 2) => {
     if (num === 0 || num === null || num === undefined || isNaN(num)) return 0;
@@ -47,7 +59,7 @@ export default function LogFood() {
     return Math.round(num * multiplier) / multiplier;
   };
 
-  const [selectedMeal, setSelectedMeal] = useState("Breakfast");
+  const [selectedMeal, setSelectedMeal] = useState(getMealTypeByTime());
   const [selectedServingSize, setSelectedServingSize] = useState(
     servingSize ? `${servingSize} ${servingSizeUnit}` : "1g"
   );
@@ -476,7 +488,8 @@ export default function LogFood() {
           const currentTotalMultiplier =
             currentServingSizeMultiplier * Number(numberOfServings);
 
-          if (!addType) {
+          if (!addType || addType === undefined || addType === "undefined") {
+            console.log("logFood");
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
@@ -518,6 +531,7 @@ export default function LogFood() {
               }
             });
           } else if (addType === "recipe") {
+            console.log("recipe");
             const newFood: FoodType = {
               foodName: foodName as string,
               foodBrandName: brandName as string,
@@ -543,6 +557,7 @@ export default function LogFood() {
             router.back();
             router.back();
           } else if (addType === "logRecipe") {
+            console.log("logRecipe");
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
