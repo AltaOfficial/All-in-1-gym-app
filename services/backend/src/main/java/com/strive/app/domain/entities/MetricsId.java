@@ -14,7 +14,6 @@ import java.util.UUID;
 @Builder
 public class MetricsId implements Serializable {
     private UUID userId;
-    @Builder.Default
-    private LocalDate date = LocalDate.now(); // uses date of server instead of user timezone, edge cases will occur
+    private LocalDate date;
 
 }

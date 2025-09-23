@@ -189,7 +189,7 @@ export default function BodyMetricsChart({
       {yScale.ticks().map((value, index) => {
         return (
           <SvgText y={yScale(value)} fill="white" key={index}>
-            {value}
+            {value.toFixed(2)}
           </SvgText>
         );
       })}

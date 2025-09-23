@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class FoodLogsServiceImpl implements FoodLogsService {
 
     @Override
     @Transactional
-    public FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto) {
+    public FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto, LocalDate date) {
         // Create FoodLogItemEntity from the DTO
         FoodLogItemEntity foodLogItemEntity = FoodLogItemEntity.builder()
                 .foodName(logFoodRequestDto.getFoodName())
@@ -66,7 +67,7 @@ public class FoodLogsServiceImpl implements FoodLogsService {
                 .build();
 
         // Log the food
-        FoodLogEntity foodLogEntity = logFood(FoodLogId.builder().userId(userId).build(), foodLogItemEntity);
+        FoodLogEntity foodLogEntity = logFood(FoodLogId.builder().userId(userId).date(date).build(), foodLogItemEntity);
         System.out.println("FoodLogItemEntity: " + foodLogItemEntity);
 
         // Update metrics

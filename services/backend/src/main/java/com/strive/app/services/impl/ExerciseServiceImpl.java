@@ -7,6 +7,7 @@ import com.strive.app.repositories.ExerciseLogRepository;
 import com.strive.app.repositories.ExerciseRepository;
 import com.strive.app.repositories.WorkoutRepository;
 import com.strive.app.services.ExerciseService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -65,6 +66,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     // Workout operations
     @Override
+    @Transactional
     public WorkoutEntity saveWorkout(WorkoutEntity workoutEntity) {
         return workoutRepository.save(workoutEntity);
     }

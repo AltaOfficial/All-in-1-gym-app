@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -61,7 +62,7 @@ public class FoodsController {
     @PostMapping("/logfood")
     @Transactional
     public ResponseEntity<Boolean> logFood(@RequestBody LogFoodRequestDto logFoodRequestDto,
-            @RequestHeader("Authorization") String jwtToken) {
+            @RequestHeader("Authorization") String jwtToken, @RequestHeader("Date") LocalDate date) {
         UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
         UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
         FoodEntity foodEntity = FoodEntity.builder()
@@ -87,7 +88,7 @@ public class FoodsController {
                 .servingUnit(logFoodRequestDto.getServingSize())
                 .build();
 
-        foodLogsService.logFoodAndUpdateMetrics(userEntity.getId(), logFoodRequestDto);
+        foodLogsService.logFoodAndUpdateMetrics(userEntity.getId(), logFoodRequestDto, date);
         userService.addToRecentFoods(foodEntity, userEntity);
 
         return ResponseEntity.ok(true);

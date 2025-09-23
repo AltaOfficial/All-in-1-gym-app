@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/me")
-    public ResponseEntity<UserDto> getUserByJwt(@RequestHeader(name = "Authorization") String jwtToken, @RequestHeader(name = "Date") LocalDate date){
+    public ResponseEntity<UserDto> getUserByJwt(@RequestHeader(name = "Authorization") String jwtToken, @RequestHeader("Date") LocalDate date){
         if(jwtToken.startsWith("Bearer ")){
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());

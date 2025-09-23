@@ -8,6 +8,7 @@ import { UserContextProvider } from "../../context/UserContext";
 import { MetricsContextProvider } from "../../context/MetricsContext";
 import { GroceryListContextProvider } from "../../context/GroceryListContext";
 import { RecipeProvider } from "../../context/RecipeContext";
+import { CreateWorkoutProvider } from "../../context/CreateWorkoutContext";
 
 export default function AppLayout() {
   return (
@@ -15,6 +16,7 @@ export default function AppLayout() {
       <GroceryListContextProvider>
         <MetricsContextProvider>
           <RecipeProvider>
+            <CreateWorkoutProvider>
             <StatusBar style="auto" />
             <Stack
               screenOptions={{
@@ -179,6 +181,7 @@ export default function AppLayout() {
               />
             </Stack>
             <BottomNavbar />
+            </CreateWorkoutProvider>
           </RecipeProvider>
         </MetricsContextProvider>
       </GroceryListContextProvider>

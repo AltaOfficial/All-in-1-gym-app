@@ -1,0 +1,39 @@
+// Exercise Set Type
+export interface ExerciseSetType {
+  repsDone?: number | null;
+  effortType?: 'FAILED' | 'MAX_EFFORT' | 'HARD' | 'MEDIUM' | 'EASY' | null;
+  note?: string | null;
+}
+
+// Exercise Log Types
+export interface ExerciseLogType {
+  id?: string;
+  exerciseParentId: string;
+  date: string;
+  setsList: ExerciseSetType[];
+  weight?: number | null;
+  time?: number | null;
+}
+
+// Exercise Types
+export interface ExerciseType {
+  id?: string;
+  exerciseName: string;
+  exerciseImageUrl?: string | null;
+  workoutConnectedToId?: string | null;
+  restTimeInSeconds?: number | null;
+  goalSets?: number | null;
+  goalReps?: number | null;
+  isWeightBased?: boolean | null;
+  weight?: number | null;
+  time?: number | null;
+  tutorialUrl?: string | null;
+  exerciseLogs?: ExerciseLogType[];
+}
+
+// Workout Types
+export interface WorkoutType {
+  id?: string;
+  workoutName: string;
+  exercises?: ExerciseType[];
+}

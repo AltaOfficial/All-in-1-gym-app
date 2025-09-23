@@ -8,6 +8,7 @@ export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
       {
         headers: {
           'Content-Type': 'application/json',
+          Date: new Date().toISOString().split("T")[0], 
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
       }

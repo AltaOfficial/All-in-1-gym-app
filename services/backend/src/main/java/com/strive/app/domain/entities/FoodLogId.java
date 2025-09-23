@@ -17,7 +17,6 @@ import java.util.UUID;
 @Builder
 public class FoodLogId implements Serializable {
     private UUID userId;
-    @Builder.Default
-    private LocalDate date = LocalDate.now(); // TODO: uses date of server instead of user timezone, edge cases will occur on client side
+    private LocalDate date;
 
 }

@@ -11,7 +11,6 @@ import { useContext } from "react";
 import { MetricsContext } from "../../../context/MetricsContext";
 import { RecipeContext } from "../../../context/RecipeContext";
 import { FoodType } from "../../../types/foodType";
-import { format } from "date-fns";
 
 // Function to determine meal type based on current time
 const getMealTypeByTime = () => {
@@ -489,10 +488,10 @@ export default function LogFood() {
             currentServingSizeMultiplier * Number(numberOfServings);
 
           if (!addType || addType === undefined || addType === "undefined") {
-            console.log("logFood");
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
+                Date: new Date().toISOString().split("T")[0],
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
@@ -531,7 +530,6 @@ export default function LogFood() {
               }
             });
           } else if (addType === "recipe") {
-            console.log("recipe");
             const newFood: FoodType = {
               foodName: foodName as string,
               foodBrandName: brandName as string,
@@ -557,10 +555,10 @@ export default function LogFood() {
             router.back();
             router.back();
           } else if (addType === "logRecipe") {
-            console.log("logRecipe");
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
+                Date: new Date().toISOString().split("T")[0],
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },

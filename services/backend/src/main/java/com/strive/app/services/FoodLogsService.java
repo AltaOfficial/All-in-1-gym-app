@@ -5,6 +5,7 @@ import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,5 +19,5 @@ public interface FoodLogsService {
     FoodLogEntity removeFood(FoodLogId foodLogId, FoodLogItemEntity foodLogItemEntity);
 
     // Combined method to log food and update metrics in a single transaction
-    FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto);
+    FoodLogEntity logFoodAndUpdateMetrics(UUID userId, LogFoodRequestDto logFoodRequestDto, LocalDate date);
 }

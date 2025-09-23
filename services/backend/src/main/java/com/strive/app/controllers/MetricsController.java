@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -26,20 +27,20 @@ public class MetricsController {
     private final Mapper<MetricsEntity, MetricsDto> metricsMapper;
 
     @GetMapping("/daily")
-    public ResponseEntity<MetricsDto> dailyMetrics(@RequestHeader("Authorization") String jwtToken) {
-        if(jwtToken.startsWith("Bearer ")) {
+    public ResponseEntity<MetricsDto> dailyMetrics(@RequestHeader("Authorization") String jwtToken, @RequestHeader("Date") LocalDate date) {
+        if(jwtToken.startsWith("Bearer ") && date != null) {
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
             try {
                 // find existing metrics for today
-                MetricsEntity metricsEntity = metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).build());
+                MetricsEntity metricsEntity = metricsService.findOne(MetricsId.builder().userId(userEntity.getId()).date(date).build());
                 MetricsDto metricsDto = metricsMapper.mapTo(metricsEntity);
                 return ResponseEntity.ok(metricsDto);
             }
             catch (NoSuchElementException ex){
                 // if not found, create one for today and return it
                 MetricsEntity metricsEntity = metricsService.save(MetricsEntity.builder()
-                        .id(MetricsId.builder().userId(userEntity.getId()).build())
+                        .id(MetricsId.builder().userId(userEntity.getId()).date(date).build())
                         .user(userEntity)
                         .goalCalories(userEntity.getGoalCalories())
                         .goalCarbohydrates(userEntity.getGoalCarbohydrates())
