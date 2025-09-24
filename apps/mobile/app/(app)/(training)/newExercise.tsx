@@ -32,7 +32,6 @@ const newExcercise = () => {
   }, []);
 
   useEffect(() => {
-    console.log(exerciseIndex);
     if (exerciseIndex) {
       const exercise = exercises[Number(exerciseIndex)];
       setExerciseName(exercise.exerciseName);
@@ -40,11 +39,12 @@ const newExcercise = () => {
       setRestTimeInSeconds(exercise.restTimeInSeconds?.toString() ?? '');
       setGoalSets(exercise.goalSets?.toString() ?? '');
       setGoalReps(exercise.goalReps?.toString() ?? '');
+      setWeightBased(exercise.isWeightBased ?? true);
       setWeight(exercise.weight?.toString() ?? '');
       setTime(exercise.time?.toString() ?? '');
       setTutorialUrl(exercise.tutorialUrl ?? '');
     }
-  }, []);
+  }, [exerciseIndex]);
 
   return (
     <View className="flex-1">
@@ -67,14 +67,14 @@ const newExcercise = () => {
         <View className="px-4">
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Exercise Name</Text>
-                <TextInput placeholder="ex. Lat pull down" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setExerciseName} />
+                <TextInput value={exerciseName} placeholder="ex. Lat pull down" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setExerciseName} />
             </View>
         </View>
         <View className="px-4">
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Rest Time</Text>
                 <View className="flex-row gap-2 items-center">
-                    <TextInput placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setRestTimeInSeconds} />
+                    <TextInput value={restTimeInSeconds} placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setRestTimeInSeconds} />
                     <Text className='text-white text-lg font-[HelveticaNeue]'>secs</Text>
                 </View>
             </View>
@@ -83,11 +83,11 @@ const newExcercise = () => {
             <View className="flex-row gap-6 mt-4">
                 <View className="flex-col gap-2">
                     <Text className='text-white text-lg font-[HelveticaNeue]'>Sets</Text>
-                    <TextInput placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setGoalSets} />
+                    <TextInput value={goalSets} placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setGoalSets} />
                 </View>
                 <View className="flex-col gap-2">
                     <Text className='text-white text-lg font-[HelveticaNeue]'>Reps</Text>
-                    <TextInput placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setGoalReps} />
+                    <TextInput value={goalReps} placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setGoalReps} />
                 </View>
             </View>
         </View>
@@ -99,7 +99,7 @@ const newExcercise = () => {
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Weight</Text>
                 <View className="flex-row gap-2 items-center">
-                    <TextInput placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setWeight} />
+                    <TextInput value={weight} placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setWeight} />
                     <Text className='text-white text-lg font-[HelveticaNeue]'>{isLbs ? 'lbs' : 'kgs'}</Text>
                 </View>
             </View>
@@ -109,7 +109,7 @@ const newExcercise = () => {
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Time</Text>
                 <View className="flex-row gap-2 items-center">
-                    <TextInput placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setTime} />
+                    <TextInput value={time} placeholder="0" keyboardType="numeric" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-40 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setTime} />
                     <Text className='text-white text-lg font-[HelveticaNeue]'>secs</Text>
                 </View>
             </View>
@@ -118,7 +118,7 @@ const newExcercise = () => {
         <View className="px-4">
             <View className="flex-col gap-2 mt-4">
                 <Text className='text-white text-lg font-[HelveticaNeue]'>Tutorial URL</Text>
-                <TextInput placeholder="youtube url" keyboardType="url" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setTutorialUrl} />
+                <TextInput value={tutorialUrl} placeholder="youtube url" keyboardType="url" placeholderTextColor="#828282" className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3" onChangeText={setTutorialUrl} />
             </View>
         </View>
 
@@ -140,7 +140,11 @@ const newExcercise = () => {
             tutorialUrl: tutorialUrl,
           }
                 
-          setExercises([exercise, ...exercises]);
+          if (exerciseIndex) {
+            setExercises(exercises.map((exercisePrev, index) => index === Number(exerciseIndex) ? exercise : exercisePrev));
+          } else {
+            setExercises([exercise, ...exercises]);
+          }
           router.back();
         }} className="self-center absolute bottom-14" textClassName="text-lg" />
     </View>

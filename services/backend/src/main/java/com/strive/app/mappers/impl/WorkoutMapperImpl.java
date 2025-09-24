@@ -20,6 +20,8 @@ public class WorkoutMapperImpl implements Mapper<WorkoutEntity, WorkoutDto> {
 
     @Override
     public WorkoutEntity mapFrom(WorkoutDto workoutDto) {
-        return modelMapper.map(workoutDto, WorkoutEntity.class);
+        WorkoutEntity workoutEntity = modelMapper.map(workoutDto, WorkoutEntity.class);
+        workoutEntity.getExercises().forEach(exercise -> exercise.setWorkoutConnectedTo(workoutEntity));
+        return workoutEntity;
     }
 }

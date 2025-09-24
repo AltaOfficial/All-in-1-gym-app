@@ -71,6 +71,21 @@ public class ExerciseServiceImpl implements ExerciseService {
         return workoutRepository.save(workoutEntity);
     }
 
+    @Transactional
+    @Override
+    public WorkoutEntity updateWorkout(WorkoutEntity workoutEntity) {
+        WorkoutEntity foundWorkoutEntity = workoutRepository.findById(workoutEntity.getId())
+                .orElseThrow();
+        foundWorkoutEntity.getExercises().clear(); // Makes all foundWorkoutEntity exercises orphaned
+        workoutEntity.getExercises()
+                .forEach(e -> {
+                    e.setWorkoutConnectedTo(foundWorkoutEntity);
+                    foundWorkoutEntity.getExercises().add(e);
+                });
+        foundWorkoutEntity.setWorkoutName(workoutEntity.getWorkoutName());
+        return workoutRepository.save(foundWorkoutEntity);
+    }
+
     @Override
     public WorkoutEntity findWorkoutById(UUID id) {
         return workoutRepository.findById(id).orElseThrow();

@@ -25,6 +25,6 @@ public class WorkoutEntity {
 
     private String workoutName;
 
-    @OneToMany(mappedBy = "workoutConnectedTo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workoutConnectedTo", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<ExerciseEntity> exercises;
 }

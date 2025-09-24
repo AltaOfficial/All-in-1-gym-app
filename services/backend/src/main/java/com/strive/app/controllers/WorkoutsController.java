@@ -47,12 +47,12 @@ public class WorkoutsController {
     }
 
     @PostMapping("/update")
-    public WorkoutDto updateWorkout(WorkoutDto workoutDto){
-        return null;
+    public WorkoutDto updateWorkout(@RequestBody WorkoutDto workoutDto){
+        return workoutMapper.mapTo(exerciseService.updateWorkout(workoutMapper.mapFrom(workoutDto)));
     }
 
-    @GetMapping("/delete")
-    public void deleteWorkout(UUID id){
-
+    @GetMapping("/delete/{id}")
+    public void deleteWorkout(@PathVariable("id") UUID id){
+        exerciseService.deleteWorkout(id);
     }
 }

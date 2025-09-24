@@ -30,6 +30,8 @@ public interface ExerciseService {
     // Workout operations
     WorkoutEntity saveWorkout(WorkoutEntity workoutEntity);
 
+    WorkoutEntity updateWorkout(WorkoutEntity workoutEntity);
+
     WorkoutEntity findWorkoutById(UUID id);
 
     List<WorkoutEntity> findAllWorkoutsByUserId(UUID userId);
