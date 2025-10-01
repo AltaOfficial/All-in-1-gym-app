@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import { NutritionMetrics } from "../types/metricsType";
+import { format } from "date-fns";
 
 export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
   try {
@@ -7,8 +8,8 @@ export async function getDailyMetrics(): Promise<NutritionMetrics | null> {
       `${process.env.EXPO_PUBLIC_BACKEND_URL}/metrics/daily`,
       {
         headers: {
-          'Content-Type': 'application/json',
-          Date: new Date().toISOString().split("T")[0], 
+          "Content-Type": "application/json",
+          Date: format(new Date(), "yyyy-MM-dd"),
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
       }

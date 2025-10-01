@@ -23,7 +23,7 @@ export function GroceryListContextProvider({
   children: React.ReactNode;
 }) {
   const getCurrentWeek = () => {
-    const today = new Date();
+    const today = format(new Date(), "yyyy-MM-dd");
     const weekFrom = startOfWeek(today);
     const weekTo = endOfWeek(today);
 

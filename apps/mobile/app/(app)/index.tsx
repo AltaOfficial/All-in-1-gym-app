@@ -26,8 +26,9 @@ const Dashboard = () => {
   >([]);
   const [weightAverage, setWeightAverage] = useState<number>(0);
   const [foodExpenses, setFoodExpenses] = useState<GroceryListItemType[]>([]);
-  const startDate = subWeeks(new Date(), 2).toISOString();
-  const endDate = new Date().toISOString();
+  const today = new Date();
+  const startDate = format(subWeeks(today, 2), "yyyy-MM-dd");
+  const endDate = format(today, "yyyy-MM-dd");
 
   useEffect(() => {
     const differenceInDates = differenceInDays(endDate, startDate);
@@ -36,6 +37,7 @@ const Dashboard = () => {
       endDate: endDate,
     }).then((data) => {
       setBodyMetricsCurrentPeriod(data || []);
+
       getBodyMetricsWithDateRange({
         startDate: format(subDays(startDate, differenceInDates), "yyyy-MM-dd"),
         endDate: format(startDate, "yyyy-MM-dd"),
@@ -94,8 +96,8 @@ const Dashboard = () => {
                 leanBodyMassChange(bodyMetricsCurrentPeriod).toFixed(1) == "0.0"
                   ? undefined
                   : leanBodyMassChange(bodyMetricsCurrentPeriod) < 0.0
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               isGood={leanBodyMassChange(bodyMetricsCurrentPeriod) > 0}
               value={
@@ -127,8 +129,8 @@ const Dashboard = () => {
                 fatMassChange(bodyMetricsCurrentPeriod).toFixed(1) == "0.0"
                   ? undefined
                   : fatMassChange(bodyMetricsCurrentPeriod) < 0.0
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               isGood={fatMassChange(bodyMetricsCurrentPeriod) < 0}
               value={

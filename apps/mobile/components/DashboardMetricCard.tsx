@@ -3,7 +3,7 @@ import ChevronRightIcon from "../assets/icons/ChevronRightIcon";
 import ArrowDownIcon from "../assets/icons/ArrowDownIcon";
 import ArrowUpIcon from "../assets/icons/ArrowUpIcon";
 import { BodyMetricEnum } from "../types/bodyMetricEnum";
-import { format, isToday } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 
 type Props = {
   title: string;
@@ -53,8 +53,8 @@ export default function DashboardMetricCard({
                 isGood === true
                   ? "#00FF4D"
                   : isGood === false
-                    ? "#F43A45"
-                    : "white"
+                  ? "#F43A45"
+                  : "white"
               }
             />
           ) : isPositive === false ? (
@@ -65,8 +65,8 @@ export default function DashboardMetricCard({
                 isGood === true
                   ? "#00FF4D"
                   : isGood === false
-                    ? "#F43A45"
-                    : "white"
+                  ? "#F43A45"
+                  : "white"
               }
             />
           ) : null}
@@ -86,15 +86,9 @@ export default function DashboardMetricCard({
 function formatDateRangeWithDateFns(from: string, to: string): string {
   if (!from || !to) return "";
 
-  try {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+  const fromStr = format(parseISO(from), "d MMM");
+  const toStr =
+    to === format(new Date(), "yyyy-MM-dd") ? "Today" : parseISO(to).getDate();
 
-    const fromStr = format(fromDate, "d MMM");
-    const toStr = isToday(toDate) ? "Today" : format(toDate, "d MMM");
-
-    return `${fromStr} - ${toStr}`;
-  } catch {
-    return `${from} - ${to}`;
-  }
+  return `${fromStr} - ${toStr}`;
 }

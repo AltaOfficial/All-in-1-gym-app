@@ -4,9 +4,19 @@ import MoreIconVertical from "../assets/icons/MoreIconVertical";
 import { WorkoutType } from "../types/ExerciseTypes";
 import { useState } from "react";
 
-const WorkoutListItem = ({ workout, onStartPress, onDelete, onEdit }: { workout: WorkoutType, onStartPress: () => void, onDelete: () => void, onEdit: () => void }) => {
+const WorkoutListItem = ({
+  workout,
+  onStartPress,
+  onDelete,
+  onEdit,
+}: {
+  workout: WorkoutType;
+  onStartPress: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
+
   return (
     <View className="flex-row justify-between items-center mb-4 p-3">
       <Text className="text-white text-lg font-[HelveticaNeue]">
@@ -15,7 +25,7 @@ const WorkoutListItem = ({ workout, onStartPress, onDelete, onEdit }: { workout:
       <View className="flex-row items-center gap-2">
         <GenericButton
           text="Start"
-          className="w-32 py-1"
+          className="w-24 py-1"
           onPress={onStartPress}
         />
         <View className="relative">
@@ -26,7 +36,7 @@ const WorkoutListItem = ({ workout, onStartPress, onDelete, onEdit }: { workout:
           >
             <MoreIconVertical width={25} height={25} fill="white" />
           </Pressable>
-          
+
           {isDropdownOpen && (
             <View className="absolute top-8 right-0 bg-white rounded-lg shadow-lg z-50 min-w-32">
               <TouchableOpacity
@@ -36,7 +46,9 @@ const WorkoutListItem = ({ workout, onStartPress, onDelete, onEdit }: { workout:
                 }}
                 className="px-4 py-3 border-b border-gray-200"
               >
-                <Text className="text-black text-base font-[HelveticaNeue]">Edit</Text>
+                <Text className="text-black text-base font-[HelveticaNeue]">
+                  Edit
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
@@ -45,7 +57,9 @@ const WorkoutListItem = ({ workout, onStartPress, onDelete, onEdit }: { workout:
                 }}
                 className="px-4 py-3"
               >
-                <Text className="text-red-600 text-base font-[HelveticaNeue]">Delete</Text>
+                <Text className="text-red-600 text-base font-[HelveticaNeue]">
+                  Delete
+                </Text>
               </TouchableOpacity>
             </View>
           )}

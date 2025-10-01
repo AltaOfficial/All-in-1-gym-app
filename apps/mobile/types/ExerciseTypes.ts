@@ -1,7 +1,9 @@
+import { EffortEnum } from "./effortEnum";
+
 // Exercise Set Type
 export interface ExerciseSetType {
   repsDone?: number | null;
-  effortType?: 'FAILED' | 'MAX_EFFORT' | 'HARD' | 'MEDIUM' | 'EASY' | null;
+  effortType?: EffortEnum | null;
   note?: string | null;
 }
 
@@ -21,7 +23,7 @@ export interface ExerciseType {
   exerciseName: string;
   exerciseImageUrl?: string | null;
   workoutConnectedToId?: string | null;
-  restTimeInSeconds?: number | null;
+  restTimeInSeconds: number;
   goalSets?: number | null;
   goalReps?: number | null;
   isWeightBased?: boolean | null;

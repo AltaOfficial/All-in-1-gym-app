@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import User from "../types/userType";
+import { format } from "date-fns";
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
@@ -7,7 +8,7 @@ export async function getCurrentUser(): Promise<User | null> {
       `${process.env.EXPO_PUBLIC_BACKEND_URL}/users/me`,
       {
         headers: {
-          Date: new Date().toISOString().split("T")[0],
+          Date: format(new Date(), "yyyy-MM-dd"),
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
       }

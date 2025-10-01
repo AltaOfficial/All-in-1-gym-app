@@ -1,4 +1,5 @@
 import { BodyMetricsLogType } from "../types/BodyMetricsLogType";
+import { format } from "date-fns";
 
 export function leanBodyMassChange(data: BodyMetricsLogType[]) {
   const sorted = data
@@ -6,7 +7,9 @@ export function leanBodyMassChange(data: BodyMetricsLogType[]) {
       (d) => typeof d.bodyFat === "number" && typeof d.weight === "number"
     )
     .sort(
-      (a, b) => new Date(a.id.date).getTime() - new Date(b.id.date).getTime()
+      (a, b) =>
+        new Date(format(a.id.date, "yyyy-MM-dd")).getTime() -
+        new Date(format(b.id.date, "yyyy-MM-dd")).getTime()
     );
 
   if (sorted.length < 2) return 0;

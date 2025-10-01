@@ -154,7 +154,7 @@ const GroceryList = () => {
   const formatDateRange = (from: Date, to: Date) => {
     // Check if today is within the date range
 
-    return isWithinInterval(new Date(), {
+    return isWithinInterval(format(new Date(), "yyyy-MM-dd"), {
       start: from,
       end: to,
     })

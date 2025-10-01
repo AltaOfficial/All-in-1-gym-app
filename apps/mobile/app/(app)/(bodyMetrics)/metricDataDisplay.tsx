@@ -228,7 +228,11 @@ const metricDataDates = () => {
         <View className="flex-col items-center gap-4">
           <View className="flex-row justify-between gap-6 px-6 mt-4">
             <Text
-              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "1W" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "1W"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(format(startOfWeek(new Date()), "yyyy-MM-dd"));
                 setEndDate(format(endOfWeek(new Date()), "yyyy-MM-dd"));
@@ -238,7 +242,11 @@ const metricDataDates = () => {
               1W
             </Text>
             <Text
-              className={` font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "1M" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={` font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "1M"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(format(startOfMonth(new Date()), "yyyy-MM-dd"));
                 setEndDate(format(endOfMonth(new Date()), "yyyy-MM-dd"));
@@ -248,7 +256,11 @@ const metricDataDates = () => {
               1M
             </Text>
             <Text
-              className={` font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "3M" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={` font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "3M"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(
                   format(subMonths(startOfMonth(new Date()), 3), "yyyy-MM-dd")
@@ -260,7 +272,11 @@ const metricDataDates = () => {
               3M
             </Text>
             <Text
-              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "6M" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "6M"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(
                   format(subMonths(startOfMonth(new Date()), 5), "yyyy-MM-dd")
@@ -272,7 +288,11 @@ const metricDataDates = () => {
               6M
             </Text>
             <Text
-              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "1Y" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "1Y"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(format(startOfYear(new Date()), "yyyy-MM-dd"));
                 setEndDate(format(endOfYear(new Date()), "yyyy-MM-dd"));
@@ -282,7 +302,11 @@ const metricDataDates = () => {
               1Y
             </Text>
             <Text
-              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${selectedDate === "All" ? "text-black bg-white rounded-full" : "text-white"}`}
+              className={`font-[HelveticaNeue] font-medium py-1 px-3 ${
+                selectedDate === "All"
+                  ? "text-black bg-white rounded-full"
+                  : "text-white"
+              }`}
               onPress={() => {
                 setStartDate(format(startOfDecade(new Date()), "yyyy-MM-dd"));
                 setEndDate(format(endOfYear(new Date()), "yyyy-MM-dd"));

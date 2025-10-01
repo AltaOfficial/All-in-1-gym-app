@@ -11,6 +11,7 @@ import { useContext } from "react";
 import { MetricsContext } from "../../../context/MetricsContext";
 import { RecipeContext } from "../../../context/RecipeContext";
 import { FoodType } from "../../../types/foodType";
+import { format } from "date-fns";
 
 // Function to determine meal type based on current time
 const getMealTypeByTime = () => {
@@ -272,7 +273,10 @@ export default function LogFood() {
                 </Text>
                 <TextInput
                   className="flex-row items-center text-white text-lg h-14 w-32 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3"
-                  placeholder={`${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`}
+                  placeholder={`${new Date().toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`}
                   placeholderTextColor="#828282"
                   keyboardType="numeric"
                 />
@@ -370,7 +374,9 @@ export default function LogFood() {
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
                   {nutritionFactsPolyunsaturatedFat
-                    ? `${toSignificantFigures(nutritionFactsPolyunsaturatedFat)}g`
+                    ? `${toSignificantFigures(
+                        nutritionFactsPolyunsaturatedFat
+                      )}g`
                     : "-"}
                 </Text>
               </View>
@@ -380,7 +386,9 @@ export default function LogFood() {
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
                   {nutritionFactsMonounsaturatedFat
-                    ? `${toSignificantFigures(nutritionFactsMonounsaturatedFat)}g`
+                    ? `${toSignificantFigures(
+                        nutritionFactsMonounsaturatedFat
+                      )}g`
                     : "-"}
                 </Text>
               </View>
@@ -462,10 +470,10 @@ export default function LogFood() {
           addType === "recipe"
             ? `Add to Recipe`
             : addType === "meal"
-              ? `Add to Meal`
-              : addType === "logRecipe"
-                ? `+ Log Recipe`
-                : "+ Log food"
+            ? `Add to Meal`
+            : addType === "logRecipe"
+            ? `+ Log Recipe`
+            : "+ Log food"
         }
         onPress={async () => {
           const token = await SecureStore.getItemAsync("jwtToken");
@@ -491,7 +499,7 @@ export default function LogFood() {
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
-                Date: new Date().toISOString().split("T")[0],
+                Date: format(new Date(), "yyyy-MM-dd"),
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
@@ -558,7 +566,7 @@ export default function LogFood() {
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {
-                Date: new Date().toISOString().split("T")[0],
+                Date: format(new Date(), "yyyy-MM-dd"),
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
