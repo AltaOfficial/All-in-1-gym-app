@@ -1,20 +1,13 @@
 import { View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { WorkoutType } from "../../../types/ExerciseTypes";
-import { getUserWorkouts } from "../../../services/getUserWorkouts";
+import React, { useContext, useState } from "react";
 import GenericButton from "../../../components/GenericButton";
 import WorkoutHistoryTable from "../../../components/WorkoutHistoryTable";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { CreateWorkoutContext } from "../../../context/CreateWorkoutContext";
 
 const WorkoutHistory = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<number>(0);
-  const [workouts, setWorkouts] = useState<WorkoutType[]>([]);
-
-  useEffect(() => {
-    getUserWorkouts().then((data) => {
-      setWorkouts(data);
-    });
-  }, []);
+  const { workouts } = useContext(CreateWorkoutContext);
 
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1">

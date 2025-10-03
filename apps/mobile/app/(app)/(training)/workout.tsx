@@ -9,10 +9,12 @@ import ChevronRightIcon from "../../../assets/icons/ChevronRightIcon";
 import GenericButton from "../../../components/GenericButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { addSeconds, differenceInSeconds } from "date-fns";
+import { AppState } from "react-native";
 
 const Workout = () => {
   const { workout, nextExercise, endWorkout, currentExerciseIndex } =
     useContext(WorkoutContext);
+
   const [currentExerciseData, setCurrentExerciseData] = useState<
     ExerciseSetType[]
   >(() => {
@@ -47,6 +49,9 @@ const Workout = () => {
   const timerIntervalRef = useRef<number | null>(null);
   const timerDateIntoTheFutureRef = useRef<Date | null>(null);
   const isRestingRef = useRef(false);
+  const [isResting, setIsResting] = useState(false);
+  const currentExerciseRef = useRef(currentExercise);
+  const currentSetRef = useRef(currentSet);
 
   const tick = () => {
     if (
@@ -60,54 +65,90 @@ const Workout = () => {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
       }
-      if (isRestingRef.current) {
-        if (currentExercise?.time) {
-          // getting done with the rest period for time based exercise
-          setTimeSecondsLeft(
-            Math.floor((currentExercise?.time ?? 0) % 60)
-              ?.toString()
-              .padStart(2, "0") || "00"
-          );
-          setTimeMinutesLeft(
-            Math.floor((currentExercise?.time ?? 0) / 60)
-              ?.toString()
-              .padStart(2, "0") || "00"
-          );
 
-          if (currentExerciseIndex + 1 == (workout?.exercises?.length ?? 0)) {
-            setCurrentExercise(
-              workout?.exercises?.[currentExerciseIndex + 1] || undefined
-            );
+      setTimeSecondsLeft("00");
+      setTimeMinutesLeft("00");
+      timerDateIntoTheFutureRef.current = null;
+      setTimerDateIntoTheFuture(null);
+
+      if (isRestingRef.current) {
+        // Rest period finished - advance to next set/exercise
+        if (currentSetRef.current == currentExerciseRef.current?.goalSets) {
+          const next = nextExercise(currentExerciseData);
+          if (next) {
+            setCurrentExercise(next);
+            currentExerciseRef.current = next;
+            setCurrentSet(1);
+            currentSetRef.current = 1;
+            if (next.time) {
+              setTimeSecondsLeft(
+                Math.floor((next.time ?? 0) % 60)
+                  ?.toString()
+                  .padStart(2, "0") || "00"
+              );
+              setTimeMinutesLeft(
+                Math.floor((next.time ?? 0) / 60)
+                  ?.toString()
+                  .padStart(2, "0") || "00"
+              );
+            }
+          } else {
+            endWorkout();
+            return;
           }
         } else {
-          // getting done with the rest period for weight based exercise
-        }
-
-        if (currentSet == currentExercise?.goalSets) {
-          setCurrentExercise(nextExercise(currentExerciseData));
-          setCurrentSet(1);
-        } else {
-          setCurrentSet(currentSet + 1);
+          setCurrentSet(currentSetRef.current + 1);
+          currentSetRef.current = currentSetRef.current + 1;
+          if (currentExerciseRef.current?.time) {
+            setTimeSecondsLeft(
+              Math.floor((currentExerciseRef.current.time ?? 0) % 60)
+                ?.toString()
+                .padStart(2, "0") || "00"
+            );
+            setTimeMinutesLeft(
+              Math.floor((currentExerciseRef.current.time ?? 0) / 60)
+                ?.toString()
+                .padStart(2, "0") || "00"
+            );
+          }
         }
         isRestingRef.current = false;
+        setIsResting(false);
       } else {
-        // exercise was a time based exercise, handling after the timer has finished
+        // Exercise timer finished
+        // Check if this is the last set of the last exercise
+        if (
+          currentSetRef.current == currentExerciseRef.current?.goalSets &&
+          currentExerciseIndex + 1 == (workout?.exercises?.length ?? 0)
+        ) {
+          // Last set of last exercise - end workout
+          endWorkout();
+          return;
+        }
+
+        // Not the last set - start rest period
+        const restTime = currentExerciseRef.current?.restTimeInSeconds ?? 0;
+        isRestingRef.current = true;
+        setIsResting(true);
+
+        // Set the initial display for rest timer
         setTimeSecondsLeft(
-          Math.floor((currentExercise?.time ?? 0) % 60)
+          Math.floor(restTime % 60)
             ?.toString()
             .padStart(2, "0") || "00"
         );
         setTimeMinutesLeft(
-          Math.floor((currentExercise?.time ?? 0) / 60)
+          Math.floor(restTime / 60)
             ?.toString()
             .padStart(2, "0") || "00"
         );
-        isRestingRef.current = true;
-        setTimerDateIntoTheFuture(
-          addSeconds(new Date(), (currentExercise?.restTimeInSeconds ?? 0) + 1)
-        );
-        startTimer();
+
+        // Start the rest timer
+        const restEndTime = addSeconds(new Date(), restTime + 1);
+        timerDateIntoTheFutureRef.current = restEndTime;
+        setTimerDateIntoTheFuture(restEndTime);
       }
+      return;
     }
 
     setTimeSecondsLeft(
@@ -146,17 +187,181 @@ const Workout = () => {
   };
 
   useEffect(() => {
+    currentExerciseRef.current = currentExercise;
+  }, [currentExercise]);
+
+  useEffect(() => {
+    currentSetRef.current = currentSet;
+  }, [currentSet]);
+
+  useEffect(() => {
     timerDateIntoTheFutureRef.current = timerDateIntoTheFuture;
     if (timerDateIntoTheFuture && !timerIntervalRef.current) {
       startTimer();
     }
   }, [timerDateIntoTheFuture]);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      // When app goes to background, clear the timer
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
+      }
+
+      // When app comes back to foreground, handle timer state
+      if (nextAppState === "active" && timerDateIntoTheFutureRef.current) {
+        const secondsLeft = differenceInSeconds(timerDateIntoTheFutureRef.current, new Date());
+
+        if (secondsLeft > 0) {
+          // Timer still has time left, restart it
+          startTimer();
+        } else {
+          // Timer finished while app was in background
+          if (isRestingRef.current) {
+            // Rest period finished - advance to next set/exercise
+            setTimeSecondsLeft("00");
+            setTimeMinutesLeft("00");
+            timerDateIntoTheFutureRef.current = null;
+            setTimerDateIntoTheFuture(null);
+
+            // Move to next set or exercise
+            if (currentSetRef.current == currentExerciseRef.current?.goalSets) {
+              const next = nextExercise(currentExerciseData);
+              if (next) {
+                setCurrentExercise(next);
+                currentExerciseRef.current = next;
+                setCurrentSet(1);
+                currentSetRef.current = 1;
+                if (next.time) {
+                  setTimeSecondsLeft(
+                    Math.floor((next.time ?? 0) % 60)
+                      ?.toString()
+                      .padStart(2, "0") || "00"
+                  );
+                  setTimeMinutesLeft(
+                    Math.floor((next.time ?? 0) / 60)
+                      ?.toString()
+                      .padStart(2, "0") || "00"
+                  );
+                }
+              } else {
+                endWorkout();
+                return;
+              }
+            } else {
+              setCurrentSet(currentSetRef.current + 1);
+              currentSetRef.current = currentSetRef.current + 1;
+              if (currentExerciseRef.current?.time) {
+                setTimeSecondsLeft(
+                  Math.floor((currentExerciseRef.current.time ?? 0) % 60)
+                    ?.toString()
+                    .padStart(2, "0") || "00"
+                );
+                setTimeMinutesLeft(
+                  Math.floor((currentExerciseRef.current.time ?? 0) / 60)
+                    ?.toString()
+                    .padStart(2, "0") || "00"
+                );
+              }
+            }
+            isRestingRef.current = false;
+            setIsResting(false);
+          } else {
+            // Exercise finished
+            console.log("Exercise finished while in background");
+            console.log("currentSet:", currentSetRef.current);
+            console.log("goalSets:", currentExerciseRef.current?.goalSets);
+            console.log("currentExerciseIndex:", currentExerciseIndex);
+            console.log("total exercises:", workout?.exercises?.length);
+
+            // Check if this is the last set of the last exercise
+            if (
+              currentSetRef.current == currentExerciseRef.current?.goalSets &&
+              currentExerciseIndex + 1 == (workout?.exercises?.length ?? 0)
+            ) {
+              console.log("Last set of last exercise - ending workout");
+              // Last set of last exercise - end workout
+              endWorkout();
+              return;
+            }
+            console.log("Not last set - starting rest period");
+
+            // Not the last set - calculate if rest period also finished
+            const restTime = currentExerciseRef.current?.restTimeInSeconds ?? 0;
+            const restEndTime = addSeconds(new Date(), restTime);
+            const restSecondsLeft = differenceInSeconds(restEndTime, new Date());
+
+            isRestingRef.current = true;
+            setIsResting(true);
+
+            if (restSecondsLeft > 0) {
+              // Start rest timer
+              setTimerDateIntoTheFuture(restEndTime);
+            } else {
+              // Rest period also finished - advance to next
+              setTimeSecondsLeft("00");
+              setTimeMinutesLeft("00");
+
+              if (currentSetRef.current == currentExerciseRef.current?.goalSets) {
+                const next = nextExercise(currentExerciseData);
+                if (next) {
+                  setCurrentExercise(next);
+                  currentExerciseRef.current = next;
+                  setCurrentSet(1);
+                  currentSetRef.current = 1;
+                  if (next.time) {
+                    setTimeSecondsLeft(
+                      Math.floor((next.time ?? 0) % 60)
+                        ?.toString()
+                        .padStart(2, "0") || "00"
+                    );
+                    setTimeMinutesLeft(
+                      Math.floor((next.time ?? 0) / 60)
+                        ?.toString()
+                        .padStart(2, "0") || "00"
+                    );
+                  }
+                } else {
+                  endWorkout();
+                  return;
+                }
+              } else {
+                setCurrentSet(currentSetRef.current + 1);
+                currentSetRef.current = currentSetRef.current + 1;
+                if (currentExerciseRef.current?.time) {
+                  setTimeSecondsLeft(
+                    Math.floor((currentExerciseRef.current.time ?? 0) % 60)
+                      ?.toString()
+                      .padStart(2, "0") || "00"
+                  );
+                  setTimeMinutesLeft(
+                    Math.floor((currentExerciseRef.current.time ?? 0) / 60)
+                      ?.toString()
+                      .padStart(2, "0") || "00"
+                  );
+                }
+              }
+              isRestingRef.current = false;
+              setIsResting(false);
+            }
+          }
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1">
       {currentExercise &&
         currentExercise.isWeightBased == true &&
-        !isRestingRef.current && (
+        !isResting && (
           <View className="flex-1">
             <View className="items-center">
               <Image
@@ -278,6 +483,7 @@ const Workout = () => {
                   }
                   setEffortScore(0);
                   isRestingRef.current = true;
+                  setIsResting(true);
                   setTimeSecondsLeft(
                     Math.floor(currentExercise.restTimeInSeconds % 60)
                       ?.toString()
@@ -306,7 +512,7 @@ const Workout = () => {
             </View>
           </View>
         )}
-      {!isRestingRef.current &&
+      {!isResting &&
         currentExercise &&
         !currentExercise.isWeightBased && (
           <View className="flex-1">
@@ -352,6 +558,7 @@ const Workout = () => {
                       clearInterval(timerIntervalRef.current ?? 0);
                       timerIntervalRef.current = null;
                       isRestingRef.current = true;
+                      setIsResting(true);
                       setTimeSecondsLeft(
                         Math.floor(
                           (currentExercise.restTimeInSeconds ?? 0) % 60
@@ -410,7 +617,7 @@ const Workout = () => {
           </View>
         )}
 
-      {isRestingRef.current && (
+      {isResting && (
         <View className="flex-1">
           <Text className="text-white text-3xl font-[HelveticaNeue] text-center mt-6">
             Rest Period
@@ -472,72 +679,50 @@ const Workout = () => {
                     timerIntervalRef.current = null;
                   }
 
-                  if (currentExercise?.time) {
-                    // getting done with the rest period for time based exercise
-                    setTimeSecondsLeft(
-                      Math.floor((currentExercise?.time ?? 0) % 60)
-                        ?.toString()
-                        .padStart(2, "0") || "00"
-                    );
-                    setTimeMinutesLeft(
-                      Math.floor((currentExercise?.time ?? 0) / 60)
-                        ?.toString()
-                        .padStart(2, "0") || "00"
-                    );
-
-                    if (
-                      currentExerciseIndex + 1 ==
-                      (workout?.exercises?.length ?? 0)
-                    ) {
-                      setCurrentExercise(
-                        workout?.exercises?.[currentExerciseIndex + 1] ||
-                          undefined
-                      );
-                    }
-                  } else {
-                    // getting done with the rest period for weight based exercise
-                  }
+                  setTimerDateIntoTheFuture(null);
+                  timerDateIntoTheFutureRef.current = null;
 
                   if (currentSet == currentExercise?.goalSets) {
                     const newExercise = nextExercise(currentExerciseData);
-                    setCurrentExercise(newExercise);
-                    if (newExercise?.time) {
-                      setTimerDateIntoTheFuture(null);
+                    if (newExercise) {
+                      setCurrentExercise(newExercise);
+                      currentExerciseRef.current = newExercise;
+                      setCurrentSet(1);
+                      currentSetRef.current = 1;
+                      if (newExercise?.time) {
+                        setTimeSecondsLeft(
+                          Math.floor((newExercise?.time ?? 0) % 60)
+                            ?.toString()
+                            .padStart(2, "0") || "00"
+                        );
+                        setTimeMinutesLeft(
+                          Math.floor((newExercise?.time ?? 0) / 60)
+                            ?.toString()
+                            .padStart(2, "0") || "00"
+                        );
+                      }
+                    } else {
+                      endWorkout();
+                      return;
+                    }
+                  } else {
+                    setCurrentSet(currentSet + 1);
+                    currentSetRef.current = currentSet + 1;
+                    if (currentExercise?.time) {
                       setTimeSecondsLeft(
-                        Math.floor((newExercise?.time ?? 0) % 60)
+                        Math.floor((currentExercise?.time ?? 0) % 60)
                           ?.toString()
                           .padStart(2, "0") || "00"
                       );
                       setTimeMinutesLeft(
-                        Math.floor((newExercise?.time ?? 0) / 60)
+                        Math.floor((currentExercise?.time ?? 0) / 60)
                           ?.toString()
                           .padStart(2, "0") || "00"
                       );
                     }
-                    setCurrentSet(1);
-                  } else {
-                    setCurrentSet(currentSet + 1);
                   }
                   isRestingRef.current = false;
-
-                  // if (currentSet == currentExercise?.goalSets) {
-                  //   setCurrentExercise(nextExercise(currentExerciseData));
-                  //   setCurrentSet(1);
-                  // } else {
-                  //   setCurrentSet(currentSet + 1);
-                  // }
-                  // isRestingRef.current = false;
-                  // setTimerDateIntoTheFuture(null);
-                  // setTimeSecondsLeft(
-                  //   Math.floor((currentExercise?.time ?? 0) % 60)
-                  //     ?.toString()
-                  //     .padStart(2, "0") || "00"
-                  // );
-                  // setTimeMinutesLeft(
-                  //   Math.floor((currentExercise?.time ?? 0) / 60)
-                  //     ?.toString()
-                  //     .padStart(2, "0") || "00"
-                  // );
+                  setIsResting(false);
                 }}
               >
                 <Text className="text-white text-xl font-[HelveticaNeue]">

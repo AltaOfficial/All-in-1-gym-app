@@ -1,4 +1,10 @@
-import { createContext, useState, ReactNode, useCallback, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from "react";
 import { ExerciseType, WorkoutType } from "../types/ExerciseTypes";
 import { getUserWorkouts } from "../services/getUserWorkouts";
 
