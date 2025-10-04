@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,10 +13,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExerciseLogRequestDto {
+public class WorkoutLogDto {
 
-    private UUID exerciseLogId;
-    private UUID workoutLogId;
-    private UUID exerciseParentId;
-    private List<ExerciseSetDto> setsList;
+    private UUID id;
+    private Date date;
+    private List<ExerciseLogDto> exerciseLogs;
+    private UUID workoutId;
 }

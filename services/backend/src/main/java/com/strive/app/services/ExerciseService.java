@@ -2,6 +2,7 @@ package com.strive.app.services;
 
 import com.strive.app.domain.entities.ExerciseEntity;
 import com.strive.app.domain.entities.ExerciseLogEntity;
+import com.strive.app.domain.entities.ExerciseSet;
 import com.strive.app.domain.entities.WorkoutEntity;
 
 import java.util.List;
@@ -20,6 +21,8 @@ public interface ExerciseService {
 
     // Exercise Log operations
     ExerciseLogEntity saveExerciseLog(ExerciseLogEntity exerciseLogEntity);
+
+    ExerciseLogEntity saveOrUpdateExerciseLog(UUID exerciseLogId, UUID workoutLogId, UUID exerciseParentId, List<ExerciseSet> sets);
 
     ExerciseLogEntity findExerciseLogById(UUID id);
 

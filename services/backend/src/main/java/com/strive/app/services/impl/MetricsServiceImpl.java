@@ -1,6 +1,7 @@
 package com.strive.app.services.impl;
 
 import com.strive.app.domain.dto.LogFoodRequestDto;
+import com.strive.app.domain.dto.NutrientGoalsDto;
 import com.strive.app.domain.entities.MetricsEntity;
 import com.strive.app.domain.entities.MetricsId;
 import com.strive.app.repositories.MetricsRepository;
@@ -79,5 +80,33 @@ public class MetricsServiceImpl implements MetricsService {
                 (int) Math.round(logFoodRequestDto.getPotassium() != null ? logFoodRequestDto.getPotassium() : 0));
 
         return save(metricsEntity);
+    }
+
+    @Override
+    public void updateTodaysGoals(UUID userId, NutrientGoalsDto nutrientGoalsDto) {
+        MetricsId metricsId = MetricsId.builder()
+                .userId(userId)
+                .date(LocalDate.now())
+                .build();
+
+        try {
+            MetricsEntity metricsEntity = findOne(metricsId);
+
+            // Update goal values
+            metricsEntity.setGoalCalories(nutrientGoalsDto.getGoalCalories());
+            metricsEntity.setGoalProtein(nutrientGoalsDto.getGoalProtein());
+            metricsEntity.setGoalCarbohydrates(nutrientGoalsDto.getGoalCarbohydrates());
+            metricsEntity.setGoalFat(nutrientGoalsDto.getGoalFat());
+            metricsEntity.setGoalFiber(nutrientGoalsDto.getGoalFiber());
+            metricsEntity.setGoalSugar(nutrientGoalsDto.getGoalSugar());
+            metricsEntity.setGoalSaturatedFat(nutrientGoalsDto.getGoalSaturatedFat());
+            metricsEntity.setGoalCholesterol(nutrientGoalsDto.getGoalCholesterol());
+            metricsEntity.setGoalSodium(nutrientGoalsDto.getGoalSodium());
+            metricsEntity.setGoalPotassium(nutrientGoalsDto.getGoalPotassium());
+
+            save(metricsEntity);
+        } catch (Exception e) {
+            // If metrics don't exist for today, do nothing
+        }
     }
 }

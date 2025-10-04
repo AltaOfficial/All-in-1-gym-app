@@ -1,64 +1,214 @@
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode, useEffect } from "react";
 import {
   ExerciseSetType,
   ExerciseType,
   WorkoutType,
 } from "../types/ExerciseTypes";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { EffortEnum } from "../types/effortEnum";
 
 interface WorkoutContextType {
   // Workout information
   workout: WorkoutType | null;
-  exerciseLogId: string;
+  workoutLogId: string;
   currentExerciseIndex: number;
+  currentExerciseData: ExerciseSetType[];
 
   // Methods
   setWorkout: (workout: WorkoutType) => void;
-  nextExercise: (sets: ExerciseSetType[]) => ExerciseType | undefined;
-  setExerciseLogId: (exerciseLogId: string) => void;
-  endWorkout: () => void;
+  nextExercise: (sets: ExerciseSetType[]) => Promise<ExerciseType | undefined>;
+  setWorkoutLogId: (workoutLogId: string) => void;
+  endWorkout: (sets?: ExerciseSetType[]) => Promise<void>;
+  setCurrentExerciseData: (
+    data: ExerciseSetType[] | ((prev: ExerciseSetType[]) => ExerciseSetType[])
+  ) => void;
 }
 
 export const WorkoutContext = createContext<WorkoutContextType>({
   workout: null,
-  exerciseLogId: "",
+  workoutLogId: "",
   currentExerciseIndex: 0,
+  currentExerciseData: [],
   // Methods
   setWorkout: () => {},
-  nextExercise: () => undefined,
-  setExerciseLogId: () => {},
-  endWorkout: () => {},
+  nextExercise: async () => undefined,
+  setWorkoutLogId: () => {},
+  endWorkout: async () => {},
+  setCurrentExerciseData: () => {},
 });
 
 export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const [workout, setWorkout] = useState<WorkoutType | null>(null);
-  const [exerciseLogId, setExerciseLogId] = useState("");
+  const [workoutLogId, setWorkoutLogId] = useState("");
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [currentExerciseData, setCurrentExerciseData] = useState<
+    ExerciseSetType[]
+  >([]);
 
-  const nextExercise = (sets: ExerciseSetType[]) => {
-    // send the exercise metrics we get to the backend
+  const nextExercise = async (sets: ExerciseSetType[]) => {
+    let currentWorkoutLogId = workoutLogId;
+    console.log(sets);
+
+    // Create workout log if it doesn't exist
+    if (!workoutLogId) {
+      try {
+        const token = await SecureStore.getItemAsync("jwtToken");
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_BACKEND_URL}/workout-log/start${
+            workout?.id ? `?workoutId=${workout.id}` : ""
+          }`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const newWorkoutLogId = await response.text();
+          setWorkoutLogId(newWorkoutLogId);
+          currentWorkoutLogId = newWorkoutLogId;
+        }
+      } catch (error) {
+        console.error("Error creating workout log:", error);
+        return;
+      }
+    }
+
+    // Send the exercise metrics to the backend
+    const currentExercise = workout?.exercises?.[currentExerciseIndex];
+
+    if (currentExercise?.id && currentWorkoutLogId) {
+      try {
+        const token = await SecureStore.getItemAsync("jwtToken");
+        await fetch(
+          `${process.env.EXPO_PUBLIC_BACKEND_URL}/exercise/save-set`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              exerciseLogId: null,
+              workoutLogId: currentWorkoutLogId,
+              exerciseParentId: currentExercise.id,
+              setsList: sets,
+            }),
+          }
+        );
+      } catch (error) {
+        console.error("Error saving exercise set:", error);
+      }
+    }
 
     setCurrentExerciseIndex(currentExerciseIndex + 1);
-    return workout?.exercises?.[currentExerciseIndex + 1] as
-      | ExerciseType
-      | undefined;
+
+    const nextExercise = workout?.exercises?.[currentExerciseIndex + 1];
+
+    // Reset currentExerciseData for the next exercise
+    if (nextExercise) {
+      setCurrentExerciseData(
+        Array.from({ length: nextExercise.goalSets ?? 0 }, () => ({
+          repsDone: 0,
+          effortType: EffortEnum.EASY,
+          note: "",
+        }))
+      );
+    }
+
+    return nextExercise as ExerciseType | undefined;
   };
 
-  const endWorkout = () => {
+  const endWorkout = async (sets?: ExerciseSetType[]) => {
+    // If sets are provided, save them before ending the workout
+    if (sets && sets.length > 0) {
+      let currentWorkoutLogId = workoutLogId;
+
+      // Create workout log if it doesn't exist
+      if (!currentWorkoutLogId) {
+        try {
+          const token = await SecureStore.getItemAsync("jwtToken");
+          const response = await fetch(
+            `${process.env.EXPO_PUBLIC_BACKEND_URL}/workout-log/start${
+              workout?.id ? `?workoutId=${workout.id}` : ""
+            }`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            currentWorkoutLogId = await response.text();
+            setWorkoutLogId(currentWorkoutLogId);
+          }
+        } catch (error) {
+          console.error("Error creating workout log:", error);
+        }
+      }
+
+      const currentExercise = workout?.exercises?.[currentExerciseIndex];
+      if (currentExercise?.id && currentWorkoutLogId) {
+        try {
+          const token = await SecureStore.getItemAsync("jwtToken");
+          await fetch(
+            `${process.env.EXPO_PUBLIC_BACKEND_URL}/exercise/save-set`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                exerciseLogId: null,
+                workoutLogId: currentWorkoutLogId,
+                exerciseParentId: currentExercise.id,
+                setsList: sets,
+              }),
+            }
+          );
+        } catch (error) {
+          console.error("Error saving final exercise set:", error);
+        }
+      }
+    }
+
     setWorkout(null);
-    setExerciseLogId("");
+    setWorkoutLogId("");
     setCurrentExerciseIndex(0);
+    setCurrentExerciseData([]);
     router.navigate("/training");
   };
 
+  // Initialize currentExerciseData when workout is set
+  useEffect(() => {
+    if (workout?.exercises?.[currentExerciseIndex]) {
+      const currentExercise = workout.exercises[currentExerciseIndex];
+      setCurrentExerciseData(
+        Array.from({ length: currentExercise.goalSets ?? 0 }, () => ({
+          repsDone: 0,
+          effortType: EffortEnum.EASY,
+          note: "",
+        }))
+      );
+    }
+  }, [workout]);
+
   const value: WorkoutContextType = {
     workout,
-    exerciseLogId,
+    workoutLogId,
     currentExerciseIndex,
+    currentExerciseData,
     setWorkout,
     nextExercise,
-    setExerciseLogId,
+    setWorkoutLogId,
     endWorkout,
+    setCurrentExerciseData,
   };
 
   return (

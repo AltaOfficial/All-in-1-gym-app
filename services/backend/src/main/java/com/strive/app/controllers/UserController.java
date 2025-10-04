@@ -1,14 +1,20 @@
 package com.strive.app.controllers;
 
+import com.strive.app.domain.dto.NutrientGoalsDto;
+import com.strive.app.domain.dto.SettingsUpdateRequestDto;
 import com.strive.app.domain.dto.UserDto;
 import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.mappers.Mapper;
+import com.strive.app.mappers.NutrientGoalsMapper;
 import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.FoodLogsService;
+import com.strive.app.services.MetricsService;
+import com.strive.app.services.NutrientsService;
 import com.strive.app.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +35,9 @@ public class UserController {
     private final Mapper<UserEntity, UserDto> userMapper;
     private final AuthenticationService authenticationService;
     private final FoodLogsService foodLogsService;
+    private final NutrientsService nutrientsService;
+    private final NutrientGoalsMapper nutrientGoalsMapper;
+    private final MetricsService metricsService;
 
     @PostMapping(path = "/create")
     public UserDto createUser(@RequestBody UserDto user) {
@@ -74,5 +83,55 @@ public class UserController {
             return ResponseEntity.ok(userDto);
         }
         return null;
+    }
+
+    @PostMapping(path = "/settings")
+    public ResponseEntity<String> updateSettings(
+            @RequestBody SettingsUpdateRequestDto settingsUpdateRequestDto,
+            @RequestHeader(name = "Authorization") String jwtToken) {
+
+        if (jwtToken.startsWith("Bearer ")) {
+            UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+            UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+
+            // Update user fields if provided
+            if (settingsUpdateRequestDto.getMainGoal() != null) {
+                userEntity.setMainGoal(settingsUpdateRequestDto.getMainGoal());
+            }
+            if (settingsUpdateRequestDto.getWeight() != null) {
+                userEntity.setWeight(settingsUpdateRequestDto.getWeight());
+            }
+            if (settingsUpdateRequestDto.getHeightInInches() != null) {
+                userEntity.setHeightInInches(settingsUpdateRequestDto.getHeightInInches());
+            }
+            if (settingsUpdateRequestDto.getAge() != null) {
+                userEntity.setAge(settingsUpdateRequestDto.getAge());
+            }
+
+            // Recalculate nutrient goals with existing and new data
+            NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(
+                    userEntity.getAge(),
+                    userEntity.getWeight(),
+                    userEntity.getWeightType(),
+                    userEntity.getSexType(),
+                    userEntity.getHeightInInches(),
+                    userEntity.getWeightChangeAmount(),
+                    userEntity.getMainGoal(),
+                    userEntity.getTrainingExperience()
+            );
+
+            // Update user with new nutrient goals
+            nutrientGoalsMapper.updateUserWithGoals(nutrientGoalsDto, userEntity);
+
+            // Save the updated user
+            userService.save(userEntity);
+
+            // Update today's metrics goals
+            metricsService.updateTodaysGoals(userEntity.getId(), nutrientGoalsDto);
+
+            return new ResponseEntity<>("Settings updated successfully", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
     }
 }

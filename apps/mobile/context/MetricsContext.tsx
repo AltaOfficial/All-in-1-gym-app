@@ -6,7 +6,7 @@ import { getDailyMetrics } from "../services/getDailyMetrics";
 export const MetricsContext = createContext({
   metrics: null as NutritionMetrics | null,
   setMetrics: (metrics: NutritionMetrics | null) => {},
-  refreshMetrics: () => {},
+  refreshMetrics: async () => {},
 });
 
 export function MetricsContextProvider({
@@ -26,10 +26,9 @@ export function MetricsContextProvider({
     }
   }, [isSignedIn]);
   
-  const refreshMetrics = () => {
-    getDailyMetrics().then((metrics) => {
-      setMetrics(metrics);
-    });
+  const refreshMetrics = async () => {
+    const metrics = await getDailyMetrics();
+    setMetrics(metrics);
   }
 
   return (

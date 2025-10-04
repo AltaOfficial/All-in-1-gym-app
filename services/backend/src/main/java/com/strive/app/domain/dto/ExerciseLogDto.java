@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,8 +16,6 @@ public class ExerciseLogDto {
 
     private UUID id;
     private UUID exerciseParentId;
-    private Date date;
     private List<ExerciseSetDto> setsList;
-    private Double weight;
-    private Integer time;
+    private UUID workoutLogId;
 }

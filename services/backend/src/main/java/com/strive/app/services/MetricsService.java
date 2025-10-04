@@ -1,6 +1,7 @@
 package com.strive.app.services;
 
 import com.strive.app.domain.dto.LogFoodRequestDto;
+import com.strive.app.domain.dto.NutrientGoalsDto;
 import com.strive.app.domain.entities.MetricsEntity;
 import com.strive.app.domain.entities.MetricsId;
 
@@ -17,4 +18,7 @@ public interface MetricsService {
 
     // Update daily metrics by adding food macros
     MetricsEntity updateDailyMetricsWithFood(UUID userId, LogFoodRequestDto logFoodRequestDto);
+
+    // Update today's metrics goals
+    void updateTodaysGoals(UUID userId, NutrientGoalsDto nutrientGoalsDto);
 }
