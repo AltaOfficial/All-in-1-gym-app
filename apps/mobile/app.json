@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icons/icon-adaptive-dark.png",
+      "image": "./assets/icons/ios/icon-adaptive-light.png",
       "imageWidth": 200,
       "resizeMode": "contain",
       "backgroundColor": "#000000"
@@ -17,8 +17,8 @@
     "ios": {
       "supportsTablet": true,
       "icon": {
-        "dark": "./assets/icons/icon-dark.png",
-        "light": "./assets/icons/icon-light.png"
+        "dark": "./assets/icons/ios/icon-dark.png",
+        "light": "./assets/icons/ios/icon-light.png"
       },
       "bundleIdentifier": "com.anonymous.Strive",
       "infoPlist": {
@@ -27,7 +27,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icons/icon-adaptive-dark.png",
+        "foregroundImage": "./assets/icons/android/icon-adaptive-dark.png",
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
@@ -42,9 +42,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icons/icon-adaptive-dark.png",
+          "image": "./assets/icons/ios/icon-adaptive-light.png",
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#000000",
+          "imageWidth": 200
         }
       ],
       "expo-secure-store",

@@ -29,4 +29,8 @@ public class WorkoutLogEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private WorkoutEntity workout;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 }

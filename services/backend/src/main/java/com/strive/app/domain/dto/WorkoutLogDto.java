@@ -19,4 +19,5 @@ public class WorkoutLogDto {
     private Date date;
     private List<ExerciseLogDto> exerciseLogs;
     private UUID workoutId;
+    private UUID userId;
 }

@@ -8,11 +8,11 @@ import java.util.UUID;
 
 public interface WorkoutLogService {
 
-    WorkoutLogEntity createWorkoutLog(Date date, UUID workoutId);
+    WorkoutLogEntity createWorkoutLog(Date date, UUID workoutId, UUID userId);
 
     WorkoutLogEntity findById(UUID id);
 
-    List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate);
+    List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate, UUID userId);
 
     void deleteWorkoutLog(UUID id);
 }

@@ -1,7 +1,9 @@
 package com.strive.app.services.impl;
 
+import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.domain.entities.WorkoutEntity;
 import com.strive.app.domain.entities.WorkoutLogEntity;
+import com.strive.app.repositories.UserRepository;
 import com.strive.app.repositories.WorkoutLogRepository;
 import com.strive.app.repositories.WorkoutRepository;
 import com.strive.app.services.WorkoutLogService;
@@ -20,13 +22,17 @@ public class WorkoutLogServiceImpl implements WorkoutLogService {
 
     private final WorkoutLogRepository workoutLogRepository;
     private final WorkoutRepository workoutRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
-    public WorkoutLogEntity createWorkoutLog(Date date, UUID workoutId) {
+    public WorkoutLogEntity createWorkoutLog(Date date, UUID workoutId, UUID userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow();
+
         WorkoutLogEntity workoutLog = WorkoutLogEntity.builder()
                 .date(date)
                 .exerciseLogs(new ArrayList<>())
+                .user(user)
                 .build();
 
         if (workoutId != null) {
@@ -43,7 +49,7 @@ public class WorkoutLogServiceImpl implements WorkoutLogService {
     }
 
     @Override
-    public List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate) {
+    public List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate, UUID userId) {
         return workoutLogRepository.findAllByDateBetween(startDate, endDate);
     }
 
