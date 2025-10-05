@@ -49,8 +49,8 @@ public class WorkoutLogServiceImpl implements WorkoutLogService {
     }
 
     @Override
-    public List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate, UUID userId) {
-        return workoutLogRepository.findAllByDateBetween(startDate, endDate);
+    public List<WorkoutLogEntity> findAllByWorkoutIdAndUserId(UUID workoutId, UUID userId) {
+        return workoutLogRepository.findAllByWorkout_idAndUser_id(workoutId, userId);
     }
 
     @Override

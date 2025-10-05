@@ -48,13 +48,12 @@ public class WorkoutLogController {
 
     @GetMapping("/history")
     public ResponseEntity<List<WorkoutLogDto>> getWorkoutHistory(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+            @RequestParam UUID workoutId,
             @RequestHeader(name = "Authorization") String jwtToken) {
         if (jwtToken.startsWith("Bearer ")) {
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
-            List<WorkoutLogEntity> workoutLogs = workoutLogService.findByDateRange(startDate, endDate, userEntity.getId());
+            List<WorkoutLogEntity> workoutLogs = workoutLogService.findAllByWorkoutIdAndUserId(workoutId, userEntity.getId());
             return ResponseEntity.ok(workoutLogs.stream().map(workoutLogMapper::mapTo).toList());
         }
         return ResponseEntity.badRequest().build();

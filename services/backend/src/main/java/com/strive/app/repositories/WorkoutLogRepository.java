@@ -11,5 +11,5 @@ import java.util.UUID;
 @Repository
 public interface WorkoutLogRepository extends JpaRepository<WorkoutLogEntity, UUID> {
 
-    List<WorkoutLogEntity> findAllByDateBetween(Date startDate, Date endDate);
+    List<WorkoutLogEntity> findAllByWorkout_idAndUser_id(UUID workoutId, UUID userId);
 }

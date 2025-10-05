@@ -35,7 +35,14 @@ export interface ExerciseType {
 
 // Workout Types
 export interface WorkoutType {
-  id?: string;
+  id: string;
   workoutName: string;
   exercises?: ExerciseType[];
+}
+
+export interface WorkoutLogType {
+  id?: string;
+  date: string;
+  exerciseLogs: ExerciseLogType[];
+  workoutId: string | null;
 }

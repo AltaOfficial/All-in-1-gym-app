@@ -12,7 +12,7 @@ public interface WorkoutLogService {
 
     WorkoutLogEntity findById(UUID id);
 
-    List<WorkoutLogEntity> findByDateRange(Date startDate, Date endDate, UUID userId);
+    List<WorkoutLogEntity> findAllByWorkoutIdAndUserId(UUID workoutId, UUID userId);
 
     void deleteWorkoutLog(UUID id);
 }
