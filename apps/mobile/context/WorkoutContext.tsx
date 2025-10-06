@@ -115,6 +115,8 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
           repsDone: 0,
           effortType: EffortEnum.EASY,
           note: "",
+          weight: nextExercise.weight ?? 0,
+          restTimeInSeconds: nextExercise.restTimeInSeconds ?? 0,
         }))
       );
     }
@@ -194,6 +196,8 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
           repsDone: 0,
           effortType: EffortEnum.EASY,
           note: "",
+          weight: currentExercise.weight ?? 0,
+          restTimeInSeconds: currentExercise.restTimeInSeconds ?? 0,
         }))
       );
     }

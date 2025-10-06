@@ -21,15 +21,21 @@ const WorkoutHistory = () => {
         workout={workouts[selectedWorkout]}
         scrollViewRef={scrollViewRef as React.RefObject<ScrollView>}
       />
-      <View className="flex-row flex-wrap gap-2 mt-auto">
-        {workouts.map((workout, index) => (
-          <GenericButton
-            className={`${selectedWorkout === index ? "" : "!bg-gray1"}`}
-            key={workout.id}
-            text={workout.workoutName}
-            onPress={() => handleWorkoutChange(index)}
-          />
-        ))}
+      <View className="flex-row gap-2 mt-auto">
+        <ScrollView
+          className="flex gap-2"
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
+          {workouts.map((workout, index) => (
+            <GenericButton
+              className={`${selectedWorkout === index ? "" : "!bg-gray1"}`}
+              key={workout.id}
+              text={workout.workoutName}
+              onPress={() => handleWorkoutChange(index)}
+            />
+          ))}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

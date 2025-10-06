@@ -25,6 +25,8 @@ public class ExerciseController {
                 .map(dto -> ExerciseSet.builder()
                         .repsDone(dto.getRepsDone())
                         .effortType(dto.getEffortType())
+                        .weight(dto.getWeight())
+                        .restTimeInSeconds(dto.getRestTimeInSeconds())
                         .note(dto.getNote())
                         .build())
                 .collect(Collectors.toList());

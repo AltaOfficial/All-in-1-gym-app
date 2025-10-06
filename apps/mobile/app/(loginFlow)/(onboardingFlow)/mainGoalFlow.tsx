@@ -63,13 +63,15 @@ export default function MainGoalFlow() {
               }),
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
+                Authorization: `Bearer ${await SecureStore.getItemAsync(
+                  "jwtToken"
+                )}`,
               },
             }
           ).then((res) => {
             if (res.ok) {
               if (mainGoal === "MAINTAIN") {
-                router.push("summaryFlow");
+                router.push("summary");
               } else {
                 router.push(`weeklyWeightChangeFlow?mainGoal=${mainGoal}`);
               }

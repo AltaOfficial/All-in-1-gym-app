@@ -15,4 +15,6 @@ public class ExerciseSetDto {
     private Integer repsDone;
     private ExerciseEffortType effortType;
     private String note;
+    private Double weight;
+    private Integer restTimeInSeconds;
 }

@@ -14,9 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +97,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     // Workout operations
     @Override
-    @Transactional
     public WorkoutEntity saveWorkout(WorkoutEntity workoutEntity) {
         return workoutRepository.save(workoutEntity);
     }
@@ -108,14 +106,53 @@ public class ExerciseServiceImpl implements ExerciseService {
     public WorkoutEntity updateWorkout(WorkoutEntity workoutEntity) {
         WorkoutEntity foundWorkoutEntity = workoutRepository.findById(workoutEntity.getId())
                 .orElseThrow();
-        foundWorkoutEntity.getExercises().clear(); // Makes all foundWorkoutEntity exercises orphaned
-        workoutEntity.getExercises()
-                .forEach(e -> {
-                    e.setWorkoutConnectedTo(foundWorkoutEntity);
-                    foundWorkoutEntity.getExercises().add(e);
-                });
+
         foundWorkoutEntity.setWorkoutName(workoutEntity.getWorkoutName());
+
+        List<ExerciseEntity> existingExercises = foundWorkoutEntity.getExercises();
+        List<ExerciseEntity> newExercises = workoutEntity.getExercises();
+
+        // Build map of existing exercises by UUID
+        Map<UUID, ExerciseEntity> existingMap = existingExercises.stream()
+                .collect(Collectors.toMap(ExerciseEntity::getId, e -> e));
+
+        // Track which UUIDs we're keeping
+        Set<UUID> idsToKeep = new HashSet<>();
+
+        // Process all new exercises
+        for (ExerciseEntity newExercise : newExercises) {
+            if (newExercise.getId() != null && existingMap.containsKey(newExercise.getId())) {
+                // Update existing exercise
+                ExerciseEntity existingExercise = existingMap.get(newExercise.getId());
+                updateExerciseFields(existingExercise, newExercise);
+                idsToKeep.add(newExercise.getId());
+            } else {
+                // Add new exercise (ID is null or not found)
+                newExercise.setWorkoutConnectedTo(foundWorkoutEntity);
+                existingExercises.add(newExercise);
+                // Don't add to idsToKeep since new exercises don't have IDs yet
+            }
+        }
+
+        // Remove exercises that weren't in the update (only check exercises with IDs)
+        existingExercises.removeIf(existing ->
+            existing.getId() != null && !idsToKeep.contains(existing.getId())
+        );
+
         return workoutRepository.save(foundWorkoutEntity);
+    }
+
+    private void updateExerciseFields(ExerciseEntity target, ExerciseEntity source) {
+        target.setExerciseName(source.getExerciseName());
+        target.setExerciseImageUrl(source.getExerciseImageUrl());
+        target.setRestTimeInSeconds(source.getRestTimeInSeconds());
+        target.setGoalSets(source.getGoalSets());
+        target.setGoalReps(source.getGoalReps());
+        target.setIsWeightBased(source.getIsWeightBased());
+        target.setWeight(source.getWeight());
+        target.setTime(source.getTime());
+        target.setTutorialUrl(source.getTutorialUrl());
+        // Note: Don't copy workoutConnectedTo or exerciseLogs
     }
 
     @Override

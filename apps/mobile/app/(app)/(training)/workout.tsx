@@ -389,7 +389,12 @@ const Workout = () => {
                 onChangeText={(text) => {
                   setCurrentExerciseData((prev) => {
                     const newData = [...prev];
-                    newData[currentSet - 1].repsDone = Number(text);
+                    newData[currentSet - 1] = {
+                      ...newData[currentSet - 1],
+                      repsDone: Number(text),
+                      weight: currentExercise?.weight ?? 0,
+                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                    };
                     return newData;
                   });
                 }}
@@ -407,9 +412,12 @@ const Workout = () => {
                   setEffortScore(effortScore - 1);
                   setCurrentExerciseData((prev) => {
                     const newData = [...prev];
-                    newData[currentSet - 1].effortType = Object.keys(
-                      EffortEnum
-                    )[effortScore - 1] as EffortEnum;
+                    newData[currentSet - 1] = {
+                      ...newData[currentSet - 1],
+                      effortType: Object.keys(EffortEnum)[effortScore - 1] as EffortEnum,
+                      weight: currentExercise?.weight ?? 0,
+                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                    };
                     return newData;
                   });
                 }}
@@ -454,9 +462,12 @@ const Workout = () => {
                   setEffortScore(effortScore + 1);
                   setCurrentExerciseData((prev) => {
                     const newData = [...prev];
-                    newData[currentSet - 1].effortType = Object.keys(
-                      EffortEnum
-                    )[effortScore + 1] as EffortEnum;
+                    newData[currentSet - 1] = {
+                      ...newData[currentSet - 1],
+                      effortType: Object.keys(EffortEnum)[effortScore + 1] as EffortEnum,
+                      weight: currentExercise?.weight ?? 0,
+                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                    };
                     return newData;
                   });
                 }}

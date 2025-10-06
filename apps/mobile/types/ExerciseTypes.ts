@@ -5,6 +5,8 @@ export interface ExerciseSetType {
   repsDone?: number | null;
   effortType?: EffortEnum | null;
   note?: string | null;
+  weight?: number | null;
+  restTimeInSeconds?: number | null;
 }
 
 // Exercise Log Types

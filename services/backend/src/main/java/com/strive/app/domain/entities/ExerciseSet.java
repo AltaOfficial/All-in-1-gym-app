@@ -17,4 +17,8 @@ public class ExerciseSet {
     private ExerciseEffortType effortType;
 
     private String note;
+
+    private Double weight;
+
+    private Integer restTimeInSeconds;
 }

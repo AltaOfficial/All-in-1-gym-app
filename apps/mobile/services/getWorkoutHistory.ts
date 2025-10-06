@@ -16,6 +16,7 @@ export async function getWorkoutHistory(
 
     if (response.ok) {
       const data = await response.json();
+      console.log(data);
       return data as WorkoutLogType[];
     } else {
       console.log("error", response.status, response.statusText);

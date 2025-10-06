@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,5 +27,6 @@ public class WorkoutEntity {
     private String workoutName;
 
     @OneToMany(mappedBy = "workoutConnectedTo", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<ExerciseEntity> exercises;
+    @OrderColumn(name = "exercise_order")
+    private List<ExerciseEntity> exercises = new ArrayList<>();
 }

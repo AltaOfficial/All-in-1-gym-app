@@ -1,10 +1,7 @@
 package com.strive.app.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.net.URL;
 import java.util.List;
@@ -25,6 +22,7 @@ public class ExerciseEntity {
     private URL exerciseImageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private WorkoutEntity workoutConnectedTo;
 
     private Integer restTimeInSeconds;
@@ -38,5 +36,6 @@ public class ExerciseEntity {
     private URL tutorialUrl;
 
     @OneToMany(mappedBy = "exerciseParent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<ExerciseLogEntity> exerciseLogs;
 }

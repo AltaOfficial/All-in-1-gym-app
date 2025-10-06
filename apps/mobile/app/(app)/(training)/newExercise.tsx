@@ -23,6 +23,7 @@ const newExcercise = () => {
   const [weight, setWeight] = useState("");
   const [time, setTime] = useState("");
   const [tutorialUrl, setTutorialUrl] = useState("");
+  let uploadedImage;
 
   useEffect(() => {
     (async () => {
@@ -53,11 +54,13 @@ const newExcercise = () => {
           onPress={async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
               mediaTypes: ["images"],
+              base64: true,
               allowsEditing: true,
               aspect: [1, 1],
               quality: 1,
             });
             setImageUri(result.assets?.[0]?.uri ?? null);
+            uploadedImage = result.assets?.[0] ?? null;
           }}
         >
           <Image
@@ -234,6 +237,7 @@ const newExcercise = () => {
           }
 
           const exercise: ExerciseType = {
+            id: exerciseIndex ? exercises[Number(exerciseIndex)].id : undefined,
             exerciseName: exerciseName,
             exerciseImageUrl: imageUri,
             restTimeInSeconds: Number(restTimeInSeconds),
@@ -252,7 +256,7 @@ const newExcercise = () => {
               )
             );
           } else {
-            setExercises([exercise, ...exercises]);
+            setExercises([...exercises, exercise]);
           }
           router.back();
         }}
