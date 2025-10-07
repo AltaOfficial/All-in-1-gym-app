@@ -105,7 +105,7 @@ public class GroceryListController {
             groceryListService.findById(groceryListId);
             return true;
         } catch (NoSuchElementException exception) {
-            GroceryListEntity groceryListEntity = groceryListService.save(GroceryListEntity.builder().user(userEntity)
+            groceryListService.save(GroceryListEntity.builder().user(userEntity)
                     .id(groceryListId)
                     .build());
             return false;

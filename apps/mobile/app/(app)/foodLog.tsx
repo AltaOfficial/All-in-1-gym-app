@@ -67,7 +67,7 @@ const FoodLog = () => {
           </View>
           {date === format(new Date(), "yyyy-MM-dd") && (
             <TouchableOpacity
-              onPress={() => router.push("/(app)/(nutrition)/logfoodsearch")}
+              onPress={() => router.push("/(nutrition)/logFoodSearch")}
             >
               <Text className="text-primary text-lg font-[HelveticaNeue]">
                 Add Food

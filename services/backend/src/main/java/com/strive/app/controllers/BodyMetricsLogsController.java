@@ -9,6 +9,7 @@ import com.strive.app.mappers.Mapper;
 import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.BodyMetricsService;
 import com.strive.app.services.UserService;
+import com.strive.app.services.BlobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ public class BodyMetricsLogsController {
     private final BodyMetricsService bodyMetricsService;
     private final UserService userService;
     private final Mapper<BodyMetricsLogEntity, BodyMetricsLogDto> bodyMetricsMapper;
+    private final BlobService blobService;
 
     @PostMapping("/log")
     public ResponseEntity<BodyMetricsLogDto> logBodyMetrics(
@@ -37,13 +39,25 @@ public class BodyMetricsLogsController {
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
 
+            // Process front photo through BlobService if metadata is present
+            String frontPhotoUrl = null;
+            if (requestDto.getFrontPhotoFileName() != null && requestDto.getFrontPhotoBase64() != null && requestDto.getFrontPhotoMimeType() != null) {
+                frontPhotoUrl = blobService.getBlobUrl(requestDto.getFrontPhotoFileName(), requestDto.getFrontPhotoBase64(), requestDto.getFrontPhotoMimeType());
+            }
+
+            // Process side photo through BlobService if metadata is present
+            String sidePhotoUrl = null;
+            if (requestDto.getSidePhotoFileName() != null && requestDto.getSidePhotoBase64() != null && requestDto.getSidePhotoMimeType() != null) {
+                sidePhotoUrl = blobService.getBlobUrl(requestDto.getSidePhotoFileName(), requestDto.getSidePhotoBase64(), requestDto.getSidePhotoMimeType());
+            }
+
             BodyMetricsLogEntity bodyMetricsLogEntity = BodyMetricsLogEntity.builder()
                     .id(BodyMetricsId.builder()
                             .userId(userEntity.getId())
                             .build())
                     .user(userEntity)
-                    .frontPhotoUrl(requestDto.getFrontPhotoUrl())
-                    .sidePhotoUrl(requestDto.getSidePhotoUrl())
+                    .frontPhotoUrl(frontPhotoUrl)
+                    .sidePhotoUrl(sidePhotoUrl)
                     .weight(requestDto.getWeight())
                     .bodyFat(requestDto.getBodyFat())
                     .shouldersCircumference(requestDto.getShouldersCircumference())
@@ -133,6 +147,39 @@ public class BodyMetricsLogsController {
                 // Return null if no metrics found for today
                 return ResponseEntity.ok(null);
             }
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/recentPhotos")
+    public ResponseEntity<List<String>> getRecentPhotos(
+            @RequestParam(name = "limit", required = false, defaultValue = "4") Integer limit,
+            @RequestHeader("Authorization") String jwtToken) {
+
+        if (jwtToken.startsWith("Bearer ")) {
+            UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
+            UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+
+            // Get recent body metrics logs with photos
+            List<BodyMetricsLogEntity> recentLogs = bodyMetricsService.findAllByUserId(userEntity.getId());
+
+            // Extract photo URLs (both front and side) and limit results
+            List<String> photoUrls = recentLogs.stream()
+                    .flatMap(log -> {
+                        java.util.List<String> urls = new java.util.ArrayList<>();
+                        if (log.getFrontPhotoUrl() != null) {
+                            urls.add(log.getFrontPhotoUrl());
+                        }
+                        if (log.getSidePhotoUrl() != null) {
+                            urls.add(log.getSidePhotoUrl());
+                        }
+                        return urls.stream();
+                    })
+                    .limit(limit)
+                    .toList();
+
+            return ResponseEntity.ok(photoUrls);
         }
 
         return ResponseEntity.badRequest().build();

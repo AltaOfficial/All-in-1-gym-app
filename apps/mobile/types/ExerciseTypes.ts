@@ -24,6 +24,9 @@ export interface ExerciseType {
   id?: string;
   exerciseName: string;
   exerciseImageUrl?: string | null;
+  exerciseImageFileName?: string | null;
+  exerciseImageBase64?: string | null;
+  exerciseImageMimeType?: string | null;
   workoutConnectedToId?: string | null;
   restTimeInSeconds: number;
   goalSets?: number | null;

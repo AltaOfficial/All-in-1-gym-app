@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -31,7 +30,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final UserDetailsService userDetailsService;
     private final Mapper<UserEntity, UserDto> userMapper;
     private final AuthenticationService authenticationService;
     private final FoodLogsService foodLogsService;

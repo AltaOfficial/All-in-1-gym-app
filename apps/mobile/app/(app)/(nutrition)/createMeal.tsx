@@ -12,79 +12,95 @@ import ProgressRing from "../../../components/ProgressRing";
 import Separator from "../../../components/Separator";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import GenericButton from "../../../components/GenericButton";
+import { MealContext } from "../../../context/MealContext";
 import * as ImagePicker from "expo-image-picker";
+import * as SecureStore from "expo-secure-store";
+import { ImagePickerPressable } from "../../../components/ImagePickerPressable";
 
 const CreateMeal = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
-  let uploadedImage;
+  const [uploadedImage, setUploadedImage] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [mealName, setMealName] = useState<string>("");
+  const { mealItems } = useContext(MealContext);
 
   const toSignificantFigures = (num: number, sigFigs: number = 2) => {
-    if (num === 0) return "0";
-    const log10 = Math.log10(Math.abs(num));
-    const sigFigsNeeded = Math.max(0, Math.ceil(log10));
-    const multiplier = Math.pow(10, sigFigsNeeded - sigFigs);
+    if (num === 0 || num === null || num === undefined || isNaN(num)) return 0;
+    const magnitude = Math.floor(Math.log10(Math.abs(num))) + 1;
+    const multiplier = Math.pow(10, sigFigs - magnitude);
     return Math.round(num * multiplier) / multiplier;
   };
-  const proteinLabel = "100";
-  const caloriesLabel = "1000";
-  const adjustedCarbohydrates = 100;
-  const adjustedFat = 100;
-  const adjustedProtein = 100;
+  const [caloriesLabel, setCaloriesLabel] = useState(
+    mealItems.reduce((acc, item) => acc + (item.calories ?? 0), 0).toFixed(0)
+  );
+  const [carbsLabel, setCarbsLabel] = useState(
+    toSignificantFigures(
+      mealItems.reduce((acc, item) => acc + (item.carbohydrates ?? 0), 0)
+    )
+  );
+  const [fatLabel, setFatLabel] = useState(
+    toSignificantFigures(
+      mealItems.reduce((acc, item) => acc + (item.fat ?? 0), 0)
+    )
+  );
+  const [proteinLabel, setProteinLabel] = useState(
+    toSignificantFigures(
+      mealItems.reduce((acc, item) => acc + (item.protein ?? 0), 0)
+    )
+  );
+  const adjustedCarbohydrates = mealItems.reduce(
+    (acc, item) => acc + (item.carbohydrates ?? 0),
+    0
+  );
+  const adjustedFat = mealItems.reduce((acc, item) => acc + (item.fat ?? 0), 0);
+  const adjustedProtein = mealItems.reduce(
+    (acc, item) => acc + (item.protein ?? 0),
+    0
+  );
   const totalMacros = adjustedCarbohydrates + adjustedFat + adjustedProtein;
-  const carbsLabel = "100";
-  const fatLabel = "100";
 
-  const foodItems = [
-    {
-      foodName: "Apple",
-      servingSize: "100g",
-      servings: 1,
-      calories: 100,
-      time: "12:00",
-      fat: 10,
-      saturatedFat: 10,
-      transFat: 10,
-      polyunsaturatedFat: 10,
-      monounsaturatedFat: 10,
-      cholesterol: 10,
-      sodium: 10,
-      carbohydrates: 10,
-      fiber: 10,
-      sugar: 10,
-      protein: 10,
-    },
-  ];
+  useEffect(() => {
+    setCaloriesLabel(
+      mealItems.reduce((acc, item) => acc + (item.calories ?? 0), 0).toFixed(0)
+    );
+    setCarbsLabel(
+      toSignificantFigures(
+        mealItems.reduce((acc, item) => acc + (item.carbohydrates ?? 0), 0)
+      )
+    );
+    setFatLabel(
+      toSignificantFigures(
+        mealItems.reduce((acc, item) => acc + (item.fat ?? 0), 0)
+      )
+    );
+    setProteinLabel(
+      toSignificantFigures(
+        mealItems.reduce((acc, item) => acc + (item.protein ?? 0), 0)
+      )
+    );
+  }, [mealItems]);
 
   return (
     <SafeAreaView className="flex-1">
       <ScrollView>
-        <Pressable
-          onPress={async () => {
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ["images"],
-              base64: true,
-              allowsEditing: true,
-              aspect: [1, 1],
-              quality: 1,
-            });
-            setImageUri(result.assets?.[0]?.uri ?? null);
-            uploadedImage = result.assets?.[0] ?? null;
-          }}
+        <ImagePickerPressable
+          setImageUri={setImageUri}
+          setImage={setUploadedImage}
         >
           <Image
             source={
               imageUri
                 ? { uri: imageUri }
-                : require("../../../assets/images/example meal.png")
+                : require("../../../assets/images/meal placeholder image.png")
             }
             className="w-full h-60"
           />
           <View className="flex-row items-center justify-between absolute bottom-4 right-4">
             <EditIcon height={25} width={25} fill="white" />
           </View>
-        </Pressable>
+        </ImagePickerPressable>
         <View className="px-4">
           <View className="flex-col gap-2 mt-4">
             <Text className="text-white text-lg font-[HelveticaNeue]">
@@ -94,6 +110,8 @@ const CreateMeal = () => {
               placeholder="Name Your Meal"
               placeholderTextColor="#828282"
               className="text-white text-lg h-[3.7rem] w-full font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3"
+              value={mealName}
+              onChangeText={setMealName}
             />
           </View>
         </View>
@@ -105,9 +123,9 @@ const CreateMeal = () => {
             valueLabel={caloriesLabel}
             subtitle="cal"
             macrosFull={true}
-            carbs={adjustedCarbohydrates}
-            fat={adjustedFat}
-            protein={adjustedProtein}
+            carbs={Number(carbsLabel)}
+            fat={Number(fatLabel)}
+            protein={Number(proteinLabel)}
           />
           <View className="flex-row gap-12 items-center">
             <View className="flex-col justify-center items-center">
@@ -149,7 +167,9 @@ const CreateMeal = () => {
               Meal Items
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/(app)/(nutrition)/logFoodSearch")}
+              onPress={() =>
+                router.push("/(app)/(nutrition)/logFoodSearch?searchType=meal")
+              }
             >
               <Text className="text-primary text-lg font-[HelveticaNeue]">
                 Add Food
@@ -158,7 +178,7 @@ const CreateMeal = () => {
           </View>
         </View>
         <Separator className="h-[0.4px]" />
-        {foodItems.map((item, index) => (
+        {mealItems.map((item, index) => (
           <View
             key={index}
             className="flex-row justify-between items-center px-4 my-3"
@@ -170,8 +190,8 @@ const CreateMeal = () => {
                   : item.foodName}
               </Text>
               <Text className="text-gray3 font-[HelveticaNeue]">
-                {item.servingSize}{" "}
-                {item.servings ? `(${item.servings} servings)` : ""}
+                {item.servingUnit}{" "}
+                {item.servingsAmount ? `(${item.servingsAmount} servings)` : ""}
               </Text>
             </View>
             <View className="flex-col items-end gap-2">
@@ -181,7 +201,9 @@ const CreateMeal = () => {
             </View>
           </View>
         ))}
-        <Separator className="h-[0.4px] mt-6" />
+        <Separator
+          className={`h-[0.4px] ${mealItems.length > 0 ? "mt-6" : ""}`}
+        />
         <Text className="text-white text-lg font-[HelveticaNeue] font-bold my-6 px-4">
           Nutrition Facts
         </Text>
@@ -192,8 +214,8 @@ const CreateMeal = () => {
               Calories
             </Text>
             <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
-              {foodItems
-                .reduce((acc, item) => acc + item.calories, 0)
+              {mealItems
+                .reduce((acc, item) => acc + (item.calories ?? 0), 0)
                 .toFixed(0)}
             </Text>
           </View>
@@ -204,8 +226,9 @@ const CreateMeal = () => {
               </Text>
               <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
                 {toSignificantFigures(
-                  foodItems.reduce((acc, item) => acc + item.fat, 0)
+                  mealItems.reduce((acc, item) => acc + (item.fat ?? 0), 0)
                 )}
+                g
               </Text>
             </View>
 
@@ -215,9 +238,17 @@ const CreateMeal = () => {
                   Saturated
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce((acc, item) => acc + item.saturatedFat, 0)
-                  )}
+                  {mealItems.reduce(
+                    (acc, item) => acc + (item.saturatedFat ?? 0),
+                    0
+                  )
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.saturatedFat ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
               <View className="flex-row justify-between gap-2 w-full">
@@ -225,9 +256,17 @@ const CreateMeal = () => {
                   Trans
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce((acc, item) => acc + item.transFat, 0)
-                  )}
+                  {mealItems.reduce(
+                    (acc, item) => acc + (item.transFat ?? 0),
+                    0
+                  )
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.transFat ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
               <View className="flex-row justify-between gap-2 w-full">
@@ -235,12 +274,17 @@ const CreateMeal = () => {
                   Polyunsaturated
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce(
-                      (acc, item) => acc + item.polyunsaturatedFat,
-                      0
-                    )
-                  )}
+                  {mealItems.reduce(
+                    (acc, item) => acc + (item.polyunsaturatedFat ?? 0),
+                    0
+                  )
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.polyunsaturatedFat ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
               <View className="flex-row justify-between gap-2 w-full">
@@ -248,12 +292,17 @@ const CreateMeal = () => {
                   Monounsaturated
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce(
-                      (acc, item) => acc + item.monounsaturatedFat,
-                      0
-                    )
-                  )}
+                  {mealItems.reduce(
+                    (acc, item) => acc + (item.monounsaturatedFat ?? 0),
+                    0
+                  )
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.monounsaturatedFat ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
             </View>
@@ -263,9 +312,11 @@ const CreateMeal = () => {
               Cholesterol
             </Text>
             <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
-              {toSignificantFigures(
-                foodItems.reduce((acc, item) => acc + item.cholesterol, 0)
-              )}
+              {mealItems.reduce((acc, item) => acc + (item.cholesterol ?? 0), 0)
+                ? `${mealItems
+                    .reduce((acc, item) => acc + (item.cholesterol ?? 0), 0)
+                    .toFixed(0)}mg`
+                : "0mg"}
             </Text>
           </View>
           <View className="flex-row justify-between gap-2 w-full">
@@ -273,9 +324,11 @@ const CreateMeal = () => {
               Sodium
             </Text>
             <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
-              {toSignificantFigures(
-                foodItems.reduce((acc, item) => acc + item.sodium, 0)
-              )}
+              {mealItems.reduce((acc, item) => acc + (item.sodium ?? 0), 0)
+                ? `${mealItems
+                    .reduce((acc, item) => acc + (item.sodium ?? 0), 0)
+                    .toFixed(0)}mg`
+                : "0mg"}
             </Text>
           </View>
           <View className="flex-col gap-2 w-full">
@@ -285,8 +338,12 @@ const CreateMeal = () => {
               </Text>
               <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
                 {toSignificantFigures(
-                  foodItems.reduce((acc, item) => acc + item.carbohydrates, 0)
+                  mealItems.reduce(
+                    (acc, item) => acc + (item.carbohydrates ?? 0),
+                    0
+                  )
                 )}
+                g
               </Text>
             </View>
 
@@ -296,9 +353,14 @@ const CreateMeal = () => {
                   Dietary Fiber
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce((acc, item) => acc + item.fiber, 0)
-                  )}
+                  {mealItems.reduce((acc, item) => acc + (item.fiber ?? 0), 0)
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.fiber ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
               <View className="flex-row justify-between gap-2 w-full">
@@ -306,9 +368,14 @@ const CreateMeal = () => {
                   Sugar
                 </Text>
                 <Text className="text-gray3 text-lg font-[HelveticaNeue] font-medium">
-                  {toSignificantFigures(
-                    foodItems.reduce((acc, item) => acc + item.sugar, 0)
-                  )}
+                  {mealItems.reduce((acc, item) => acc + (item.sugar ?? 0), 0)
+                    ? `${toSignificantFigures(
+                        mealItems.reduce(
+                          (acc, item) => acc + (item.sugar ?? 0),
+                          0
+                        )
+                      )}g`
+                    : "-"}
                 </Text>
               </View>
               <View className="flex-row justify-between gap-2 w-full">
@@ -327,15 +394,50 @@ const CreateMeal = () => {
             </Text>
             <Text className="text-white text-lg font-[HelveticaNeue] font-medium">
               {toSignificantFigures(
-                foodItems.reduce((acc, item) => acc + item.protein, 0)
+                mealItems.reduce((acc, item) => acc + (item.protein ?? 0), 0)
               )}
+              g
             </Text>
           </View>
         </View>
       </ScrollView>
       <GenericButton
         text="Create Meal"
-        onPress={async () => {}}
+        onPress={async () => {
+          if (!mealName.trim()) {
+            console.log("Meal name is required");
+            return;
+          }
+
+          const requestData = {
+            mealName: mealName,
+            mealImageFileName: uploadedImage?.fileName || null,
+            mealImageBase64: uploadedImage?.base64 || null,
+            mealImageMimeType: uploadedImage?.mimeType || null,
+            foodItems: mealItems,
+          };
+
+          const response = await fetch(
+            `${process.env.EXPO_PUBLIC_BACKEND_URL}/meals/create`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${await SecureStore.getItemAsync(
+                  "jwtToken"
+                )}`,
+              },
+              body: JSON.stringify(requestData),
+            }
+          );
+
+          if (response?.ok) {
+            console.log("Meal created successfully");
+            router.back();
+          } else {
+            console.log("Meal creation failed");
+          }
+        }}
         className="self-center absolute bottom-20"
         textClassName="text-lg"
       />

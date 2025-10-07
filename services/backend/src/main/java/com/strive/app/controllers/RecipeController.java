@@ -1,8 +1,6 @@
 package com.strive.app.controllers;
 
-import com.strive.app.domain.dto.FoodDto;
 import com.strive.app.domain.dto.RecipeDto;
-import com.strive.app.domain.entities.FoodEntity;
 import com.strive.app.domain.entities.RecipeEntity;
 import com.strive.app.domain.entities.RecipeId;
 import com.strive.app.domain.entities.UserEntity;
@@ -16,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/recipes")
@@ -26,7 +23,6 @@ public class RecipeController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final Mapper<RecipeEntity, RecipeDto> recipeMapper;
-    private final Mapper<FoodEntity, FoodDto> foodMapper;
 
     @PostMapping(path = "/create")
     public ResponseEntity<RecipeDto> createRecipe(@RequestBody RecipeDto recipeDto, @RequestHeader("Authorization") String jwtToken) {

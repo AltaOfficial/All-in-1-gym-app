@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ChevronRightIcon from "../../../assets/icons/ChevronRightIcon";
 import { router } from "expo-router";
-import { getBodyMetrics } from "../../../services/getBodyMetrics";
+import { getTodaysBodyMetrics } from "../../../services/getBodyMetrics";
 import { useIsFocused } from "@react-navigation/native";
 import { BodyMetricEnum } from "../../../types/bodyMetricEnum";
 
@@ -27,6 +27,7 @@ export default function BodyMetrics() {
   const [leftCalf, setLeftCalf] = useState<string>("");
   const [rightCalf, setRightCalf] = useState<string>("");
   const [neck, setNeck] = useState<string>("");
+  const [recentPhotos, setRecentPhotos] = useState<string[]>([]);
 
   const bodyMetrics: BodyMetric[] = [
     {
@@ -62,7 +63,7 @@ export default function BodyMetrics() {
   useEffect(() => {
     // will refresh when the screen is focused
     if (isFocused) {
-      getBodyMetrics({ latest: true }).then((bodyMetrics) => {
+      getTodaysBodyMetrics({ latest: true }).then((bodyMetrics) => {
         setBodyFat(
           bodyMetrics?.bodyFat ? bodyMetrics.bodyFat?.toString() + "%" : "--"
         );
@@ -122,6 +123,10 @@ export default function BodyMetrics() {
             : "--"
         );
       });
+
+      // TODO: Fetch recent photos from backend /bodymetrics/recentPhotos?limit=4
+      // This will be implemented when the backend endpoint is ready
+      // setRecentPhotos([...])
     }
   }, [isFocused]);
 
@@ -138,18 +143,32 @@ export default function BodyMetrics() {
             </Text>
             <View className="flex-row justify-between items-end">
               <View className="flex-row gap-4">
-                <Image
-                  source={require("../../../assets/images/gallery image 1.png")}
-                  className="w-20 h-20 rounded-xl"
-                />
-                <Image
-                  source={require("../../../assets/images/gallery image 1.png")}
-                  className="w-20 h-20 rounded-xl"
-                />
-                <Image
-                  source={require("../../../assets/images/gallery image 1.png")}
-                  className="w-20 h-20 rounded-xl"
-                />
+                {recentPhotos.length > 0 ? (
+                  recentPhotos
+                    .slice(0, 3)
+                    .map((photoUrl, index) => (
+                      <Image
+                        key={index}
+                        source={{ uri: photoUrl }}
+                        className="w-20 h-20 rounded-xl"
+                      />
+                    ))
+                ) : (
+                  <>
+                    <Image
+                      source={require("../../../assets/images/gallery image 1.png")}
+                      className="w-20 h-20 rounded-xl"
+                    />
+                    <Image
+                      source={require("../../../assets/images/gallery image 1.png")}
+                      className="w-20 h-20 rounded-xl"
+                    />
+                    <Image
+                      source={require("../../../assets/images/gallery image 1.png")}
+                      className="w-20 h-20 rounded-xl"
+                    />
+                  </>
+                )}
               </View>
               <ChevronRightIcon height={20} width={20} fill="white" />
             </View>

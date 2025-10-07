@@ -1,11 +1,8 @@
 package com.strive.app.controllers;
 
 import com.strive.app.domain.dto.OnboardingUpdateRequestDto;
-import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.OnboardingService;
-import com.strive.app.services.UserService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-import { Image, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { Image, Switch, Text, TextInput, View } from "react-native";
 import EditIcon from "../../../assets/icons/EditIcon";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "../../../services/getCurrentUser";
@@ -9,9 +9,12 @@ import { ExerciseType } from "../../../types/ExerciseTypes";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams } from "expo-router";
+import { ImagePickerPressable } from "../../../components/ImagePickerPressable";
 
 const newExcercise = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
   const { exerciseIndex } = useLocalSearchParams();
   const { exercises, setExercises } = useContext(CreateWorkoutContext);
   const [isLbs, setIsLbs] = useState(true);
@@ -23,7 +26,6 @@ const newExcercise = () => {
   const [weight, setWeight] = useState("");
   const [time, setTime] = useState("");
   const [tutorialUrl, setTutorialUrl] = useState("");
-  let uploadedImage;
 
   useEffect(() => {
     (async () => {
@@ -50,18 +52,9 @@ const newExcercise = () => {
   return (
     <View className="flex-1">
       <View>
-        <Pressable
-          onPress={async () => {
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ["images"],
-              base64: true,
-              allowsEditing: true,
-              aspect: [1, 1],
-              quality: 1,
-            });
-            setImageUri(result.assets?.[0]?.uri ?? null);
-            uploadedImage = result.assets?.[0] ?? null;
-          }}
+        <ImagePickerPressable
+          setImage={setUploadedImage}
+          setImageUri={setImageUri}
         >
           <Image
             source={
@@ -74,7 +67,7 @@ const newExcercise = () => {
           <View className="flex-row items-center justify-between absolute bottom-4 right-4">
             <EditIcon height={25} width={25} fill="white" />
           </View>
-        </Pressable>
+        </ImagePickerPressable>
       </View>
       <View className="px-4">
         <View className="flex-col gap-2 mt-4">
@@ -240,6 +233,9 @@ const newExcercise = () => {
             id: exerciseIndex ? exercises[Number(exerciseIndex)].id : undefined,
             exerciseName: exerciseName,
             exerciseImageUrl: imageUri,
+            exerciseImageFileName: uploadedImage?.fileName || null,
+            exerciseImageBase64: uploadedImage?.base64 || null,
+            exerciseImageMimeType: uploadedImage?.mimeType || null,
             restTimeInSeconds: Number(restTimeInSeconds),
             goalSets: Number(goalSets),
             goalReps: Number(goalReps),

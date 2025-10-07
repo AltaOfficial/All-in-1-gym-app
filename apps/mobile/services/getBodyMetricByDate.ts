@@ -1,21 +1,29 @@
 import * as SecureStore from "expo-secure-store";
 import { BodyMetricsLogType } from "../types/BodyMetricsLogType";
 
-export async function getTodaysBodyMetrics(
-  { latest }: { latest?: boolean } = { latest: false }
-): Promise<BodyMetricsLogType | null> {
+export async function getBodyMetricByDate({
+  date,
+}: {
+  date: Date;
+}): Promise<BodyMetricsLogType | null> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/bodymetrics/todaysLog?latest=${latest}`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/bodymetrics/logsByDateRange`,
       {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
         },
+        body: JSON.stringify({
+          startDate: date ? date : new Date(),
+          endDate: date ? date : new Date(),
+        }),
       }
     );
 
     if (response.ok) {
-      const data = await response.json();
+      const [data] = await response.json();
       return data as BodyMetricsLogType;
     } else {
       console.log("error", response.status, response.statusText);

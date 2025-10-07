@@ -8,7 +8,6 @@ import com.strive.app.services.AuthenticationService;
 import com.strive.app.services.UserService;
 import com.strive.app.services.WorkoutLogService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;

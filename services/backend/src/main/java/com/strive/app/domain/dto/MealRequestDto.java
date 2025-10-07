@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class MealDto {
-    private UUID id;
-    private UUID userId;
+@NoArgsConstructor
+@Builder
+public class MealRequestDto {
+    private UUID id;  // For update operations
     private String mealName;
-    private String mealImageUrl;  // serialize URL as string for clients
     private String mealImageFileName;
     private String mealImageBase64;
     private String mealImageMimeType;

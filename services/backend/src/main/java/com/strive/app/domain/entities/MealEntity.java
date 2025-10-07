@@ -28,7 +28,8 @@ public class MealEntity {
     @Column(nullable = false)
     private String mealName;
 
-    @OneToMany(mappedBy = "mealConnectedTo", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "mealConnectedTo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
-    private List<FoodEntity> foodItems;
+    @Builder.Default
+    private List<FoodEntity> foodItems = new java.util.ArrayList<>();
 }

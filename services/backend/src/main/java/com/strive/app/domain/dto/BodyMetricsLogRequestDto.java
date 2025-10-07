@@ -17,9 +17,17 @@ public class BodyMetricsLogRequestDto {
     private LocalDate endDate;
     private LocalDate date;
 
-    // Photos
+    // Front Photo
     private String frontPhotoUrl;
+    private String frontPhotoFileName;
+    private String frontPhotoBase64;
+    private String frontPhotoMimeType;
+
+    // Side Photo
     private String sidePhotoUrl;
+    private String sidePhotoFileName;
+    private String sidePhotoBase64;
+    private String sidePhotoMimeType;
 
     // Basic body metrics
     private Double weight;

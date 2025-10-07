@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ScrollView,
-  Text,
-  View,
-  Image,
-  TextInput,
-  Pressable,
-} from "react-native";
+import { ScrollView, Text, View, Image, TextInput } from "react-native";
 import CameraIcon from "../../../assets/icons/CameraIcon";
 import Separator from "../../../components/Separator";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,11 +8,16 @@ import * as SecureStore from "expo-secure-store";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { getCurrentUser } from "../../../services/getCurrentUser";
-import { getBodyMetrics } from "../../../services/getBodyMetrics";
+import { getTodaysBodyMetrics } from "../../../services/getBodyMetrics";
+import { ImagePickerPressable } from "../../../components/ImagePickerPressable";
 
 const AddDailyMetrics = () => {
   const [frontPhoto, setFrontPhoto] = useState<string | null>(null);
   const [sidePhoto, setSidePhoto] = useState<string | null>(null);
+  const [uploadedFrontPhoto, setUploadedFrontPhoto] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [uploadedSidePhoto, setUploadedSidePhoto] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
 
   // Form state for body metrics
   const [bodyFat, setBodyFat] = useState<string>("");
@@ -36,14 +34,12 @@ const AddDailyMetrics = () => {
   const [leftCalf, setLeftCalf] = useState<string>("");
   const [rightCalf, setRightCalf] = useState<string>("");
   const [isLbs, setIsLbs] = useState(true);
-  let uploadedFrontPhoto;
-  let uploadedSidePhoto;
 
   useEffect(() => {
     getCurrentUser().then((user) => {
       setIsLbs(user?.weightType === "LBS");
     });
-    getBodyMetrics().then((bodyMetrics) => {
+    getTodaysBodyMetrics().then((bodyMetrics) => {
       setFrontPhoto(bodyMetrics?.frontPhotoUrl || null);
       setSidePhoto(bodyMetrics?.sidePhotoUrl || null);
       setBodyFat(bodyMetrics?.bodyFat?.toString() || "");
@@ -66,8 +62,12 @@ const AddDailyMetrics = () => {
     try {
       // Prepare the request payload
       const requestData = {
-        frontPhotoUrl: frontPhoto,
-        sidePhotoUrl: sidePhoto,
+        frontPhotoFileName: uploadedFrontPhoto?.fileName || null,
+        frontPhotoBase64: uploadedFrontPhoto?.base64 || null,
+        frontPhotoMimeType: uploadedFrontPhoto?.mimeType || null,
+        sidePhotoFileName: uploadedSidePhoto?.fileName || null,
+        sidePhotoBase64: uploadedSidePhoto?.base64 || null,
+        sidePhotoMimeType: uploadedSidePhoto?.mimeType || null,
         weight: weight ? parseFloat(weight) : null,
         bodyFat: bodyFat ? parseFloat(bodyFat) : null,
         shouldersCircumference: shoulders ? parseFloat(shoulders) : null,
@@ -122,81 +122,65 @@ const AddDailyMetrics = () => {
     }
   };
 
-  const resetForm = () => {
-    setFrontPhoto(null);
-    setSidePhoto(null);
-    setBodyFat("");
-    setWeight("");
-    setShoulders("");
-    setNeck("");
-    setWaist("");
-    setChest("");
-    setHips("");
-    setLeftBicep("");
-    setRightBicep("");
-    setLeftThigh("");
-    setRightThigh("");
-    setLeftCalf("");
-    setRightCalf("");
-  };
+  // const resetForm = () => {
+  //   setFrontPhoto(null);
+  //   setSidePhoto(null);
+  //   setBodyFat("");
+  //   setWeight("");
+  //   setShoulders("");
+  //   setNeck("");
+  //   setWaist("");
+  //   setChest("");
+  //   setHips("");
+  //   setLeftBicep("");
+  //   setRightBicep("");
+  //   setLeftThigh("");
+  //   setRightThigh("");
+  //   setLeftCalf("");
+  //   setRightCalf("");
+  // };
 
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1">
       <ScrollView>
         <View className="flex-row gap-8 justify-center items-center">
           <View className="flex-col gap-2 mt-4 justify-center items-center">
-            {frontPhoto ? (
-              <Image
-                className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
-                source={{ uri: frontPhoto }}
-              />
-            ) : (
-              <Pressable
-                onPress={async () => {
-                  const result = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ["images"],
-                    base64: true,
-                    allowsEditing: true,
-                    aspect: [1, 1],
-                    quality: 1,
-                  });
-                  setFrontPhoto(result.assets?.[0]?.uri ?? null);
-                  uploadedFrontPhoto = result.assets?.[0] ?? null;
-                }}
-                className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
-              >
-                <CameraIcon height={40} width={40} fill="white" />
-              </Pressable>
-            )}
+            <ImagePickerPressable
+              setImage={setUploadedFrontPhoto}
+              setImageUri={setFrontPhoto}
+            >
+              {frontPhoto ? (
+                <Image
+                  className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
+                  source={{ uri: frontPhoto }}
+                />
+              ) : (
+                <View className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center">
+                  <CameraIcon height={40} width={40} fill="white" />
+                </View>
+              )}
+            </ImagePickerPressable>
             <Text className="text-white text-lg font-[HelveticaNeue]">
               Front Photo
             </Text>
           </View>
 
           <View className="flex-col gap-2 mt-4 justify-center items-center">
-            {sidePhoto ? (
-              <Image
-                className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
-                source={{ uri: sidePhoto }}
-              />
-            ) : (
-              <Pressable
-                onPress={async () => {
-                  const result = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ["images"],
-                    base64: true,
-                    allowsEditing: true,
-                    aspect: [1, 1],
-                    quality: 1,
-                  });
-                  setSidePhoto(result.assets?.[0]?.uri ?? null);
-                  uploadedSidePhoto = result.assets?.[0] ?? null;
-                }}
-                className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
-              >
-                <CameraIcon height={40} width={40} fill="white" />
-              </Pressable>
-            )}
+            <ImagePickerPressable
+              setImage={setUploadedSidePhoto}
+              setImageUri={setSidePhoto}
+            >
+              {sidePhoto ? (
+                <Image
+                  className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center"
+                  source={{ uri: sidePhoto }}
+                />
+              ) : (
+                <View className="flex-row h-48 w-48 gap-2 border-white border-2 rounded-lg border-dashed items-center justify-center">
+                  <CameraIcon height={40} width={40} fill="white" />
+                </View>
+              )}
+            </ImagePickerPressable>
             <Text className="text-white text-lg font-[HelveticaNeue]">
               Side Photo
             </Text>

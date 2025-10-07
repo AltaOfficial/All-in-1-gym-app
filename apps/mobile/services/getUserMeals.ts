@@ -1,12 +1,10 @@
 import * as SecureStore from "expo-secure-store";
-import { BodyMetricsLogType } from "../types/BodyMetricsLogType";
+import { MealType } from "../types/mealType";
 
-export async function getTodaysBodyMetrics(
-  { latest }: { latest?: boolean } = { latest: false }
-): Promise<BodyMetricsLogType | null> {
+export async function getUserMeals(): Promise<MealType[]> {
   try {
     const response = await fetch(
-      `${process.env.EXPO_PUBLIC_BACKEND_URL}/bodymetrics/todaysLog?latest=${latest}`,
+      `${process.env.EXPO_PUBLIC_BACKEND_URL}/meals/usermeals`,
       {
         headers: {
           Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
@@ -16,12 +14,13 @@ export async function getTodaysBodyMetrics(
 
     if (response.ok) {
       const data = await response.json();
-      return data as BodyMetricsLogType;
+      return data as MealType[];
     } else {
       console.log("error", response.status, response.statusText);
-      return null;
+      return [];
     }
   } catch (error) {
-    return null;
+    console.error("Error fetching user meals:", error);
+    return [];
   }
 }

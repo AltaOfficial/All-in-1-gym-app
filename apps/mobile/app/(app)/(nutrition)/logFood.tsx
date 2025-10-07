@@ -10,6 +10,7 @@ import GenericButton from "../../../components/GenericButton";
 import { useContext } from "react";
 import { MetricsContext } from "../../../context/MetricsContext";
 import { RecipeContext } from "../../../context/RecipeContext";
+import { MealContext } from "../../../context/MealContext";
 import { FoodType } from "../../../types/foodType";
 import { format } from "date-fns";
 
@@ -28,6 +29,7 @@ const getMealTypeByTime = () => {
 
 export default function LogFood() {
   const { refreshMetrics } = useContext(MetricsContext);
+  const { setMealItems, mealItems } = useContext(MealContext);
   const { setIngredients, ingredients } = useContext(RecipeContext);
   const {
     addType,
@@ -473,7 +475,9 @@ export default function LogFood() {
             ? `Add to Meal`
             : addType === "logRecipe"
             ? `+ Log Recipe`
-            : "+ Log food"
+            : addType === "logMeal"
+            ? `+ Log Meal`
+            : "+ Log Food"
         }
         onPress={async () => {
           const token = await SecureStore.getItemAsync("jwtToken");
@@ -537,12 +541,13 @@ export default function LogFood() {
                 router.back();
               }
             });
-          } else if (addType === "recipe") {
+          } else if (addType === "recipe" || addType === "meal") {
             const newFood: FoodType = {
               foodName: foodName as string,
               foodBrandName: brandName as string,
               servingSize: Number(selectedServingSize),
               servingsAmount: Number(numberOfServings),
+              servingUnit: String(selectedServingSize),
               calories: Number(calories) * currentTotalMultiplier,
               protein: Number(protein) * currentTotalMultiplier,
               carbohydrates: Number(carbohydrates) * currentTotalMultiplier,
@@ -559,10 +564,14 @@ export default function LogFood() {
               sodium: Number(sodium) * currentTotalMultiplier,
               potassium: Number(potassium) * currentTotalMultiplier,
             };
-            setIngredients([...ingredients, newFood]);
+            if (addType === "recipe") {
+              setIngredients([...ingredients, newFood]);
+            } else if (addType === "meal") {
+              setMealItems([...mealItems, newFood]);
+            }
             router.back();
             router.back();
-          } else if (addType === "logRecipe") {
+          } else if (addType === "logRecipe" || addType === "logMeal") {
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {

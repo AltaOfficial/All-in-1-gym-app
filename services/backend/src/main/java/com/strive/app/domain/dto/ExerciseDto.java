@@ -18,6 +18,9 @@ public class ExerciseDto {
     private UUID id;
     private String exerciseName;
     private URL exerciseImageUrl;
+    private String exerciseImageFileName;
+    private String exerciseImageBase64;
+    private String exerciseImageMimeType;
     private UUID workoutConnectedToId;
     private Integer restTimeInSeconds;
     private Integer goalSets;

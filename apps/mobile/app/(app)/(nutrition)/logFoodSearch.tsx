@@ -8,18 +8,19 @@ import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { FoodSearchResult } from "../../../types/searchResultType";
 import { FoodType } from "../../../types/foodType";
-import { FoodLogItemType, MealType } from "../../../types/foodLogItemType";
+import { MealType } from "../../../types/mealType";
 import MealIcon from "../../../assets/icons/MealIcon";
 import ChickenWingIcon from "../../../assets/icons/ChickenWingIcon";
 import { getRecentFoods } from "../../../services/getRecentFoods";
 import { getUserFoods } from "../../../services/getUserFoods";
-import { CreateFoodContext } from "../../../context/CreateFoodContext";
 import CookingPotIcon from "../../../assets/icons/CookingPotIcon";
 import { getUserRecipes } from "../../../services/getUserRecipes";
 import { RecipeType } from "../../../types/recipeType";
 import { RecipeContext } from "../../../context/RecipeContext";
+import { MealContext } from "../../../context/MealContext";
 import { useLocalSearchParams } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
+import { getUserMeals } from "../../../services/getUserMeals";
 
 export default function LogFoodSearch() {
   const [selectedTab, setSelectedTab] = useState("all");
@@ -28,8 +29,9 @@ export default function LogFoodSearch() {
   const [recentFoods, setRecentFoods] = useState<FoodType[]>([]);
   const [userFoods, setUserFoods] = useState<FoodType[]>([]);
   const [userRecipes, setUserRecipes] = useState<RecipeType[]>([]);
-  // const [userMeals, setUserMeals] = useState<MealType[]>([]);
+  const [userMeals, setUserMeals] = useState<MealType[]>([]);
   const { clearRecipeContext } = useContext(RecipeContext);
+  const { clearMealContext } = useContext(MealContext);
   const { searchType } = useLocalSearchParams();
   const isFocused = useIsFocused();
 
@@ -46,8 +48,8 @@ export default function LogFoodSearch() {
         const recipes = await getUserRecipes();
         setUserRecipes(recipes);
       } else if (selectedTab === "myMeals") {
-        // const meals = await getUserMeals();
-        // setUserMeals(meals);
+        const meals = await getUserMeals();
+        setUserMeals(meals);
       }
     };
 
@@ -59,10 +61,12 @@ export default function LogFoodSearch() {
     selectedTab === "all"
       ? recentFoods
       : selectedTab === "myFoods"
-        ? userFoods
-        : selectedTab === "myRecipes"
-          ? userRecipes
-          : [];
+      ? userFoods
+      : selectedTab === "myRecipes"
+      ? userRecipes
+      : selectedTab === "myMeals"
+      ? userMeals
+      : [];
 
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1">
@@ -86,7 +90,9 @@ export default function LogFoodSearch() {
                 `${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/search?query=${searchQuery}`,
                 {
                   headers: {
-                    Authorization: `Bearer ${await SecureStore.getItemAsync("jwtToken")}`,
+                    Authorization: `Bearer ${await SecureStore.getItemAsync(
+                      "jwtToken"
+                    )}`,
                   },
                 }
               );
@@ -101,7 +107,9 @@ export default function LogFoodSearch() {
         <View className="flex-row items-center justify-center px-6 mt-4 gap-6">
           <Pressable onPress={() => setSelectedTab("all")}>
             <Text
-              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${selectedTab === "all" ? "!border-primary" : ""}`}
+              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${
+                selectedTab === "all" ? "!border-primary" : ""
+              }`}
             >
               {"   All   "}
             </Text>
@@ -115,7 +123,9 @@ export default function LogFoodSearch() {
             }}
           >
             <Text
-              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${selectedTab === "myMeals" ? "!border-primary" : ""}`}
+              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${
+                selectedTab === "myMeals" ? "!border-primary" : ""
+              }`}
             >
               {"My Meals"}
             </Text>
@@ -129,7 +139,9 @@ export default function LogFoodSearch() {
             }}
           >
             <Text
-              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${selectedTab === "myRecipes" ? "!border-primary" : ""}`}
+              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${
+                selectedTab === "myRecipes" ? "!border-primary" : ""
+              }`}
             >
               {"My Recipes"}
             </Text>
@@ -137,7 +149,9 @@ export default function LogFoodSearch() {
 
           <Pressable onPress={() => setSelectedTab("myFoods")}>
             <Text
-              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${selectedTab === "myFoods" ? "!border-primary" : ""}`}
+              className={`text-white text-md font-[HelveticaNeue] pb-4 border-b-2 border-gray1 ${
+                selectedTab === "myFoods" ? "!border-primary" : ""
+              }`}
             >
               {"My Foods"}
             </Text>
@@ -156,14 +170,17 @@ export default function LogFoodSearch() {
                 if (selectedTab == "myRecipes") {
                   clearRecipeContext();
                 }
+                if (selectedTab == "myMeals") {
+                  clearMealContext();
+                }
                 router.push(
                   selectedTab === "all"
                     ? "/(app)/(nutrition)/scanBarcode?searchType=" + searchType
                     : selectedTab === "myMeals"
-                      ? "/createMeal"
-                      : selectedTab === "myRecipes"
-                        ? "/(createRecipe)/createRecipeInfo"
-                        : "/(createFood)/createFoodBasic"
+                    ? "/createMeal"
+                    : selectedTab === "myRecipes"
+                    ? "/(createRecipe)/createRecipeInfo"
+                    : "/(createFood)/createFoodBasic"
                 );
               }}
             >
@@ -182,19 +199,19 @@ export default function LogFoodSearch() {
                     {selectedTab === "all"
                       ? "Scan Barcode"
                       : selectedTab === "myMeals"
-                        ? "Create New Meal"
-                        : selectedTab === "myRecipes"
-                          ? "Create New Recipe"
-                          : "Create New Food"}
+                      ? "Create New Meal"
+                      : selectedTab === "myRecipes"
+                      ? "Create New Recipe"
+                      : "Create New Food"}
                   </Text>
                   <Text className="text-white text-xs font-[HelveticaNeue]">
                     {selectedTab === "all"
                       ? "Find your food instantly by scanning \nthe barcode on it"
                       : selectedTab === "myMeals"
-                        ? "Create a new meal by\nadding foods to it"
-                        : selectedTab === "myRecipes"
-                          ? "Create a new recipe by\nadding ingredients to it"
-                          : "Create a new food by\nadding nutrient details"}
+                      ? "Create a new meal by\nadding foods to it"
+                      : selectedTab === "myRecipes"
+                      ? "Create a new recipe by\nadding ingredients to it"
+                      : "Create a new food by\nadding nutrient details"}
                   </Text>
                 </View>
               </View>
@@ -206,10 +223,10 @@ export default function LogFoodSearch() {
               {selectedTab === "all"
                 ? "Recent Foods"
                 : selectedTab === "myFoods"
-                  ? "My Foods"
-                  : selectedTab === "myRecipes"
-                    ? "My Recipes"
-                    : "My Meals"}
+                ? "My Foods"
+                : selectedTab === "myRecipes"
+                ? "My Recipes"
+                : "My Meals"}
             </Text>
             <ScrollView>
               {displayFoods.length > 0 ? (
@@ -254,20 +271,101 @@ export default function LogFoodSearch() {
                       />
                     );
                   } else if (selectedTab === "myMeals") {
-                    const userMeal = food as any; // TODO: fix this
+                    const userMeal = food as MealType;
                     return (
                       <FoodSearchItem
                         key={index}
                         foodName={userMeal.mealName || "Unknown Meal"}
-                        calories={userMeal.calories || 0}
-                        brandName={userMeal.mealBrandName || ""}
-                        servingSize={userMeal.servingSize || 1}
-                        servingSizeUnit={userMeal.servingUnit || "g"}
-                        onPress={() => {}}
+                        foodImgUrl={
+                          userMeal.mealImageUrl ||
+                          require("../../../assets/images/meal placeholder image.png")
+                        }
+                        calories={Number(
+                          userMeal.foodItems
+                            .reduce(
+                              (acc, foodItem) => acc + (foodItem.calories || 0),
+                              0
+                            )
+                            .toFixed(2)
+                        )}
+                        servingSize={1}
+                        servingSizeUnit={"serving"}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/(app)/(nutrition)/logFood",
+                            params: {
+                              addType: "logMeal",
+                              foodName: userMeal.mealName,
+                              userId: userMeal.userid,
+                              brandName: "",
+                              calories: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.calories || 0),
+                                0
+                              ),
+                              protein: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.protein || 0),
+                                0
+                              ),
+                              carbohydrates: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.carbohydrates || 0),
+                                0
+                              ),
+                              fat: userMeal.foodItems.reduce(
+                                (acc, foodItem) => acc + (foodItem.fat || 0),
+                                0
+                              ),
+                              fiber: userMeal.foodItems.reduce(
+                                (acc, foodItem) => acc + (foodItem.fiber || 0),
+                                0
+                              ),
+                              sugar: userMeal.foodItems.reduce(
+                                (acc, foodItem) => acc + (foodItem.sugar || 0),
+                                0
+                              ),
+                              saturatedFat: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.saturatedFat || 0),
+                                0
+                              ),
+                              polyunsaturatedFat: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.polyunsaturatedFat || 0),
+                                0
+                              ),
+                              monounsaturatedFat: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.monounsaturatedFat || 0),
+                                0
+                              ),
+                              transFat: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.transFat || 0),
+                                0
+                              ),
+                              cholesterol: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.cholesterol || 0),
+                                0
+                              ),
+                              sodium: userMeal.foodItems.reduce(
+                                (acc, foodItem) => acc + (foodItem.sodium || 0),
+                                0
+                              ),
+                              potassium: userMeal.foodItems.reduce(
+                                (acc, foodItem) =>
+                                  acc + (foodItem.potassium || 0),
+                                0
+                              ),
+                            },
+                          })
+                        }
                       />
                     );
                   } else if (selectedTab === "myRecipes") {
-                    const userRecipe = food as RecipeType; // TODO: fix this
+                    const userRecipe = food as RecipeType;
                     return (
                       <FoodSearchItem
                         key={index}
@@ -420,10 +518,10 @@ export default function LogFoodSearch() {
                   {selectedTab === "all"
                     ? "No recent foods found"
                     : selectedTab === "myFoods"
-                      ? "No foods created yet"
-                      : selectedTab === "myRecipes"
-                        ? "No recipes created yet"
-                        : "No meals created yet"}
+                    ? "No foods created yet"
+                    : selectedTab === "myRecipes"
+                    ? "No recipes created yet"
+                    : "No meals created yet"}
                 </Text>
               )}
             </ScrollView>
