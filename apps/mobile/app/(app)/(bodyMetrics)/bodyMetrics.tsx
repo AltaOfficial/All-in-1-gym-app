@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ChevronRightIcon from "../../../assets/icons/ChevronRightIcon";
 import { router } from "expo-router";
 import { getTodaysBodyMetrics } from "../../../services/getBodyMetrics";
+import { getRecentBodyMetricPhotos } from "../../../services/getRecentBodyMetricPhotos";
 import { useIsFocused } from "@react-navigation/native";
 import { BodyMetricEnum } from "../../../types/bodyMetricEnum";
 
@@ -124,9 +125,10 @@ export default function BodyMetrics() {
         );
       });
 
-      // TODO: Fetch recent photos from backend /bodymetrics/recentPhotos?limit=4
-      // This will be implemented when the backend endpoint is ready
-      // setRecentPhotos([...])
+      // Fetch recent photos from backend
+      getRecentBodyMetricPhotos(3).then((photos) => {
+        setRecentPhotos(photos);
+      });
     }
   }, [isFocused]);
 
@@ -144,30 +146,19 @@ export default function BodyMetrics() {
             <View className="flex-row justify-between items-end">
               <View className="flex-row gap-4">
                 {recentPhotos.length > 0 ? (
-                  recentPhotos
-                    .slice(0, 3)
-                    .map((photoUrl, index) => (
-                      <Image
-                        key={index}
-                        source={{ uri: photoUrl }}
-                        className="w-20 h-20 rounded-xl"
-                      />
-                    ))
+                  recentPhotos.map((photoUrl, index) => (
+                    <Image
+                      key={index}
+                      source={{ uri: photoUrl }}
+                      className="w-20 h-20 rounded-xl"
+                    />
+                  ))
                 ) : (
-                  <>
-                    <Image
-                      source={require("../../../assets/images/gallery image 1.png")}
-                      className="w-20 h-20 rounded-xl"
-                    />
-                    <Image
-                      source={require("../../../assets/images/gallery image 1.png")}
-                      className="w-20 h-20 rounded-xl"
-                    />
-                    <Image
-                      source={require("../../../assets/images/gallery image 1.png")}
-                      className="w-20 h-20 rounded-xl"
-                    />
-                  </>
+                  <View className="flex-row gap-4">
+                    <View className="w-20 h-20 rounded-xl bg-gray2" />
+                    <View className="w-20 h-20 rounded-xl bg-gray2" />
+                    <View className="w-20 h-20 rounded-xl bg-gray2" />
+                  </View>
                 )}
               </View>
               <ChevronRightIcon height={20} width={20} fill="white" />

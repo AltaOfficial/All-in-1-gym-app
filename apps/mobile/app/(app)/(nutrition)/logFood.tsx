@@ -11,8 +11,11 @@ import { useContext } from "react";
 import { MetricsContext } from "../../../context/MetricsContext";
 import { RecipeContext } from "../../../context/RecipeContext";
 import { MealContext } from "../../../context/MealContext";
+import { MealPlannerContext } from "../../../context/MealPlannerContext";
 import { FoodType } from "../../../types/foodType";
 import { format } from "date-fns";
+import { addToMealPlan } from "../../../services/addToMealPlan";
+import { MealType } from "../../../types/foodLogItemType";
 
 // Function to determine meal type based on current time
 const getMealTypeByTime = () => {
@@ -31,8 +34,12 @@ export default function LogFood() {
   const { refreshMetrics } = useContext(MetricsContext);
   const { setMealItems, mealItems } = useContext(MealContext);
   const { setIngredients, ingredients } = useContext(RecipeContext);
+  const { refreshMealPlanner } = useContext(MealPlannerContext);
   const {
     addType,
+    foodImageUrl,
+    mealType,
+    date,
     foodName,
     calories,
     protein,
@@ -61,7 +68,9 @@ export default function LogFood() {
     return Math.round(num * multiplier) / multiplier;
   };
 
-  const [selectedMeal, setSelectedMeal] = useState(getMealTypeByTime());
+  const [selectedMeal, setSelectedMeal] = useState(
+    mealType ? mealType : getMealTypeByTime().toUpperCase()
+  );
   const [selectedServingSize, setSelectedServingSize] = useState(
     servingSize ? `${servingSize} ${servingSizeUnit}` : "1g"
   );
@@ -268,59 +277,63 @@ export default function LogFood() {
             />
           </View>
           <View className="flex-col gap-2 mt-4">
-            {addType !== "recipe" && addType !== "meal" && (
-              <>
-                <Text className="text-white text-lg font-[HelveticaNeue]">
-                  Time
-                </Text>
-                <TextInput
-                  className="flex-row items-center text-white text-lg h-14 w-32 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3"
-                  placeholder={`${new Date().toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}`}
-                  placeholderTextColor="#828282"
-                  keyboardType="numeric"
-                />
-              </>
-            )}
+            {addType !== "recipe" &&
+              addType !== "meal" &&
+              addType !== "mealPlan" && (
+                <>
+                  <Text className="text-white text-lg font-[HelveticaNeue]">
+                    Time
+                  </Text>
+                  <TextInput
+                    className="flex-row items-center text-white text-lg h-14 w-32 font-[HelveticaNeue] justify-center pl-4 border-gray2 border rounded-2xl py-3"
+                    placeholder={`${new Date().toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}`}
+                    placeholderTextColor="#828282"
+                    keyboardType="numeric"
+                  />
+                </>
+              )}
           </View>
           <View className="flex-col gap-2 mt-4">
-            {addType !== "recipe" && addType !== "meal" && (
-              <>
-                <Text className="text-white text-lg font-[HelveticaNeue]">
-                  Meal
-                </Text>
-                <View className="border-gray2 border rounded-2xl overflow-hidden h-14 w-48 justify-center">
-                  <Picker
-                    selectedValue={selectedMeal}
-                    onValueChange={(itemValue) => setSelectedMeal(itemValue)}
-                    style={{
-                      backgroundColor: "black",
-                      color: "white",
-                    }}
-                    dropdownIconColor="white"
-                    mode="dropdown"
-                  >
-                    <Picker.Item
-                      label="Breakfast"
-                      value="Breakfast"
-                      style={{ backgroundColor: "black", color: "white" }}
-                    />
-                    <Picker.Item
-                      label="Lunch"
-                      value="Lunch"
-                      style={{ backgroundColor: "black", color: "white" }}
-                    />
-                    <Picker.Item
-                      label="Dinner"
-                      value="Dinner"
-                      style={{ backgroundColor: "black", color: "white" }}
-                    />
-                  </Picker>
-                </View>
-              </>
-            )}
+            {addType !== "recipe" &&
+              addType !== "meal" &&
+              addType !== "mealPlan" && (
+                <>
+                  <Text className="text-white text-lg font-[HelveticaNeue]">
+                    Meal
+                  </Text>
+                  <View className="border-gray2 border rounded-2xl overflow-hidden h-14 w-48 justify-center">
+                    <Picker
+                      selectedValue={selectedMeal}
+                      onValueChange={(itemValue) => setSelectedMeal(itemValue)}
+                      style={{
+                        backgroundColor: "black",
+                        color: "white",
+                      }}
+                      dropdownIconColor="white"
+                      mode="dropdown"
+                    >
+                      <Picker.Item
+                        label="Breakfast"
+                        value="Breakfast"
+                        style={{ backgroundColor: "black", color: "white" }}
+                      />
+                      <Picker.Item
+                        label="Lunch"
+                        value="Lunch"
+                        style={{ backgroundColor: "black", color: "white" }}
+                      />
+                      <Picker.Item
+                        label="Dinner"
+                        value="Dinner"
+                        style={{ backgroundColor: "black", color: "white" }}
+                      />
+                    </Picker>
+                  </View>
+                </>
+              )}
           </View>
         </View>
 
@@ -473,6 +486,8 @@ export default function LogFood() {
             ? `Add to Recipe`
             : addType === "meal"
             ? `Add to Meal`
+            : addType === "mealPlan"
+            ? `Add to Meal Plan`
             : addType === "logRecipe"
             ? `+ Log Recipe`
             : addType === "logMeal"
@@ -512,7 +527,7 @@ export default function LogFood() {
                 brandName: brandName,
                 servingSize: selectedServingSize,
                 servings: Number(numberOfServings),
-                mealType: selectedMeal.toUpperCase(),
+                mealType: selectedMeal,
                 time: new Date().toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -584,7 +599,7 @@ export default function LogFood() {
                 brandName: "",
                 servingSize: selectedServingSize,
                 servings: Number(numberOfServings),
-                mealType: selectedMeal.toUpperCase(),
+                mealType: selectedMeal,
                 time: new Date().toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -613,9 +628,47 @@ export default function LogFood() {
                 router.back();
               }
             });
+          } else if (addType === "mealPlan") {
+            // Add to meal plan
+            const mealPlanItem: FoodType = {
+              mealType: selectedMeal as MealType,
+              foodName: foodName as string,
+              foodBrandName: brandName as string,
+              calories: Number(calories) * currentTotalMultiplier,
+              protein: Number(protein) * currentTotalMultiplier,
+              carbohydrates: Number(carbohydrates) * currentTotalMultiplier,
+              fat: Number(fat) * currentTotalMultiplier,
+              fiber: Number(fiber) * currentTotalMultiplier,
+              sugar: Number(sugar) * currentTotalMultiplier,
+              saturatedFat: Number(saturatedFat) * currentTotalMultiplier,
+              polyunsaturatedFat:
+                Number(polyunsaturatedFat) * currentTotalMultiplier,
+              monounsaturatedFat:
+                Number(monounsaturatedFat) * currentTotalMultiplier,
+              transFat: Number(transFat) * currentTotalMultiplier,
+              cholesterol: Number(cholesterol) * currentTotalMultiplier,
+              sodium: Number(sodium) * currentTotalMultiplier,
+              potassium: Number(potassium) * currentTotalMultiplier,
+              servingSize: Number(selectedServingSize),
+              servingUnit: String(selectedServingSize),
+              servingsAmount: Number(numberOfServings),
+              foodImageUrl: foodImageUrl as string,
+              isLogged: false,
+            };
+
+            const result = await addToMealPlan(
+              (date as string) || format(new Date(), "yyyy-MM-dd"),
+              mealPlanItem
+            );
+            refreshMealPlanner();
+
+            if (result) {
+              router.back();
+              router.back();
+            }
           }
         }}
-        className="self-center absolute bottom-20"
+        className="self-center !w-52 absolute bottom-20"
         textClassName="text-lg"
       />
     </SafeAreaView>

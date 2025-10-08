@@ -8,9 +8,6 @@ import com.strive.app.enums.WeightType;
 import com.strive.app.services.NutrientsService;
 import org.springframework.stereotype.Service;
 
-import static com.strive.app.enums.TrainingExperience.BEGINNER;
-import static com.strive.app.enums.TrainingExperience.INTERMEDIATE;
-
 @Service
 public class NutrientsServiceImpl implements NutrientsService {
 

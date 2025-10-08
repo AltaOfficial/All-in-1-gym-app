@@ -1,9 +1,11 @@
 package com.strive.app.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.strive.app.enums.MealType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -33,6 +35,15 @@ public class FoodEntity {
     @JsonBackReference
     @ToString.Exclude
     private MealEntity mealConnectedTo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "meal_plan_date"),
+            @JoinColumn(name = "meal_plan_user_id")
+    })
+    @JsonBackReference
+    @ToString.Exclude
+    private MealPlanEntity mealPlanConnectedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
@@ -71,7 +82,16 @@ public class FoodEntity {
     private String householdServingText;
 
     private LocalDateTime createdAt;
+    @Builder.Default
+    private Boolean isLogged = false;
+    private MealType mealType;
     private Integer servingsAmount;
+
+    private URL foodImageUrl;
+
+    public void setMealPlan(MealPlanEntity mealPlanEntity) {
+        this.mealPlanConnectedTo = mealPlanEntity;
+    }
 
     @PrePersist
     private void prePersist() {

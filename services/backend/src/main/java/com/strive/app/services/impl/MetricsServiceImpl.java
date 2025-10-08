@@ -106,7 +106,7 @@ public class MetricsServiceImpl implements MetricsService {
 
             save(metricsEntity);
         } catch (Exception e) {
-            // If metrics don't exist for today, do nothing
+            // If metrics doesn't exist for today, do nothing
         }
     }
 }

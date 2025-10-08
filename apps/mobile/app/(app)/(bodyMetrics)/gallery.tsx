@@ -40,7 +40,9 @@ const Gallery = () => {
       setIsLbs(user?.weightType === "LBS");
     });
 
-    getBodyMetricByDate({ date: selectedDate }).then((bodyMetric) => {
+    getBodyMetricByDate({
+      date: new Date(format(selectedDate, "yyyy-MM-dd")),
+    }).then((bodyMetric) => {
       setWeight(bodyMetric?.weight?.toString());
       setBodyFat(bodyMetric?.bodyFat ?? 0.0);
       setShoulders(bodyMetric?.shouldersCircumference?.toString());
@@ -148,6 +150,70 @@ const Gallery = () => {
             </Text>
             <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
               {rightThigh ?? "--"}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Left Thigh:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {leftThigh ?? "--"}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="flex-row gap-4 justify-between items-center px-10 mt-4">
+        <View>
+          <View className="flex-row items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Body Fat:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {bodyFat ? `${bodyFat}%` : "--"}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Shoulders:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {shoulders ?? "--"}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Chest:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {chest ?? "--"}
+            </Text>
+          </View>
+        </View>
+
+        <View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Waist:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {waist ?? "--"}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Hips:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {hips ?? "--"}
+            </Text>
+          </View>
+          <View className="flex-row justify-between items-center">
+            <Text className="text-white text-lg font-[HelveticaNeue]">
+              Neck:{" "}
+            </Text>
+            <Text className="text-white text-lg font-[HelveticaNeue] font-bold">
+              {neck ?? "--"}
             </Text>
           </View>
         </View>

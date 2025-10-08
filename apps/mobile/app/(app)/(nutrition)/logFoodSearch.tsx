@@ -32,7 +32,7 @@ export default function LogFoodSearch() {
   const [userMeals, setUserMeals] = useState<MealType[]>([]);
   const { clearRecipeContext } = useContext(RecipeContext);
   const { clearMealContext } = useContext(MealContext);
-  const { searchType } = useLocalSearchParams();
+  const { searchType, mealType, date } = useLocalSearchParams();
   const isFocused = useIsFocused();
 
   // Fetch data based on selected tab
@@ -247,7 +247,9 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: searchType,
+                              addType: searchType ? searchType : "logFood",
+                              mealType: mealType,
+                              date: date,
                               foodName: recentFood.foodName,
                               brandName: recentFood.foodBrandName,
                               servingSize: recentFood.servingSize || 1,
@@ -294,7 +296,10 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: "logMeal",
+                              addType: searchType ? searchType : "logMeal",
+                              mealType: mealType,
+                              date: date,
+                              foodImageUrl: userMeal.mealImageUrl,
                               foodName: userMeal.mealName,
                               userId: userMeal.userid,
                               brandName: "",
@@ -385,8 +390,10 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: "logRecipe",
+                              addType: searchType ? searchType : "logRecipe",
                               foodName: userRecipe.recipeName,
+                              mealType: mealType,
+                              date: date,
                               userId: userRecipe.userid,
                               brandName: "",
                               calories:
@@ -486,7 +493,9 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: searchType,
+                              addType: searchType ? searchType : "logFood",
+                              date: date,
+                              mealType: mealType,
                               foodName: userFood.foodName,
                               userId: userFood.userCreatedById,
                               brandName: userFood.foodBrandName,
@@ -561,6 +570,8 @@ export default function LogFoodSearch() {
                   pathname: "/(app)/(nutrition)/logFood",
                   params: {
                     addType: searchType,
+                    mealType: mealType,
+                    date: date,
                     foodName: result.foodName,
                     brandName: result.foodBrandName,
                     servingSize: result.servingSize,

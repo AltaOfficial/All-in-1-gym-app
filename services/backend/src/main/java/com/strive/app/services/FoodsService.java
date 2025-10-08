@@ -1,7 +1,6 @@
 package com.strive.app.services;
 
 import com.strive.app.domain.entities.FoodEntity;
-import com.strive.app.domain.entities.FoodLogItemEntity;
 
 import java.io.IOException;
 import java.util.List;

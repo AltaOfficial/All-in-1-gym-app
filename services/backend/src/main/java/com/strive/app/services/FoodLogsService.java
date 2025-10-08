@@ -6,7 +6,6 @@ import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 public interface FoodLogsService {

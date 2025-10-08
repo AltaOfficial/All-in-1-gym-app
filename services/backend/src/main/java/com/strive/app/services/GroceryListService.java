@@ -1,6 +1,5 @@
 package com.strive.app.services;
 
-import com.strive.app.domain.dto.LogFoodRequestDto;
 import com.strive.app.domain.entities.GroceryListEntity;
 import com.strive.app.domain.entities.GroceryListId;
 import com.strive.app.domain.entities.GroceryListItemEntity;

@@ -5,7 +5,6 @@ import com.strive.app.domain.entities.FoodLogEntity;
 import com.strive.app.domain.entities.FoodLogId;
 import com.strive.app.domain.entities.FoodLogItemEntity;
 import com.strive.app.repositories.FoodLogsRepository;
-import com.strive.app.repositories.FoodRepository;
 import com.strive.app.services.FoodLogsService;
 import com.strive.app.services.MetricsService;
 import jakarta.transaction.Transactional;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Service

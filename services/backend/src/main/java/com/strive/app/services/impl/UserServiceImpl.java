@@ -4,7 +4,6 @@ import com.strive.app.domain.entities.FoodEntity;
 import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.repositories.FoodRepository;
 import com.strive.app.repositories.UserRepository;
-import com.strive.app.services.FoodsService;
 import com.strive.app.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FoodRepository foodRepository;
-    private final FoodsService foodsService;
 
     @Override
     public boolean isExists(UUID id) {

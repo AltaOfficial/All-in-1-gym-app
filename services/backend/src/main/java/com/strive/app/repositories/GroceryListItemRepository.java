@@ -1,6 +1,5 @@
 package com.strive.app.repositories;
 
-import com.strive.app.domain.entities.BodyMetricsLogEntity;
 import com.strive.app.domain.entities.GroceryListItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
