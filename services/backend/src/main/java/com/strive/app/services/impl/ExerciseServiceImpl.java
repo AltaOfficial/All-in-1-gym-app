@@ -166,7 +166,16 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
+    @Transactional
     public void deleteWorkout(UUID id) {
+        // First, delete all workout logs that reference this workout
+        List<WorkoutLogEntity> workoutLogs = workoutLogRepository.findAll().stream()
+                .filter(log -> log.getWorkout() != null && log.getWorkout().getId().equals(id))
+                .toList();
+
+        workoutLogRepository.deleteAll(workoutLogs);
+
+        // Then delete the workout itself
         workoutRepository.deleteById(id);
     }
 }

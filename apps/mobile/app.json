@@ -33,6 +33,8 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.anonymous.Strive"
@@ -62,6 +64,12 @@
       "eas": {
         "projectId": "a8428fd4-cb6d-47d9-97d1-7698077026d6"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a8428fd4-cb6d-47d9-97d1-7698077026d6"
     }
   }
 }
