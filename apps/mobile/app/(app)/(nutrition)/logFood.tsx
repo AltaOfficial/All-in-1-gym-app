@@ -69,7 +69,12 @@ export default function LogFood() {
   };
 
   const [selectedMeal, setSelectedMeal] = useState(
-    mealType ? mealType : getMealTypeByTime().toUpperCase()
+    mealType != null &&
+      mealType != "undefined" &&
+      mealType != "null" &&
+      mealType != undefined
+      ? (mealType as MealType)
+      : (getMealTypeByTime().toUpperCase() as MealType)
   );
   const [selectedServingSize, setSelectedServingSize] = useState(
     servingSize ? `${servingSize} ${servingSizeUnit}` : "1g"
@@ -317,17 +322,17 @@ export default function LogFood() {
                     >
                       <Picker.Item
                         label="Breakfast"
-                        value="Breakfast"
+                        value="BREAKFAST"
                         style={{ backgroundColor: "black", color: "white" }}
                       />
                       <Picker.Item
                         label="Lunch"
-                        value="Lunch"
+                        value="LUNCH"
                         style={{ backgroundColor: "black", color: "white" }}
                       />
                       <Picker.Item
                         label="Dinner"
-                        value="Dinner"
+                        value="DINNER"
                         style={{ backgroundColor: "black", color: "white" }}
                       />
                     </Picker>

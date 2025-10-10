@@ -161,9 +161,9 @@ export default function LogFoodSearch() {
 
       {searchResults.length == 0 && !noResults && (
         <ScrollView className="flex-1">
-          {(((selectedTab !== "myFoods" &&
+          {((selectedTab !== "myFoods" &&
             (searchType == "recipe" || searchType == "meal")) ||
-            searchType == undefined) ||
+            searchType == undefined ||
             (searchType == "mealPlan" && selectedTab === "all")) && (
             <Pressable
               className="px-6 mt-8"
@@ -176,7 +176,12 @@ export default function LogFoodSearch() {
                 }
                 router.push(
                   selectedTab === "all"
-                    ? "/(app)/(nutrition)/scanBarcode?searchType=" + searchType
+                    ? "/(app)/(nutrition)/scanBarcode?searchType=" +
+                        searchType +
+                        "&mealType=" +
+                        mealType +
+                        "&date=" +
+                        date
                     : selectedTab === "myMeals"
                     ? "/createMeal"
                     : selectedTab === "myRecipes"

@@ -16,9 +16,7 @@ import { useLocalSearchParams } from "expo-router";
 export default function ScanBarcode() {
   const [permission, requestPermission] = useCameraPermissions();
   const [fetching, setFetching] = useState(false);
-  const { searchType } = useLocalSearchParams();
-
-  console.log("searchType", searchType);
+  const { searchType, mealType, date } = useLocalSearchParams();
 
   const handleBarcodeScanned = async (event: BarcodeScanningResult) => {
     // Prevent multiple scans while fetching
@@ -51,7 +49,9 @@ export default function ScanBarcode() {
           return router.push({
             pathname: "/(app)/(nutrition)/logFood",
             params: {
-              addType: searchType,
+              addType: searchType ? searchType : "logFood",
+              mealType: mealType ? mealType : null,
+              date: date ? date : null,
               foodName: food.foodName,
               brandName: food.foodBrandName,
               servingSize: food.servingSize,
