@@ -27,6 +27,7 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+        working-directory: ./apps/mobile
 
       - name: Launch Update
         run: eas update --auto --non-interactive
