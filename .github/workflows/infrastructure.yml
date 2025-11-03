@@ -8,6 +8,9 @@ on:
       - ".github/workflows/infrastructure.yml"
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
 jobs:
   terraform:
     runs-on: ubuntu-latest
