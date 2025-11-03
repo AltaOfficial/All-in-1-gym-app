@@ -30,4 +30,5 @@ jobs:
         working-directory: ./apps/mobile
 
       - name: Launch Update
-        run: eas update --auto --non-interactive
+        run: eas update --channel "preview" --environment "preview" --auto --non-interactive
+        working-directory: ./apps/mobile
