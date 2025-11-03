@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "frontend/apps/mobile/**"
+      - ".github/workflows/mobile-deploy.yml"
   workflow_dispatch:
 
 jobs:

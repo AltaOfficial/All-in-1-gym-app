@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
   workflow_dispatch:
 
 env:
@@ -12,6 +13,9 @@ env:
   IMAGE_NAME: striveapp
   WEBAPP_NAME: striveapp
 
+permissions:
+  id-token: write
+  contents: read
 jobs:
   deploy:
     runs-on: ubuntu-latest
