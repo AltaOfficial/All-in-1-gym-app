@@ -1,0 +1,30 @@
+name: Deploy/Update Expo App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/apps/mobile/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Launch Update
+        run: eas update --auto --non-interactive

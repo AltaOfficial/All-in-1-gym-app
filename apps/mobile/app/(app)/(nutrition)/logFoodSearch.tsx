@@ -253,7 +253,7 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: searchType ? searchType : "logFood",
+                              addType: searchType,
                               mealType: mealType,
                               date: date,
                               foodName: recentFood.foodName,
@@ -499,7 +499,7 @@ export default function LogFoodSearch() {
                           router.push({
                             pathname: "/(app)/(nutrition)/logFood",
                             params: {
-                              addType: searchType ? searchType : "logFood",
+                              addType: searchType,
                               date: date,
                               mealType: mealType,
                               foodName: userFood.foodName,

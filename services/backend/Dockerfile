@@ -1,6 +1,10 @@
 # Stage 1: Build the application
 FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /home/app
+
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+
 COPY . /home/app
 RUN mvn -f /home/app/pom.xml clean package -DskipTests
 

@@ -13,7 +13,7 @@ import { RecipeContext } from "../../../context/RecipeContext";
 import { MealContext } from "../../../context/MealContext";
 import { MealPlannerContext } from "../../../context/MealPlannerContext";
 import { FoodType } from "../../../types/foodType";
-import { format } from "date-fns";
+import { add, format } from "date-fns";
 import { addToMealPlan } from "../../../services/addToMealPlan";
 import { MealType } from "../../../types/foodLogItemType";
 
@@ -500,6 +500,7 @@ export default function LogFood() {
             : "+ Log Food"
         }
         onPress={async () => {
+          console.log("working");
           const token = await SecureStore.getItemAsync("jwtToken");
 
           // Calculate the current total multiplier based on selected serving size and number of servings
@@ -519,7 +520,9 @@ export default function LogFood() {
           const currentTotalMultiplier =
             currentServingSizeMultiplier * Number(numberOfServings);
 
+          console.log(addType);
           if (!addType || addType === undefined || addType === "undefined") {
+            console.log("adding food");
             fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/foods/logfood`, {
               method: "POST",
               headers: {

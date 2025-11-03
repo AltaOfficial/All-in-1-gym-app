@@ -373,9 +373,18 @@ const Workout = () => {
             <Text className="text-white text-2xl font-[HelveticaNeue] text-center mt-6">
               {currentExercise?.exerciseName}
             </Text>
-            <Text className="text-gray3 text-xl font-[HelveticaNeue] text-center mt-6">
-              Set {currentSet} of {currentExercise?.goalSets}
-            </Text>
+            <View className="flex-row gap-4 mt-6 justify-center">
+              <Text className="text-gray3 text-xl font-[HelveticaNeue] text-center">
+                Set {currentSet} of {currentExercise?.goalSets}
+                {"  "} |
+              </Text>
+              <Text className="text-gray3 text-xl font-[HelveticaNeue] text-center">
+                Weight: {currentExercise.weight} lbs{"  "} |
+              </Text>
+              <Text className="text-gray3 text-xl font-[HelveticaNeue] text-center">
+                Goal Reps: {currentExercise.goalReps}
+              </Text>
+            </View>
 
             <View className="justify-center items-center text-center mt-10">
               <Text className="text-white text-xl font-[HelveticaNeue] text-center mt-6">
@@ -393,7 +402,8 @@ const Workout = () => {
                       ...newData[currentSet - 1],
                       repsDone: Number(text),
                       weight: currentExercise?.weight ?? 0,
-                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                      restTimeInSeconds:
+                        currentExercise?.restTimeInSeconds ?? 0,
                     };
                     return newData;
                   });
@@ -414,9 +424,12 @@ const Workout = () => {
                     const newData = [...prev];
                     newData[currentSet - 1] = {
                       ...newData[currentSet - 1],
-                      effortType: Object.keys(EffortEnum)[effortScore - 1] as EffortEnum,
+                      effortType: Object.keys(EffortEnum)[
+                        effortScore - 1
+                      ] as EffortEnum,
                       weight: currentExercise?.weight ?? 0,
-                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                      restTimeInSeconds:
+                        currentExercise?.restTimeInSeconds ?? 0,
                     };
                     return newData;
                   });
@@ -464,9 +477,12 @@ const Workout = () => {
                     const newData = [...prev];
                     newData[currentSet - 1] = {
                       ...newData[currentSet - 1],
-                      effortType: Object.keys(EffortEnum)[effortScore + 1] as EffortEnum,
+                      effortType: Object.keys(EffortEnum)[
+                        effortScore + 1
+                      ] as EffortEnum,
                       weight: currentExercise?.weight ?? 0,
-                      restTimeInSeconds: currentExercise?.restTimeInSeconds ?? 0,
+                      restTimeInSeconds:
+                        currentExercise?.restTimeInSeconds ?? 0,
                     };
                     return newData;
                   });
