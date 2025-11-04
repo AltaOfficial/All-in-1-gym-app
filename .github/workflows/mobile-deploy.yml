@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "frontend/apps/mobile/**"
+      - "apps/mobile/**"
       - ".github/workflows/mobile-deploy.yml"
   workflow_dispatch:
 
