@@ -68,8 +68,8 @@ public class FoodLogsServiceImpl implements FoodLogsService {
         FoodLogEntity foodLogEntity = logFood(FoodLogId.builder().userId(userId).date(date).build(), foodLogItemEntity);
         System.out.println("FoodLogItemEntity: " + foodLogItemEntity);
 
-        // Update metrics
-        metricsService.updateDailyMetricsWithFood(userId, logFoodRequestDto);
+        // Update metrics for the specified date
+        metricsService.updateDailyMetricsWithFood(userId, logFoodRequestDto, date);
 
         return foodLogEntity;
     }

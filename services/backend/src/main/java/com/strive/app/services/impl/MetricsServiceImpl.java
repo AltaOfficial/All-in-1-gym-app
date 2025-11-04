@@ -34,13 +34,13 @@ public class MetricsServiceImpl implements MetricsService {
     }
 
     @Override
-    public MetricsEntity updateDailyMetricsWithFood(UUID userId, LogFoodRequestDto logFoodRequestDto) {
+    public MetricsEntity updateDailyMetricsWithFood(UUID userId, LogFoodRequestDto logFoodRequestDto, LocalDate date) {
         MetricsId metricsId = MetricsId.builder()
                 .userId(userId)
-                .date(LocalDate.now())
+                .date(date)
                 .build();
 
-        // Find existing metrics for today, throw exception if not found
+        // Find existing metrics for the specified date, throw exception if not found
         MetricsEntity metricsEntity = findOne(metricsId);
 
         // Add the food macros to current values (frontend already calculated servings)
