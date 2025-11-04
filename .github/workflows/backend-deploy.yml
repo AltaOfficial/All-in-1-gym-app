@@ -22,6 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Azure CLI (for local act)
+        if: ${{ env.ACT }} == 'true'
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
       - name: Azure Login
         uses: azure/login@v2
         with:

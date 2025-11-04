@@ -19,6 +19,7 @@ public class MetricsServiceImpl implements MetricsService {
 
     @Override
     public MetricsEntity findOne(MetricsId id) {
+        System.out.println(id);
         return metricsRepository.findById(id).orElseThrow();
     }
 
