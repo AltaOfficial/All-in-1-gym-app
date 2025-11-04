@@ -36,7 +36,7 @@ jobs:
           --image ${{ env.IMAGE_NAME }}:${{github.sha}} \
           --image ${{ env.IMAGE_NAME }}:latest \
           --platform linux/amd64 \
-          --build-arg SENTRY_AUTH_TOKEN="${{ secrets.SENTRY_AUTH_TOKEN }}"
+          --build-arg SENTRY_AUTH_TOKEN="${{ secrets.SENTRY_AUTH_TOKEN }}" \
           ./services/backend
 
       - name: Deploy to App Service
