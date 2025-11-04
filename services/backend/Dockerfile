@@ -9,7 +9,7 @@ COPY . /home/app
 RUN mvn -f /home/app/pom.xml clean package -DskipTests
 
 # Stage 2: Run the application
-FROM openjdk:21
+FROM amazoncorretto:21
 COPY --from=build /home/app/target/*.jar /usr/local/lib/app.jar
 EXPOSE 8000
 ENTRYPOINT ["java","-jar","/usr/local/lib/app.jar"]
