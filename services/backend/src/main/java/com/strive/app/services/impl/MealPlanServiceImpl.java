@@ -97,7 +97,7 @@ public class MealPlanServiceImpl implements MealPlanService {
                     .carbohydrates(item.getCarbohydrates())
                     .fat(item.getFat())
                     .build();
-            metricsService.updateDailyMetricsWithFood(mealPlanId.getUserId(), logFoodDto);
+            metricsService.updateDailyMetricsWithFood(mealPlanId.getUserId(), logFoodDto, mealPlanId.getDate());
         } else {
             // Find and remove from food log
             FoodLogEntity foodLog = foodLogsService.findById(foodLogId);
@@ -121,7 +121,7 @@ public class MealPlanServiceImpl implements MealPlanService {
                     .carbohydrates(-item.getCarbohydrates())
                     .fat(-item.getFat())
                     .build();
-            metricsService.updateDailyMetricsWithFood(mealPlanId.getUserId(), subtractFoodDto);
+            metricsService.updateDailyMetricsWithFood(mealPlanId.getUserId(), subtractFoodDto, mealPlanId.getDate());
         }
 
         return foodRepository.save(item);
