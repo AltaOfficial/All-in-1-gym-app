@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useState, ReactNode, useEffect, useRef } from "react";
 import {
   ExerciseSetType,
   ExerciseType,
@@ -11,9 +11,9 @@ import { EffortEnum } from "../types/effortEnum";
 interface WorkoutContextType {
   // Workout information
   workout: WorkoutType | null;
-  workoutLogId: string;
-  currentExerciseIndex: number;
-  currentExerciseData: ExerciseSetType[];
+  workoutLogIdRef: React.RefObject<string>;
+  currentExerciseIndexRef: React.RefObject<number>;
+  currentExerciseDataRef: React.RefObject<ExerciseSetType[]>;
 
   // Methods
   setWorkout: (workout: WorkoutType) => void;
@@ -27,9 +27,9 @@ interface WorkoutContextType {
 
 export const WorkoutContext = createContext<WorkoutContextType>({
   workout: null,
-  workoutLogId: "",
-  currentExerciseIndex: 0,
-  currentExerciseData: [],
+  workoutLogIdRef: { current: "" },
+  currentExerciseIndexRef: { current: 0 },
+  currentExerciseDataRef: { current: [] },
   // Methods
   setWorkout: () => {},
   nextExercise: async () => undefined,
@@ -45,13 +45,28 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const [currentExerciseData, setCurrentExerciseData] = useState<
     ExerciseSetType[]
   >([]);
+  const workoutLogIdRef = useRef(workoutLogId);
+  const currentExerciseIndexRef = useRef(currentExerciseIndex);
+  const currentExerciseDataRef = useRef(currentExerciseData);
+
+  useEffect(() => {
+    workoutLogIdRef.current = workoutLogId;
+  }, [workoutLogId]);
+
+  useEffect(() => {
+    currentExerciseIndexRef.current = currentExerciseIndex;
+  }, [currentExerciseIndex]);
+
+  useEffect(() => {
+    currentExerciseDataRef.current = currentExerciseData;
+  }, [currentExerciseData]);
 
   const nextExercise = async (sets: ExerciseSetType[]) => {
-    let currentWorkoutLogId = workoutLogId;
+    let currentWorkoutLogId = workoutLogIdRef.current;
     console.log(sets);
 
     // Create workout log if it doesn't exist
-    if (!workoutLogId) {
+    if (!workoutLogIdRef.current) {
       try {
         const token = await SecureStore.getItemAsync("jwtToken");
         const response = await fetch(
@@ -78,7 +93,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Send the exercise metrics to the backend
-    const currentExercise = workout?.exercises?.[currentExerciseIndex];
+    const currentExercise = workout?.exercises?.[currentExerciseIndexRef.current];
 
     if (currentExercise?.id && currentWorkoutLogId) {
       try {
@@ -104,9 +119,9 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    setCurrentExerciseIndex(currentExerciseIndex + 1);
+    setCurrentExerciseIndex(currentExerciseIndexRef.current + 1);
 
-    const nextExercise = workout?.exercises?.[currentExerciseIndex + 1];
+    const nextExercise = workout?.exercises?.[currentExerciseIndexRef.current + 1];
 
     // Reset currentExerciseData for the next exercise
     if (nextExercise) {
@@ -127,7 +142,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
   const endWorkout = async (sets?: ExerciseSetType[]) => {
     // If sets are provided, save them before ending the workout
     if (sets && sets.length > 0) {
-      let currentWorkoutLogId = workoutLogId;
+      let currentWorkoutLogId = workoutLogIdRef.current;
 
       // Create workout log if it doesn't exist
       if (!currentWorkoutLogId) {
@@ -154,7 +169,7 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
         }
       }
 
-      const currentExercise = workout?.exercises?.[currentExerciseIndex];
+      const currentExercise = workout?.exercises?.[currentExerciseIndexRef.current];
       if (currentExercise?.id && currentWorkoutLogId) {
         try {
           const token = await SecureStore.getItemAsync("jwtToken");
@@ -189,8 +204,8 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
 
   // Initialize currentExerciseData when workout is set
   useEffect(() => {
-    if (workout?.exercises?.[currentExerciseIndex]) {
-      const currentExercise = workout.exercises[currentExerciseIndex];
+    if (workout?.exercises?.[currentExerciseIndexRef.current]) {
+      const currentExercise = workout.exercises[currentExerciseIndexRef.current];
       setCurrentExerciseData(
         Array.from({ length: currentExercise.goalSets ?? 0 }, () => ({
           repsDone: 0,
@@ -205,9 +220,9 @@ export const WorkoutProvider = ({ children }: { children: ReactNode }) => {
 
   const value: WorkoutContextType = {
     workout,
-    workoutLogId,
-    currentExerciseIndex,
-    currentExerciseData,
+    workoutLogIdRef,
+    currentExerciseIndexRef,
+    currentExerciseDataRef,
     setWorkout,
     nextExercise,
     setWorkoutLogId,

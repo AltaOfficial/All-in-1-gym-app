@@ -15,8 +15,8 @@ const Workout = () => {
     workout,
     nextExercise,
     endWorkout,
-    currentExerciseIndex,
-    currentExerciseData,
+    currentExerciseIndexRef,
+    currentExerciseDataRef,
     setCurrentExerciseData,
   } = useContext(WorkoutContext);
   const [effortScore, setEffortScore] = useState(0);
@@ -25,7 +25,7 @@ const Workout = () => {
     useState<Date | null>(null);
   const [currentExercise, setCurrentExercise] = useState<
     ExerciseType | undefined
-  >(workout?.exercises?.[currentExerciseIndex] || undefined);
+  >(workout?.exercises?.[currentExerciseIndexRef.current] || undefined);
   const [TimeSecondsLeft, setTimeSecondsLeft] = useState<string>(
     Math.floor((currentExercise?.time ?? 0) % 60)
       ?.toString()
@@ -64,7 +64,8 @@ const Workout = () => {
       if (isRestingRef.current) {
         // Rest period finished - advance to next set/exercise
         if (currentSetRef.current == currentExerciseRef.current?.goalSets) {
-          const next = await nextExercise(currentExerciseData);
+          // end of current exercise moving on to next
+          const next = await nextExercise(currentExerciseDataRef.current);
           if (next) {
             setCurrentExercise(next);
             currentExerciseRef.current = next;
@@ -83,11 +84,12 @@ const Workout = () => {
               );
             }
           } else {
-            console.log("No next exercise");
+            // no next exercise, end workout
             endWorkout();
             return;
           }
         } else {
+          // end of current set, but still in current exercise, advance to next set
           setCurrentSet(currentSetRef.current + 1);
           currentSetRef.current = currentSetRef.current + 1;
           if (currentExerciseRef.current?.time) {
@@ -110,7 +112,7 @@ const Workout = () => {
         // Check if this is the last set of the last exercise
         if (
           currentSetRef.current == currentExerciseRef.current?.goalSets &&
-          currentExerciseIndex + 1 == (workout?.exercises?.length ?? 0)
+          currentExerciseIndexRef.current + 1 == (workout?.exercises?.length ?? 0)
         ) {
           // Last set of last exercise - end workout
           endWorkout();
@@ -227,7 +229,7 @@ const Workout = () => {
               if (
                 currentSetRef.current == currentExerciseRef.current?.goalSets
               ) {
-                const next = await nextExercise(currentExerciseData);
+                const next = await nextExercise(currentExerciseDataRef.current);
                 if (next) {
                   setCurrentExercise(next);
                   currentExerciseRef.current = next;
@@ -272,14 +274,14 @@ const Workout = () => {
               // Check if this is the last set of the last exercise
               if (
                 currentSetRef.current == currentExerciseRef.current?.goalSets &&
-                currentExerciseIndex + 1 == (workout?.exercises?.length ?? 0)
+                currentExerciseIndexRef.current + 1 == (workout?.exercises?.length ?? 0)
               ) {
                 // Last set of last exercise - end workout
                 endWorkout();
                 return;
               }
 
-              // Not the last set - calculate if rest period also finished
+              // Not the last set - calculate rest period
               const restTime =
                 currentExerciseRef.current?.restTimeInSeconds ?? 0;
               const restEndTime = addSeconds(new Date(), restTime);
@@ -302,7 +304,7 @@ const Workout = () => {
                 if (
                   currentSetRef.current == currentExerciseRef.current?.goalSets
                 ) {
-                  const next = await nextExercise(currentExerciseData);
+                  const next = await nextExercise(currentExerciseDataRef.current);
                   if (next) {
                     setCurrentExercise(next);
                     currentExerciseRef.current = next;
@@ -498,11 +500,11 @@ const Workout = () => {
                 textClassName="text-lg"
                 onPress={async () => {
                   if (
-                    currentExerciseIndex + 1 ==
+                    currentExerciseIndexRef.current + 1 ==
                       (workout?.exercises?.length ?? 0) &&
                     currentSet == currentExercise?.goalSets
                   ) {
-                    await endWorkout(currentExerciseData);
+                    await endWorkout(currentExerciseDataRef.current);
                     return;
                   }
                   setEffortScore(0);
@@ -526,7 +528,7 @@ const Workout = () => {
                   );
                 }}
                 text={
-                  currentExerciseIndex + 1 ==
+                  currentExerciseIndexRef.current + 1 ==
                     (workout?.exercises?.length ?? 0) &&
                   currentSet == currentExercise?.goalSets
                     ? "Complete Workout"
@@ -570,11 +572,11 @@ const Workout = () => {
                 onPress={async () => {
                   if (timerDateIntoTheFuture || timerIntervalRef.current) {
                     if (
-                      currentExerciseIndex + 1 ==
+                      currentExerciseIndexRef.current + 1 ==
                         (workout?.exercises?.length ?? 0) &&
                       currentSet == currentExercise?.goalSets
                     ) {
-                      await endWorkout(currentExerciseData);
+                      await endWorkout(currentExerciseDataRef.current);
                       return;
                     }
                     clearInterval(timerIntervalRef.current ?? 0);
@@ -649,18 +651,18 @@ const Workout = () => {
             </View>
           </View>
           <View className="items-center mt-48">
-            {workout?.exercises?.[currentExerciseIndex + 1] &&
+            {workout?.exercises?.[currentExerciseIndexRef.current + 1] &&
               currentSet == currentExercise?.goalSets && (
                 <Pressable className="bg-gray1 rounded-lg p-4 w-11/12 h-24 justify-between items-center flex-row">
                   <View className="flex-row gap-4 items-center">
                     <View>
                       <Image
                         source={
-                          workout?.exercises?.[currentExerciseIndex + 1]
+                          workout?.exercises?.[currentExerciseIndexRef.current + 1]
                             ?.exerciseImageUrl
                             ? {
                                 uri: workout?.exercises?.[
-                                  currentExerciseIndex + 1
+                                  currentExerciseIndexRef.current + 1
                                 ]?.exerciseImageUrl,
                               }
                             : require("../../../assets/images/exercise example.png")
@@ -674,13 +676,13 @@ const Workout = () => {
                       </Text>
                       <Text className="text-white text-sm font-[HelveticaNeue] w-40">
                         {
-                          workout?.exercises?.[currentExerciseIndex + 1]
+                          workout?.exercises?.[currentExerciseIndexRef.current + 1]
                             ?.exerciseName
                         }
                       </Text>
                     </View>
                   </View>
-                  {workout?.exercises?.[currentExerciseIndex + 1]
+                  {workout?.exercises?.[currentExerciseIndexRef.current + 1]
                     ?.tutorialUrl && (
                     <Text className="text-link text-lg font-[HelveticaNeue]">
                       Watch Video
@@ -701,7 +703,7 @@ const Workout = () => {
                   timerDateIntoTheFutureRef.current = null;
 
                   if (currentSet == currentExercise?.goalSets) {
-                    const newExercise = await nextExercise(currentExerciseData);
+                    const newExercise = await nextExercise(currentExerciseDataRef.current);
                     if (newExercise) {
                       setCurrentExercise(newExercise);
                       currentExerciseRef.current = newExercise;
