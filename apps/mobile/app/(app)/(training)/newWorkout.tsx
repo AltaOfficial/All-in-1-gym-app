@@ -23,57 +23,172 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 const { width: screenWidth } = Dimensions.get("window");
+const ITEM_HEIGHT = 140; // Approximate height of each exercise item
 
-// Swipeable Exercise Item Component
-const SwipeableExerciseItem = ({
+// Draggable Exercise Item Component with Swipe to Delete
+const DraggableExerciseItem = ({
   exercise,
   index,
   onDelete,
+  onReorder,
+  isDragging,
+  draggedIndex,
+  targetIndex,
+  totalItems,
 }: {
   exercise: any;
   index: number;
   onDelete: (index: number) => void;
+  onReorder: (fromIndex: number, toIndex: number) => void;
+  isDragging: ReturnType<typeof useSharedValue<number>>;
+  draggedIndex: ReturnType<typeof useSharedValue<number>>;
+  targetIndex: ReturnType<typeof useSharedValue<number>>;
+  totalItems: number;
 }) => {
   const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
   const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
+  const isGestureActive = useSharedValue(false);
+  const startY = useSharedValue(0);
 
   const handleDelete = () => {
     onDelete(index);
   };
 
+  const handleReorder = (from: number, to: number) => {
+    onReorder(from, to);
+  };
+
+  // Long press gesture for dragging
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(300)
+    .onStart(() => {
+      isGestureActive.value = true;
+      isDragging.value = index;
+      draggedIndex.value = index;
+      targetIndex.value = index;
+      startY.value = 0;
+      scale.value = withSpring(1.05);
+    });
+
+  // Pan gesture for both swiping and dragging
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      // Allow swiping in both directions
-      translateX.value = event.translationX;
+      if (isGestureActive.value) {
+        // Dragging mode (vertical)
+        translateY.value = event.translationY;
+
+        // Calculate which position we're hovering over
+        const draggedY = event.translationY;
+        const newTargetIndex = Math.round(draggedY / ITEM_HEIGHT) + draggedIndex.value;
+        const clampedTargetIndex = Math.max(0, Math.min(totalItems - 1, newTargetIndex));
+
+        targetIndex.value = clampedTargetIndex;
+      } else {
+        // Swipe mode (horizontal)
+        translateX.value = event.translationX;
+      }
     })
     .onEnd((event) => {
-      const threshold = screenWidth * 0.3; // 30% of screen width
+      if (isGestureActive.value) {
+        // End dragging - store values before resetting
+        const finalIndex = targetIndex.value;
+        const startIndex = draggedIndex.value;
 
-      if (Math.abs(event.translationX) > threshold) {
-        // Swipe far enough in either direction to delete
-        const direction = event.translationX > 0 ? screenWidth : -screenWidth;
-        translateX.value = withSpring(direction, {
-          damping: 20,
-          stiffness: 300,
-        });
-        opacity.value = withSpring(0, { damping: 20, stiffness: 300 }, () => {
-          runOnJS(handleDelete)();
-        });
+        if (finalIndex !== startIndex) {
+          runOnJS(handleReorder)(startIndex, finalIndex);
+        }
+
+        // Reset states and animate back
+        translateY.value = withSpring(0);
+        scale.value = withSpring(1);
+        isGestureActive.value = false;
+        isDragging.value = -1;
+        draggedIndex.value = -1;
+        targetIndex.value = -1;
       } else {
-        // Snap back to original position
-        translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+        // End swiping
+        const threshold = screenWidth * 0.3;
+
+        if (Math.abs(event.translationX) > threshold) {
+          const direction = event.translationX > 0 ? screenWidth : -screenWidth;
+          translateX.value = withSpring(direction, {
+            damping: 20,
+            stiffness: 300,
+          });
+          opacity.value = withSpring(0, { damping: 20, stiffness: 300 }, () => {
+            runOnJS(handleDelete)();
+          });
+        } else {
+          translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+        }
       }
     });
 
+  const gesture = Gesture.Simultaneous(longPressGesture, panGesture);
+
   const animatedStyle = useAnimatedStyle(() => {
+    // If this item is being dragged
+    if (isDragging.value === index) {
+      return {
+        transform: [
+          { translateX: translateX.value },
+          { translateY: translateY.value },
+          { scale: scale.value },
+        ],
+        opacity: opacity.value,
+        zIndex: 1000,
+      };
+    }
+
+    // If another item is being dragged, shift this item to make space
+    if (isDragging.value !== -1) {
+      const draggedIdx = draggedIndex.value;
+      const targetIdx = targetIndex.value;
+
+      let offset = 0;
+
+      // If dragging down (draggedIdx < targetIdx)
+      if (draggedIdx < targetIdx) {
+        // Items between dragged and target should move up
+        if (index > draggedIdx && index <= targetIdx) {
+          offset = -ITEM_HEIGHT;
+        }
+      }
+      // If dragging up (draggedIdx > targetIdx)
+      else if (draggedIdx > targetIdx) {
+        // Items between target and dragged should move down
+        if (index < draggedIdx && index >= targetIdx) {
+          offset = ITEM_HEIGHT;
+        }
+      }
+
+      return {
+        transform: [
+          { translateX: translateX.value },
+          { translateY: withSpring(offset, { damping: 15, stiffness: 200 }) },
+          { scale: scale.value },
+        ],
+        opacity: opacity.value,
+        zIndex: 1,
+      };
+    }
+
+    // Normal state
     return {
-      transform: [{ translateX: translateX.value }],
+      transform: [
+        { translateX: translateX.value },
+        { translateY: 0 },
+        { scale: scale.value },
+      ],
       opacity: opacity.value,
+      zIndex: 1,
     };
   });
 
   return (
-    <GestureDetector gesture={panGesture}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={animatedStyle}>
         <View className="bg-gray1 rounded-xl p-4 mb-4">
           <Pressable
@@ -122,6 +237,18 @@ const NewWorkout = () => {
   const { workoutId } = useLocalSearchParams();
   const { exercises, clearContext, setWorkoutName, setExercises, workoutName, refreshWorkouts } =
     useContext(CreateWorkoutContext);
+
+  // Shared values for drag-and-drop
+  const isDragging = useSharedValue(-1);
+  const draggedIndex = useSharedValue(-1);
+  const targetIndex = useSharedValue(-1);
+
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    const newExercises = [...exercises];
+    const [removed] = newExercises.splice(fromIndex, 1);
+    newExercises.splice(toIndex, 0, removed);
+    setExercises(newExercises);
+  };
 
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1 bg-black">
@@ -183,9 +310,9 @@ const NewWorkout = () => {
                 );
               }
               if (response?.ok) {
-                clearContext();
-                refreshWorkouts();
+                await refreshWorkouts();
                 router.back();
+                clearContext();
               } else {
                 console.log("Workout creation/update failed");
               }
@@ -198,13 +325,18 @@ const NewWorkout = () => {
         {/* Exercise List */}
         {exercises.length > 0 &&
           exercises.map((exercise, index) => (
-            <SwipeableExerciseItem
+            <DraggableExerciseItem
               key={index}
               exercise={exercise}
               index={index}
               onDelete={() =>
                 setExercises(exercises.filter((_, i) => i !== index))
               }
+              onReorder={handleReorder}
+              isDragging={isDragging}
+              draggedIndex={draggedIndex}
+              targetIndex={targetIndex}
+              totalItems={exercises.length}
             />
           ))}
 

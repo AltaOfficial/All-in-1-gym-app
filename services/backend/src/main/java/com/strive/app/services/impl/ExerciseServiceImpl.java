@@ -10,6 +10,8 @@ import com.strive.app.repositories.ExerciseRepository;
 import com.strive.app.repositories.WorkoutLogRepository;
 import com.strive.app.repositories.WorkoutRepository;
 import com.strive.app.services.ExerciseService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class ExerciseServiceImpl implements ExerciseService {
     private final ExerciseLogRepository exerciseLogRepository;
     private final WorkoutRepository workoutRepository;
     private final WorkoutLogRepository workoutLogRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // Exercise CRUD operations
     @Override
@@ -116,28 +121,22 @@ public class ExerciseServiceImpl implements ExerciseService {
         Map<UUID, ExerciseEntity> existingMap = existingExercises.stream()
                 .collect(Collectors.toMap(ExerciseEntity::getId, e -> e));
 
-        // Track which UUIDs we're keeping
-        Set<UUID> idsToKeep = new HashSet<>();
+        // Clear the existing list and rebuild in the correct order
+        existingExercises.clear();
 
-        // Process all new exercises
+        // Process all new exercises in order
         for (ExerciseEntity newExercise : newExercises) {
             if (newExercise.getId() != null && existingMap.containsKey(newExercise.getId())) {
-                // Update existing exercise
+                // Update existing exercise and add it in the new position
                 ExerciseEntity existingExercise = existingMap.get(newExercise.getId());
                 updateExerciseFields(existingExercise, newExercise);
-                idsToKeep.add(newExercise.getId());
+                existingExercises.add(existingExercise);
             } else {
-                // Add new exercise (ID is null or not found)
+                // Add new exercise in the new position
                 newExercise.setWorkoutConnectedTo(foundWorkoutEntity);
                 existingExercises.add(newExercise);
-                // Don't add to idsToKeep since new exercises don't have IDs yet
             }
         }
-
-        // Remove exercises that weren't in the update (only check exercises with IDs)
-        existingExercises.removeIf(existing ->
-            existing.getId() != null && !idsToKeep.contains(existing.getId())
-        );
 
         return workoutRepository.save(foundWorkoutEntity);
     }

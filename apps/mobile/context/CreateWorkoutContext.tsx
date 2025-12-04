@@ -19,7 +19,7 @@ interface CreateWorkoutContextType {
   setWorkouts: (workouts: WorkoutType[]) => void;
   addExercise: (exercise: ExerciseType) => void;
   clearContext: () => void;
-  refreshWorkouts: () => void;
+  refreshWorkouts: () => Promise<void>;
 }
 
 export const CreateWorkoutContext = createContext<CreateWorkoutContextType>({
@@ -33,7 +33,7 @@ export const CreateWorkoutContext = createContext<CreateWorkoutContextType>({
   setWorkouts: () => {},
   addExercise: () => {},
   clearContext: () => {},
-  refreshWorkouts: () => {},
+  refreshWorkouts: async () => {},
 });
 
 export const CreateWorkoutProvider = ({
