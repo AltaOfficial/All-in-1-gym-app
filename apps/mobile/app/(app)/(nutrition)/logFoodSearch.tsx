@@ -38,18 +38,19 @@ export default function LogFoodSearch() {
   // Fetch data based on selected tab
   useEffect(() => {
     const fetchData = async () => {
-      if (selectedTab === "all") {
-        const foods = await getRecentFoods();
-        setRecentFoods(foods);
-      } else if (selectedTab === "myFoods") {
-        const foods = await getUserFoods();
-        setUserFoods(foods);
-      } else if (selectedTab === "myRecipes") {
-        const recipes = await getUserRecipes();
-        setUserRecipes(recipes);
-      } else if (selectedTab === "myMeals") {
-        const meals = await getUserMeals();
-        setUserMeals(meals);
+      switch (selectedTab) {
+        case "all":
+          setRecentFoods(await getRecentFoods());
+          break;
+        case "myFoods":
+          setUserFoods(await getUserFoods());
+          break;
+        case "myRecipes":
+          setUserRecipes(await getUserRecipes());
+          break;
+        case "myMeals":
+          setUserMeals(await getUserMeals());
+          break;
       }
     };
 
@@ -78,7 +79,22 @@ export default function LogFoodSearch() {
             placeholderTextColor="#828282"
             className="text-white font-[HelveticaNeue] w-full"
             returnKeyType="search"
-            onChangeText={(text) => {
+            onChangeText={async (text) => {
+              let searchText = text.trim().toLocaleLowerCase();
+              switch (selectedTab) {
+                case "all":
+                  setRecentFoods((await getRecentFoods()).filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  break;
+                case "myFoods":
+                  setUserFoods((await getUserFoods()).filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  break;
+                case"myRecipes":
+                  setUserRecipes((await getUserRecipes()).filter((recipe) => recipe.recipeName.toLocaleLowerCase().includes(searchText)));
+                  break;
+                case "myMeals":
+                  setUserMeals((await getUserMeals()).filter((meal) => meal.mealName.toLocaleLowerCase().includes(searchText)));
+                  break;
+              }
               if (text.length == 0) {
                 setSearchResults([]);
                 setNoResults(false);
