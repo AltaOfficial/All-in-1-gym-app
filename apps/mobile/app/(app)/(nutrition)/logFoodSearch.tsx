@@ -30,6 +30,11 @@ export default function LogFoodSearch() {
   const [userFoods, setUserFoods] = useState<FoodType[]>([]);
   const [userRecipes, setUserRecipes] = useState<RecipeType[]>([]);
   const [userMeals, setUserMeals] = useState<MealType[]>([]);
+  // Used to keep a reference to the food items before sorting
+  let allRecentFoods: FoodType[] = [];
+  let allUserFoods: FoodType[] = [];
+  let allUserRecipes: RecipeType[] = [];
+  let allUserMeals: MealType[] = [];
   const { clearRecipeContext } = useContext(RecipeContext);
   const { clearMealContext } = useContext(MealContext);
   const { searchType, mealType, date } = useLocalSearchParams();
@@ -40,16 +45,20 @@ export default function LogFoodSearch() {
     const fetchData = async () => {
       switch (selectedTab) {
         case "all":
-          setRecentFoods(await getRecentFoods());
+          allRecentFoods = await getRecentFoods();
+          setRecentFoods(allRecentFoods);
           break;
         case "myFoods":
-          setUserFoods(await getUserFoods());
+          allUserFoods = await getUserFoods();
+          setUserFoods(allUserFoods);
           break;
         case "myRecipes":
-          setUserRecipes(await getUserRecipes());
+          allUserRecipes = await getUserRecipes();
+          setUserRecipes(allUserRecipes);
           break;
         case "myMeals":
-          setUserMeals(await getUserMeals());
+          allUserMeals = await getUserMeals();
+          setUserMeals(allUserMeals);
           break;
       }
     };
@@ -83,19 +92,19 @@ export default function LogFoodSearch() {
               let searchText = text.trim().toLocaleLowerCase();
               switch (selectedTab) {
                 case "all":
-                  setRecentFoods(recentFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  setRecentFoods(allRecentFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case "myFoods":
-                  setUserFoods(userFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  setUserFoods(allUserFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case"myRecipes":
-                  setUserRecipes(userRecipes.filter((recipe) => recipe.recipeName.toLocaleLowerCase().includes(searchText)));
+                  setUserRecipes(allUserRecipes.filter((recipe) => recipe.recipeName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case "myMeals":
-                  setUserMeals(userMeals.filter((meal) => meal.mealName.toLocaleLowerCase().includes(searchText)));
+                  setUserMeals(allUserMeals.filter((meal) => meal.mealName.toLocaleLowerCase().includes(searchText)));
                   break;
               }
-              if (text.length == 0) {
+              if (searchText.length == 0) {
                 setSearchResults([]);
                 setNoResults(false);
               }
