@@ -83,16 +83,16 @@ export default function LogFoodSearch() {
               let searchText = text.trim().toLocaleLowerCase();
               switch (selectedTab) {
                 case "all":
-                  setRecentFoods((await getRecentFoods()).filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  setRecentFoods(recentFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case "myFoods":
-                  setUserFoods((await getUserFoods()).filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
+                  setUserFoods(userFoods.filter((food) => food.foodName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case"myRecipes":
-                  setUserRecipes((await getUserRecipes()).filter((recipe) => recipe.recipeName.toLocaleLowerCase().includes(searchText)));
+                  setUserRecipes(userRecipes.filter((recipe) => recipe.recipeName.toLocaleLowerCase().includes(searchText)));
                   break;
                 case "myMeals":
-                  setUserMeals((await getUserMeals()).filter((meal) => meal.mealName.toLocaleLowerCase().includes(searchText)));
+                  setUserMeals(userMeals.filter((meal) => meal.mealName.toLocaleLowerCase().includes(searchText)));
                   break;
               }
               if (text.length == 0) {
