@@ -31,10 +31,10 @@ export default function LogFoodSearch() {
   const [userRecipes, setUserRecipes] = useState<RecipeType[]>([]);
   const [userMeals, setUserMeals] = useState<MealType[]>([]);
   // Used to keep a reference to the food items before sorting
-  let allRecentFoods: FoodType[] = [];
-  let allUserFoods: FoodType[] = [];
-  let allUserRecipes: RecipeType[] = [];
-  let allUserMeals: MealType[] = [];
+  const [allRecentFoods, setAllRecentFoods] = useState<FoodType[]>([]);
+  const [allUserFoods, setAllUserFoods] = useState<FoodType[]>([]);
+  const [allUserRecipes, setAllUserRecipes] = useState<RecipeType[]>([]);
+  const [allUserMeals, setAllUserMeals] = useState<MealType[]>([]);
   const { clearRecipeContext } = useContext(RecipeContext);
   const { clearMealContext } = useContext(MealContext);
   const { searchType, mealType, date } = useLocalSearchParams();
@@ -45,19 +45,23 @@ export default function LogFoodSearch() {
     const fetchData = async () => {
       switch (selectedTab) {
         case "all":
-          allRecentFoods = await getRecentFoods();
+          let allRecentFoods = await getRecentFoods();
+          setAllRecentFoods(allRecentFoods);
           setRecentFoods(allRecentFoods);
           break;
         case "myFoods":
-          allUserFoods = await getUserFoods();
+          let allUserFoods = await getUserFoods();
+          setAllUserFoods(allUserFoods);
           setUserFoods(allUserFoods);
           break;
         case "myRecipes":
-          allUserRecipes = await getUserRecipes();
+          let allUserRecipes = await getUserRecipes();
+          setAllUserRecipes(allUserRecipes);
           setUserRecipes(allUserRecipes);
           break;
         case "myMeals":
-          allUserMeals = await getUserMeals();
+          let allUserMeals = await getUserMeals();
+          setAllUserMeals(allUserMeals);
           setUserMeals(allUserMeals);
           break;
       }
