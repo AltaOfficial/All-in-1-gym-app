@@ -25,7 +25,7 @@ public class NutrientsServiceImpl implements NutrientsService {
             MainGoal mainGoal,
             TrainingExperience trainingExperience) {
 
-        // Use last 2 weeks average as current weight baseline, convert to kg
+        // Use last 2 weeks average as the current weight baseline, convert to kg
         double avgRecentWeight = lastTwoWeeksWeights.stream().mapToDouble(Double::doubleValue).average().orElse(0);
         double weightKg = weightType == WeightType.LBS ? avgRecentWeight / 2.205 : avgRecentWeight;
 

@@ -30,6 +30,7 @@ public class NutrientGoalsScheduler {
 
     @Scheduled(fixedRate = 14, timeUnit = TimeUnit.DAYS)
     public void recalculateNutrientGoals() {
+        System.out.println("NutrientGoalsScheduler fired");
         LocalDate today = LocalDate.now();
         LocalDate fourteenDaysAgo = today.minusDays(14);
         LocalDate twentyEightDaysAgo = today.minusDays(28);
@@ -90,6 +91,7 @@ public class NutrientGoalsScheduler {
      * has at least 4 days of weight data logged.
      */
     private boolean hasSufficientWeightData(List<BodyMetricsLogEntity> weightLogs, LocalDate startDate) {
+        int weeksPassing = 0;
         for (int week = 0; week < 4; week++) {
             LocalDate weekStart = startDate.plusDays((long) week * 7);
             LocalDate weekEnd = weekStart.plusDays(6);
@@ -100,9 +102,9 @@ public class NutrientGoalsScheduler {
                     .distinct()
                     .count();
 
-            if (daysWithData < 4) return false;
+            if (daysWithData >= 4) weeksPassing++;
         }
-        return true;
+        return weeksPassing >= 3;
     }
 
     private boolean hasCompleteProfile(UserEntity user) {
