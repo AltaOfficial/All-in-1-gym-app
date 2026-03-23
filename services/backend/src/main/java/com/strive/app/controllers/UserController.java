@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -109,7 +110,8 @@ public class UserController {
             // Recalculate nutrient goals with existing and new data
             NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(
                     userEntity.getAge(),
-                    userEntity.getWeight(),
+                    List.of(userEntity.getWeight().doubleValue()),
+                    List.of(),
                     userEntity.getWeightType(),
                     userEntity.getSexType(),
                     userEntity.getHeightInInches(),

@@ -10,6 +10,8 @@ import com.strive.app.services.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OnboardingServiceImpl implements OnboardingService {
@@ -53,7 +55,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             if (onboardingUpdateRequestDto.getWeightChangeAmount() != null) {
                 existingUser.setWeightChangeAmount(onboardingUpdateRequestDto.getWeightChangeAmount());
                 nextOnboardingStep = 0;
-                NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(existingUser.getAge(), existingUser.getWeight(), existingUser.getWeightType(), existingUser.getSexType(), existingUser.getHeightInInches(), existingUser.getWeightChangeAmount(), existingUser.getMainGoal(), existingUser.getTrainingExperience());
+                NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(existingUser.getAge(), List.of(existingUser.getWeight().doubleValue()), List.of(), existingUser.getWeightType(), existingUser.getSexType(), existingUser.getHeightInInches(), existingUser.getWeightChangeAmount(), existingUser.getMainGoal(), existingUser.getTrainingExperience());
                 nutrientGoalsMapper.updateUserWithGoals(nutrientGoalsDto, existingUser);
             }
             existingUser.setOnBoardingStep(nextOnboardingStep);

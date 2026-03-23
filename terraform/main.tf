@@ -43,7 +43,7 @@ resource "azurerm_service_plan" "asp" {
     resource_group_name = azurerm_resource_group.rg.name
 
     os_type             = "Linux"
-    sku_name            = "B2"
+    sku_name            = "P0v3"
 }
 
 resource "azurerm_linux_web_app" "app" {

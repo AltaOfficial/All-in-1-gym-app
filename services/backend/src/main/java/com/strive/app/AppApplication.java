@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -11,6 +12,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
+@EnableScheduling
 public class AppApplication implements CommandLineRunner {
 
     @Value("${SERVER_PORT}")

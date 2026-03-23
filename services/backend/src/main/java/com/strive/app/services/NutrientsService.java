@@ -6,6 +6,8 @@ import com.strive.app.enums.MainGoal;
 import com.strive.app.enums.TrainingExperience;
 import com.strive.app.enums.WeightType;
 
+import java.util.List;
+
 public interface NutrientsService {
-    NutrientGoalsDto calculateNutrientGoals(Integer age, Integer weight, WeightType weightType, GenderType sex, Integer heightInInches, Double weightChangeAmount, MainGoal mainGoal, TrainingExperience trainingExperience);
+    NutrientGoalsDto calculateNutrientGoals(Integer age, List<Double> lastTwoWeeksWeights, List<Double> priorTwoWeeksWeights, WeightType weightType, GenderType sex, Integer heightInInches, Double weightChangeAmount, MainGoal mainGoal, TrainingExperience trainingExperience);
 }

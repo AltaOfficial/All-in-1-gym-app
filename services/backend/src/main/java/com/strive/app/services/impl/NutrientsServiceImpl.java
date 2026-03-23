@@ -8,13 +8,16 @@ import com.strive.app.enums.WeightType;
 import com.strive.app.services.NutrientsService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class NutrientsServiceImpl implements NutrientsService {
 
     @Override
     public NutrientGoalsDto calculateNutrientGoals(
             Integer age,
-            Integer weight,
+            List<Double> lastTwoWeeksWeights,
+            List<Double> priorTwoWeeksWeights,
             WeightType weightType,
             GenderType sex,
             Integer heightInInches,
@@ -22,8 +25,9 @@ public class NutrientsServiceImpl implements NutrientsService {
             MainGoal mainGoal,
             TrainingExperience trainingExperience) {
 
-        // Convert weight
-        double weightKg = weightType == WeightType.LBS ? weight / 2.205 : weight;
+        // Use last 2 weeks average as current weight baseline, convert to kg
+        double avgRecentWeight = lastTwoWeeksWeights.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double weightKg = weightType == WeightType.LBS ? avgRecentWeight / 2.205 : avgRecentWeight;
 
         // --- Calories (Mifflin–St Jeor BMR) ---
         double bmr = 10 * weightKg + 6.25 * (heightInInches * 2.54) - 5 * age;
@@ -48,6 +52,30 @@ public class NutrientsServiceImpl implements NutrientsService {
             case BUILD_MUSCLE -> tdee + dailyAdjustment;
             case MAINTAIN -> tdee;
         };
+
+        // --- Trend correction: compare actual progress vs goal ---
+        // Only applies when we have both recent and prior weight history
+        if (!lastTwoWeeksWeights.isEmpty() && !priorTwoWeeksWeights.isEmpty()) {
+            double avgPriorWeight = priorTwoWeeksWeights.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+
+            // Actual weekly rate of change (positive = gaining, negative = losing)
+            double actualWeeklyChange = (avgRecentWeight - avgPriorWeight) / 2.0;
+
+            // Target weekly rate based on goal (positive = gaining, negative = losing, 0 = maintain)
+            double targetWeeklyChange = switch (mainGoal) {
+                case BUILD_MUSCLE -> weightChangeAmount != null ? weightChangeAmount : 0;
+                case LOSE_FAT -> weightChangeAmount != null ? -weightChangeAmount : 0;
+                case MAINTAIN -> 0;
+            };
+
+            // Positive gap = falling short of goal, needs more calories
+            double weeklyGap = targetWeeklyChange - actualWeeklyChange;
+            double trendCorrection = (weeklyGap * caloriesPerUnit) / 7.0;
+
+            // Cap correction at ±500 cal/day to avoid extreme swings
+            trendCorrection = Math.max(-500, Math.min(500, trendCorrection));
+            goalCalories += trendCorrection;
+        }
 
         // --- Macronutrients ---
         // Protein: 2g per kg

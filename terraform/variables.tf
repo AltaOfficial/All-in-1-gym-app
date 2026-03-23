@@ -25,7 +25,7 @@ variable "acr_name" {
 variable "app_service_sku" {
     type = string
     description = "The SKU of the App Service Plan"
-    default = "B2"
+    default = "P0v3"
 }
  
 variable "AZURE_STORAGE_CONNECTION_STRING" {
