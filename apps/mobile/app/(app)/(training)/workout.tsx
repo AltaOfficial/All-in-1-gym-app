@@ -1,5 +1,6 @@
 import { Text, View, Image, Pressable, TextInput } from "react-native";
 import { useContext, useState, useEffect, useRef } from "react";
+import { useNavigation } from "expo-router";
 import { ExerciseType } from "../../../types/ExerciseTypes";
 import { WorkoutContext } from "../../../context/WorkoutContext";
 import { EffortEnum } from "../../../types/effortEnum";
@@ -36,6 +37,7 @@ const Workout = () => {
       ?.toString()
       .padStart(2, "0") || "00"
   );
+  const navigation = useNavigation();
   const timerIntervalRef = useRef<number | null>(null);
   const timerDateIntoTheFutureRef = useRef<Date | null>(null);
   const isRestingRef = useRef(false);
@@ -178,6 +180,11 @@ const Workout = () => {
       tick();
     }, 1000);
   };
+
+  useEffect(() => {
+    // this makes it so that the user doesnt accidentally go back during a workout session
+    navigation.addListener("beforeRemove", (event) => event.preventDefault());
+  }, [navigation]);
 
   useEffect(() => {
     currentExerciseRef.current = currentExercise;
