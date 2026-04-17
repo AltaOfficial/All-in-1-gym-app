@@ -2,8 +2,10 @@ package com.strive.app.schedules;
 
 import com.strive.app.domain.dto.NutrientGoalsDto;
 import com.strive.app.domain.entities.BodyMetricsLogEntity;
+import com.strive.app.domain.entities.MetricsEntity;
 import com.strive.app.domain.entities.UserEntity;
 import com.strive.app.repositories.BodyMetricsRepository;
+import com.strive.app.repositories.MetricsRepository;
 import com.strive.app.repositories.UserRepository;
 import com.strive.app.services.NutrientsService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,20 +13,25 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class NutrientGoalsScheduler {
 
     private final UserRepository userRepository;
     private final BodyMetricsRepository bodyMetricsRepository;
+    private final MetricsRepository metricsRepository;
     private final NutrientsService nutrientsService;
 
     public NutrientGoalsScheduler(UserRepository userRepository,
                                   BodyMetricsRepository bodyMetricsRepository,
+                                  MetricsRepository metricsRepository,
                                   NutrientsService nutrientsService) {
         this.userRepository = userRepository;
         this.bodyMetricsRepository = bodyMetricsRepository;
+        this.metricsRepository = metricsRepository;
         this.nutrientsService = nutrientsService;
     }
 
@@ -49,20 +56,25 @@ public class NutrientGoalsScheduler {
 
             if (!hasSufficientWeightData(weightLogs, twentyEightDaysAgo)) continue;
 
-            List<Double> lastTwoWeeksWeights = weightLogs.stream()
-                    .filter(l -> !l.getId().getDate().isBefore(fourteenDaysAgo))
-                    .map(BodyMetricsLogEntity::getWeight)
-                    .toList();
+            Map<LocalDate, Double> weightHistory = weightLogs.stream()
+                    .collect(Collectors.toMap(
+                            l -> l.getId().getDate(),
+                            BodyMetricsLogEntity::getWeight
+                    ));
 
-            List<Double> priorTwoWeeksWeights = weightLogs.stream()
-                    .filter(l -> l.getId().getDate().isBefore(fourteenDaysAgo))
-                    .map(BodyMetricsLogEntity::getWeight)
-                    .toList();
+            Map<LocalDate, Integer> caloriesHistory = metricsRepository
+                    .findAllByUserIdAndDateRange(user.getId(), twentyEightDaysAgo, today)
+                    .stream()
+                    .filter(m -> m.getCurrentCalories() != null && m.getCurrentCalories() > 0)
+                    .collect(Collectors.toMap(
+                            m -> m.getId().getDate(),
+                            MetricsEntity::getCurrentCalories
+                    ));
 
             NutrientGoalsDto goals = nutrientsService.calculateNutrientGoals(
                     user.getAge(),
-                    lastTwoWeeksWeights,
-                    priorTwoWeeksWeights,
+                    weightHistory,
+                    caloriesHistory,
                     user.getWeightType(),
                     user.getSexType(),
                     user.getHeightInInches(),
@@ -71,7 +83,8 @@ public class NutrientGoalsScheduler {
                     user.getTrainingExperience()
             );
 
-            user.setGoalCalories(goals.getGoalCalories());
+            int clampedCalories = clampCalorieChange(user.getGoalCalories(), goals.getGoalCalories());
+            user.setGoalCalories(clampedCalories);
             user.setGoalProtein(goals.getGoalProtein());
             user.setGoalCarbohydrates(goals.getGoalCarbohydrates());
             user.setGoalFat(goals.getGoalFat());
@@ -105,6 +118,15 @@ public class NutrientGoalsScheduler {
             if (daysWithData >= 4) weeksPassing++;
         }
         return weeksPassing >= 3;
+    }
+
+    private static final int MAX_CALORIE_DELTA_PER_CYCLE = 150;
+
+    private int clampCalorieChange(Integer currentGoal, int newGoal) {
+        if (currentGoal == null) return newGoal;
+        int delta = newGoal - currentGoal;
+        int clampedDelta = Math.max(-MAX_CALORIE_DELTA_PER_CYCLE, Math.min(MAX_CALORIE_DELTA_PER_CYCLE, delta));
+        return currentGoal + clampedDelta;
     }
 
     private boolean hasCompleteProfile(UserEntity user) {
