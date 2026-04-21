@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class NutrientsServiceImpl implements NutrientsService {
 
         double weightKg = weightType == WeightType.LBS ? avgRecentWeight / 2.205 : avgRecentWeight;
 
-        // Compute linear regression slope over all weight history (lbs/week)
+        // Compute linear regression slope using weekly averages to filter out daily noise
         double actualWeeklyChange = 0;
         boolean hasTrend = false;
         if (weightHistory.size() >= 2) {
@@ -57,20 +58,31 @@ public class NutrientsServiceImpl implements NutrientsService {
             Collections.sort(sortedDates);
             LocalDate firstDate = sortedDates.get(0);
 
-            int n = sortedDates.size();
-            double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+            // Bucket daily weights into 7-day bins and average each bin
+            Map<Integer, List<Double>> weekBuckets = new LinkedHashMap<>();
             for (LocalDate date : sortedDates) {
-                double x = ChronoUnit.DAYS.between(firstDate, date);
-                double y = weightHistory.get(date);
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumXX += x * x;
+                int weekIndex = (int) (ChronoUnit.DAYS.between(firstDate, date) / 7);
+                weekBuckets.computeIfAbsent(weekIndex, k -> new ArrayList<>()).add(weightHistory.get(date));
             }
-            double denom = n * sumXX - sumX * sumX;
-            if (denom != 0) {
-                actualWeeklyChange = ((n * sumXY - sumX * sumY) / denom) * 7;
-                hasTrend = true;
+
+            List<Integer> weekIndices = new ArrayList<>(weekBuckets.keySet());
+            if (weekIndices.size() >= 2) {
+                int n = weekIndices.size();
+                double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                for (int weekIndex : weekIndices) {
+                    double x = weekIndex;
+                    double y = weekBuckets.get(weekIndex).stream().mapToDouble(Double::doubleValue).average().orElse(0);
+                    sumX += x;
+                    sumY += y;
+                    sumXY += x * y;
+                    sumXX += x * x;
+                }
+                double denom = n * sumXX - sumX * sumX;
+                if (denom != 0) {
+                    // slope is lbs/week-index; each week-index = 1 week, so no scaling needed
+                    actualWeeklyChange = (n * sumXY - sumX * sumY) / denom;
+                    hasTrend = true;
+                }
             }
         }
 
