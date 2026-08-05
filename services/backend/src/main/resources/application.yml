@@ -1,4 +1,38 @@
 spring:
+  application:
+    name: strive-backend
+  ai:
+    mcp:
+      server:
+        name: strive
+        protocol: streamable
+        version: 1.0.0
+        type: sync
+  security:
+    oauth2:
+      authorizationserver:
+        client:
+          default-client:
+            token:
+              access-token-time-to-live: 1h
+            registration:
+              client-id: "default-client"
+              client-secret: "{noop}default-secret"
+              client-authentication-methods:
+                - "client_secret_basic"
+                - "none"
+              scopes:
+                - "mcp"
+              authorization-grant-types:
+                - "authorization_code"
+                - "client_credentials"
+              redirect-uris:
+                - "http://127.0.0.1:8000/authorize/oauth2/code/authserver"
+                - "http://localhost:8000/authorize/oauth2/code/authserver"
+                # mcp-inspector
+                - "http://localhost:6274/oauth/callback"
+                # claude code
+                - "https://claude.ai/api/mcp/auth_callback"
   cloud:
     azure:
       storage:
@@ -10,8 +44,6 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  application:
-    name: app
   jpa:
     hibernate:
       ddl-auto: update

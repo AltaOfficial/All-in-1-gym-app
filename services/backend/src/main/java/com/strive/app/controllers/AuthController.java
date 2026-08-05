@@ -60,6 +60,8 @@ public class AuthController {
         }
     }
 
+
+
     private ResponseEntity<AuthResponseDto> getAuthResponseDtoResponseEntity(UserDetails userDetails) {
         String tokenValue = authenticationService.generateToken(userDetails);
         UserDto userDto = userMapper.mapTo(userService.findByEmail(userDetails.getUsername()));
