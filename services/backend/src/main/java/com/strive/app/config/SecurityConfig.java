@@ -13,19 +13,28 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.authorization.OAuth2ClientRegistration;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationContext;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationValidator;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.converter.OAuth2ClientRegistrationRegisteredClientConverter;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 @Configuration
@@ -39,7 +48,7 @@ public class SecurityConfig {
     private String hostname;
 
     private String serverHost() {
-        return hostname.startsWith("https://") ? hostname : "http://" + hostname;
+        return hostname.startsWith("localhost") ? "http://" + hostname : "https://" + hostname;
     }
 
     @Bean
@@ -53,7 +62,26 @@ public class SecurityConfig {
                     public void accept(OAuth2ClientRegistrationAuthenticationContext context){
 
                     }
-                });
+                })
+                .authorizationServer(authServer -> authServer.addObjectPostProcessor(
+                        new ObjectPostProcessor<OAuth2ClientRegistrationAuthenticationProvider>() {
+                            private final Converter<OAuth2ClientRegistration, RegisteredClient> oAuth2ClientRegistrationToRegisteredClientConverter =
+                                    new OAuth2ClientRegistrationRegisteredClientConverter();
+
+                            // since mcpAuthorizationServer doesn't listen to our YAML we need to add refresh token as a grant type,
+                            // reuseRefreshTokens to false, and refresh token time to live here
+                            @Override
+                            public <O extends OAuth2ClientRegistrationAuthenticationProvider> O postProcess(O provider) {
+                                provider.setRegisteredClientConverter(clientRegistration -> {
+                                    RegisteredClient registeredClient = oAuth2ClientRegistrationToRegisteredClientConverter.convert(clientRegistration);
+                                    return RegisteredClient.from(registeredClient) // creates a new builder using registeredClient so all the metadata passes over
+                                            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                                            .tokenSettings(TokenSettings.builder().reuseRefreshTokens(false).accessTokenTimeToLive(Duration.ofHours(1)).refreshTokenTimeToLive(Duration.ofHours(48)).build())
+                                            .build();
+                                });
+                                return provider;
+                            }
+                        }));
 
         httpSecurity
                 .securityMatcher(
