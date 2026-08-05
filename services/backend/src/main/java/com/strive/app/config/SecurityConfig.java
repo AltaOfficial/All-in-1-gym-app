@@ -1,5 +1,7 @@
 package com.strive.app.config;
 
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.strive.app.repositories.UserRepository;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -29,6 +30,9 @@ import java.util.function.Consumer;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${RSA_JWK}")
+    private String jwkJson;
 
     // azure autopopulates WEBSITE_HOSTNAME
     @Value("${WEBSITE_HOSTNAME:localhost:8000}")
@@ -98,6 +102,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthenticationFilter(authenticationService), UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
+    }
+
+    @Bean
+    public JWKSource<SecurityContext> jwkSource() throws Exception {
+        RSAKey rsaKey = RSAKey.parse(jwkJson);
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return ((jwkSelector, context) ->  jwkSelector.select(jwkSet));
     }
 
     @Bean
