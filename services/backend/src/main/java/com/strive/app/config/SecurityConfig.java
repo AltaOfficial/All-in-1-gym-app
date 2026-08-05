@@ -31,8 +31,12 @@ import java.util.function.Consumer;
 public class SecurityConfig {
 
     // azure autopopulates WEBSITE_HOSTNAME
-    @Value("${WEBSITE_HOSTNAME:http://localhost:8000}")
-    private String serverHost;
+    @Value("${WEBSITE_HOSTNAME:localhost:8000}")
+    private String hostname;
+
+    private String serverHost() {
+        return hostname.startsWith("https://") ? hostname : "https://" + hostname;
+    }
 
     @Bean
     @Order(1)
@@ -66,8 +70,8 @@ public class SecurityConfig {
     public SecurityFilterChain mcpAuthorizationFilterChain(HttpSecurity httpSecurity) throws Exception {
         // since we have the auth server and the mcp on the same server,
         // this code is here instead of the default to stop the mcp from eagerly calling the auth server on startup before its ready
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(serverHost + "/oauth2/jwks").build();
-        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(serverHost));
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(serverHost() + "/oauth2/jwks").build();
+        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(serverHost()));
 
         httpSecurity.securityMatcher("/mcp", "/.well-known/oauth-protected-resource", "/.well-known/oauth-protected-resource/**")
                 .authorizeHttpRequests(auth -> auth
@@ -76,8 +80,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(o -> o.jwt(jwt -> jwt.decoder(decoder))
                         .protectedResourceMetadata(prm -> prm
                                 .protectedResourceMetadataCustomizer(metadata -> metadata
-                                        .resource(serverHost + "/mcp")
-                                        .authorizationServer(serverHost))
+                                        .resource(serverHost() + "/mcp")
+                                        .authorizationServer(serverHost()))
                         ))
                 .csrf(csrf -> csrf.disable());
         return httpSecurity.build();
