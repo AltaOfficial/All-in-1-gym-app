@@ -35,7 +35,7 @@ public class SecurityConfig {
     private String hostname;
 
     private String serverHost() {
-        return hostname.startsWith("https://") ? hostname : "https://" + hostname;
+        return hostname.startsWith("https://") ? hostname : "http://" + hostname;
     }
 
     @Bean

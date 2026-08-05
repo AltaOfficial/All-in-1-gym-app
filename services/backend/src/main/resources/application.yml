@@ -25,6 +25,7 @@ spring:
                 - "mcp"
               authorization-grant-types:
                 - "authorization_code"
+                - "refresh_token"
                 - "client_credentials"
               redirect-uris:
                 - "http://127.0.0.1:8000/authorize/oauth2/code/authserver"
