@@ -1,5 +1,6 @@
 package com.strive.app.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.strive.app.domain.entities.FoodEntity;
 import com.strive.app.domain.entities.MealEntity;
 import com.strive.app.domain.entities.RecipeEntity;
@@ -46,6 +47,8 @@ public class UserDto {
 
     private String email;
 
+    // Never serialized out (REST or MCP); only accepted on deserialization, e.g. POST /users/create.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     private LinkedList<FoodDto> recentFoods;

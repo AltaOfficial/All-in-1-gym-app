@@ -8,6 +8,20 @@ spring:
         protocol: streamable
         version: 1.0.0
         type: sync
+        instructions: >
+          Strive is a gym training and nutrition app. Every tool acts only on the currently
+          authenticated user's own data - there is no way to act on behalf of anyone else.
+          Weight and body-measurement units come from getMyProfile (weightType is LBS or KGS);
+          use that unit whenever you display or ask about a weight or measurement. When a tool
+          takes an optional date and none is given, it defaults to the server's current UTC
+          date, which may not match the user's local day - pass an explicit date whenever the
+          user's local "today" matters. Logging food to the daily food log, starting or logging
+          a workout session, and changing profile/goals/body-metrics are intentionally not
+          available as tools; direct the user to the Strive app for those. Every write tool
+          (anything that creates, updates, or deletes data) must be preceded by describing the
+          intended change to the user in plain language and getting their explicit confirmation
+          before calling it - never call a write tool speculatively. Read tools do not need
+          confirmation.
   security:
     oauth2:
       authorizationserver:

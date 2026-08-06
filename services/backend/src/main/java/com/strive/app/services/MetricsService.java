@@ -6,12 +6,13 @@ import com.strive.app.domain.entities.MetricsEntity;
 import com.strive.app.domain.entities.MetricsId;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface MetricsService {
     MetricsEntity findOne(MetricsId id);
 
-    // find by id and date range
+    List<MetricsEntity> findAllByUserIdAndDateRange(UUID userId, LocalDate startDate, LocalDate endDate);
 
     MetricsEntity save(MetricsId id, MetricsEntity metricsEntity);
 

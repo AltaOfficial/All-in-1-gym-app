@@ -14,5 +14,7 @@ public interface WorkoutLogService {
 
     List<WorkoutLogEntity> findAllByWorkoutIdAndUserId(UUID workoutId, UUID userId);
 
+    List<WorkoutLogEntity> findAllByUserId(UUID userId);
+
     void deleteWorkoutLog(UUID id);
 }

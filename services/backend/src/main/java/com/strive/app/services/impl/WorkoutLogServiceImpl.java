@@ -54,6 +54,11 @@ public class WorkoutLogServiceImpl implements WorkoutLogService {
     }
 
     @Override
+    public List<WorkoutLogEntity> findAllByUserId(UUID userId) {
+        return workoutLogRepository.findAllByUser_idOrderByDateDesc(userId);
+    }
+
+    @Override
     public void deleteWorkoutLog(UUID id) {
         workoutLogRepository.deleteById(id);
     }

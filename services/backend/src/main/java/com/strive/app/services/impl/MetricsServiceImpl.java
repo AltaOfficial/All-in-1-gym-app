@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -21,6 +22,11 @@ public class MetricsServiceImpl implements MetricsService {
     public MetricsEntity findOne(MetricsId id) {
         System.out.println(id);
         return metricsRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<MetricsEntity> findAllByUserIdAndDateRange(UUID userId, LocalDate startDate, LocalDate endDate) {
+        return metricsRepository.findAllByUserIdAndDateRange(userId, startDate, endDate);
     }
 
     @Override
