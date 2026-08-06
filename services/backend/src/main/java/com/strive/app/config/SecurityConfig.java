@@ -76,7 +76,7 @@ public class SecurityConfig {
                                     RegisteredClient registeredClient = oAuth2ClientRegistrationToRegisteredClientConverter.convert(clientRegistration);
                                     return RegisteredClient.from(registeredClient) // creates a new builder using registeredClient so all the metadata passes over
                                             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                                            .tokenSettings(TokenSettings.builder().reuseRefreshTokens(false).accessTokenTimeToLive(Duration.ofHours(1)).refreshTokenTimeToLive(Duration.ofHours(48)).build())
+                                            .tokenSettings(TokenSettings.builder().reuseRefreshTokens(false).accessTokenTimeToLive(Duration.ofHours(1)).refreshTokenTimeToLive(Duration.ofHours(168)).build())
                                             .build();
                                 });
                                 return provider;

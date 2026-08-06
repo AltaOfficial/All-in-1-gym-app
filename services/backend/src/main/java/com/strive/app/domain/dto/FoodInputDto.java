@@ -23,7 +23,7 @@ public class FoodInputDto {
     @McpToolParam(required = false, description = "Brand name, if any")
     private String foodBrandName;
 
-    @McpToolParam(required = false, description = "Numeric serving size")
+    @McpToolParam(required = false, description = "Numeric serving size, grams per serving")
     private Double servingSize;
 
     @McpToolParam(required = false, description = "Serving unit, e.g. 'g' or 'ml'")
