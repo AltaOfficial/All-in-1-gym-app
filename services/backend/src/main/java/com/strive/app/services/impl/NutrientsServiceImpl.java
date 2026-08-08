@@ -24,6 +24,7 @@ public class NutrientsServiceImpl implements NutrientsService {
 
     @Override
     public NutrientGoalsDto calculateNutrientGoals(
+            Integer currentCalorieGoal,
             Integer age,
             Map<LocalDate, Double> weightHistory,
             Map<LocalDate, Integer> caloriesHistory,
@@ -90,13 +91,14 @@ public class NutrientsServiceImpl implements NutrientsService {
         long loggedCalorieDays = caloriesHistory.values().stream().filter(c -> c != null && c > 0).count();
 
         double goalCalories;
+        final int INCOMPLETE_LOG_THRESHOLD = currentCalorieGoal / 2;
 
         if (weightHistory.size() >= MIN_WEIGHT_POINTS_FOR_INFERENCE
                 && loggedCalorieDays >= MIN_CALORIE_DAYS_FOR_INFERENCE
                 && hasTrend) {
             // Infer TDEE from actual intake and actual weight trend — no activity factor needed
             double avgDailyCalories = caloriesHistory.values().stream()
-                    .filter(c -> c != null && c > 0)
+                    .filter(calories -> calories != null && calories > INCOMPLETE_LOG_THRESHOLD)
                     .mapToInt(Integer::intValue)
                     .average()
                     .orElse(0);

@@ -56,7 +56,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             if (onboardingUpdateRequestDto.getWeightChangeAmount() != null) {
                 existingUser.setWeightChangeAmount(onboardingUpdateRequestDto.getWeightChangeAmount());
                 nextOnboardingStep = 0;
-                NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(existingUser.getAge(), Map.of(LocalDate.now(), existingUser.getWeight().doubleValue()), Map.of(), existingUser.getWeightType(), existingUser.getSexType(), existingUser.getHeightInInches(), existingUser.getWeightChangeAmount(), existingUser.getMainGoal(), existingUser.getTrainingExperience());
+                NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(existingUser.getGoalCalories(), existingUser.getAge(), Map.of(LocalDate.now(), existingUser.getWeight().doubleValue()), Map.of(), existingUser.getWeightType(), existingUser.getSexType(), existingUser.getHeightInInches(), existingUser.getWeightChangeAmount(), existingUser.getMainGoal(), existingUser.getTrainingExperience());
                 nutrientGoalsMapper.updateUserWithGoals(nutrientGoalsDto, existingUser);
             }
             existingUser.setOnBoardingStep(nextOnboardingStep);

@@ -110,6 +110,7 @@ public class UserController {
 
             // Recalculate nutrient goals with existing and new data
             NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(
+                    userEntity.getGoalCalories(),
                     userEntity.getAge(),
                     Map.of(LocalDate.now(), userEntity.getWeight().doubleValue()),
                     Map.of(),

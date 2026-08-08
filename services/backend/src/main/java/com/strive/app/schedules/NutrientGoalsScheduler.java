@@ -72,6 +72,7 @@ public class NutrientGoalsScheduler {
                     ));
 
             NutrientGoalsDto goals = nutrientsService.calculateNutrientGoals(
+                    user.getGoalCalories(),
                     user.getAge(),
                     weightHistory,
                     caloriesHistory,

@@ -10,5 +10,5 @@ import java.time.LocalDate;
 import java.util.Map;
 
 public interface NutrientsService {
-    NutrientGoalsDto calculateNutrientGoals(Integer age, Map<LocalDate, Double> weightHistory, Map<LocalDate, Integer> caloriesHistory, WeightType weightType, GenderType sex, Integer heightInInches, Double weightChangeAmount, MainGoal mainGoal, TrainingExperience trainingExperience);
+    NutrientGoalsDto calculateNutrientGoals(Integer currentCalorieGoal, Integer age, Map<LocalDate, Double> weightHistory, Map<LocalDate, Integer> caloriesHistory, WeightType weightType, GenderType sex, Integer heightInInches, Double weightChangeAmount, MainGoal mainGoal, TrainingExperience trainingExperience);
 }
