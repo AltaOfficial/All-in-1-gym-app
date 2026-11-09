@@ -3,6 +3,7 @@ package com.strive.app.controllers;
 import com.strive.app.domain.dto.SettingsUpdateRequestDto;
 import com.strive.app.domain.dto.UserDto;
 import com.strive.app.domain.entities.UserEntity;
+import com.strive.app.enums.GenderType;
 import com.strive.app.enums.MainGoal;
 import com.strive.app.mappers.Mapper;
 import com.strive.app.services.AuthenticationService;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,7 +63,7 @@ class UserControllerSettingsTest {
 
         // "Lose 1.0/week" must not become "gain 1.0/week"
         assertThat(user.getWeightChangeAmount()).isEqualTo(0.5);
-        verify(nutrientsService).recalculate(user);
+        verify(nutrientsService).recalculate(user, false);
     }
 
     @Test
@@ -91,7 +93,43 @@ class UserControllerSettingsTest {
                 SettingsUpdateRequestDto.builder().mainGoal(MainGoal.BUILD_MUSCLE).weightChangeAmount(5.0).build());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        verify(nutrientsService, never()).recalculate(any());
+        verify(nutrientsService, never()).recalculate(any(), anyBoolean());
+        verify(userService, never()).save(any(UserEntity.class));
+    }
+
+    @Test
+    void editingProfileWithoutChangingThePlanLimitsCalorieChange() {
+        save(SettingsUpdateRequestDto.builder().mainGoal(MainGoal.LOSE_FAT).weightChangeAmount(1.0).age(31).build());
+
+        verify(nutrientsService).recalculate(user, true);
+    }
+
+    @Test
+    void customCalorieGoalIsSaved() {
+        save(SettingsUpdateRequestDto.builder().mainGoal(MainGoal.LOSE_FAT).customCalorieGoal(2600).build());
+
+        assertThat(user.getCustomCalorieGoal()).isEqualTo(2600);
+        verify(nutrientsService).recalculate(user, false);
+    }
+
+    @Test
+    void zeroSwitchesBackToAutomaticCalories() {
+        user.setCustomCalorieGoal(2600);
+
+        save(SettingsUpdateRequestDto.builder().customCalorieGoal(0).build());
+
+        assertThat(user.getCustomCalorieGoal()).isNull();
+        verify(nutrientsService).recalculate(user, false);
+    }
+
+    @Test
+    void customCalorieGoalBelowSafeMinimumIsRejected() {
+        user.setSexType(GenderType.MALE);
+
+        ResponseEntity<String> response = save(SettingsUpdateRequestDto.builder().customCalorieGoal(1400).build());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(user.getCustomCalorieGoal()).isNull();
         verify(userService, never()).save(any(UserEntity.class));
     }
 }

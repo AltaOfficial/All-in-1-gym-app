@@ -16,4 +16,6 @@ public class SettingsUpdateRequestDto {
     private Integer heightInInches;
     private Integer age;
     private Double weightChangeAmount;
+    // Null leaves it unchanged, 0 switches back to automatic calories, anything else fixes the goal
+    private Integer customCalorieGoal;
 }

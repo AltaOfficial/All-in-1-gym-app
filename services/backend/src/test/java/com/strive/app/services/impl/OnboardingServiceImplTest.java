@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,7 +42,7 @@ class OnboardingServiceImplTest {
 
         assertThat(saved.getOnBoardingStep()).isZero();
         assertThat(saved.getWeightChangeAmount()).isNull();
-        verify(nutrientsService).recalculate(user);
+        verify(nutrientsService).recalculate(user, false);
     }
 
     @Test
@@ -50,7 +51,7 @@ class OnboardingServiceImplTest {
                 OnboardingUpdateRequestDto.builder().mainGoal(MainGoal.LOSE_FAT).build());
 
         assertThat(saved.getOnBoardingStep()).isEqualTo(7);
-        verify(nutrientsService, never()).recalculate(any());
+        verify(nutrientsService, never()).recalculate(any(), anyBoolean());
     }
 
     @Test
@@ -62,7 +63,7 @@ class OnboardingServiceImplTest {
 
         assertThat(saved.getOnBoardingStep()).isZero();
         assertThat(saved.getWeightChangeAmount()).isEqualTo(0.5);
-        verify(nutrientsService).recalculate(user);
+        verify(nutrientsService).recalculate(user, false);
     }
 
     @Test
@@ -76,6 +77,6 @@ class OnboardingServiceImplTest {
 
         assertThat(saved.getOnBoardingStep()).isZero();
         assertThat(saved.getWeightChangeAmount()).isNull();
-        verify(nutrientsService).recalculate(user);
+        verify(nutrientsService).recalculate(user, false);
     }
 }

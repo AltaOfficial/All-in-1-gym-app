@@ -63,6 +63,10 @@ public class UserEntity {
 
     private Integer goalCalories;
 
+    // A calorie goal the user set themselves. While set, recalculation keeps calories here and
+    // only rebuilds the macros around it. Null means calories are calculated automatically.
+    private Integer customCalorieGoal;
+
     private Integer goalProtein;
     private Integer goalCarbohydrates;
     private Integer goalFat;

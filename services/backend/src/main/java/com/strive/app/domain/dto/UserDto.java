@@ -55,6 +55,8 @@ public class UserDto {
 
     private Integer goalCalories;
 
+    private Integer customCalorieGoal;
+
     private Integer goalProtein;
     private Integer goalCarbohydrates;
     private Integer goalFat;

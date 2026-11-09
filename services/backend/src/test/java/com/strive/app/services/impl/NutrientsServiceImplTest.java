@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 import static com.strive.app.services.impl.NutrientsServiceImpl.buildGoalsForCalories;
 import static com.strive.app.services.impl.NutrientsServiceImpl.calculateNutrientGoals;
+import static com.strive.app.services.impl.NutrientsServiceImpl.fatMassRising;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -89,13 +91,21 @@ class NutrientsServiceImplTest {
 
     /** One weigh-in and one food log per day, ending yesterday, returned by the mocked repos. */
     private void stubDailyLogs(int days, double weight, int calories) {
+        stubDailyLogs(days, weight, calories, null, null);
+    }
+
+    /** Same, plus a body-fat reading each day moving evenly from oldestBodyFat to newestBodyFat. */
+    private void stubDailyLogs(int days, double weight, int calories, Double oldestBodyFat, Double newestBodyFat) {
         List<BodyMetricsLogEntity> weighIns = new ArrayList<>();
         List<MetricsEntity> foodDays = new ArrayList<>();
         for (int i = 0; i < days; i++) {
             LocalDate date = YESTERDAY.minusDays(i);
+            Double bodyFat = (oldestBodyFat == null) ? null
+                    : newestBodyFat + (oldestBodyFat - newestBodyFat) * i / (days - 1);
             weighIns.add(BodyMetricsLogEntity.builder()
                     .id(BodyMetricsId.builder().userId(user.getId()).date(date).build())
                     .weight(weight)
+                    .bodyFat(bodyFat)
                     .build());
             foodDays.add(MetricsEntity.builder()
                     .id(MetricsId.builder().userId(user.getId()).date(date).build())
@@ -222,15 +232,15 @@ class NutrientsServiceImplTest {
 
     @Test
     void historyWindowEndsYesterday() {
-        service.recalculate(user);
+        service.recalculate(user, false);
 
-        verify(bodyMetricsRepository).findAllByUserIdAndDateRange(user.getId(), TODAY.minusDays(28), YESTERDAY);
-        verify(metricsRepository).findAllByUserIdAndDateRange(user.getId(), TODAY.minusDays(28), YESTERDAY);
+        verify(bodyMetricsRepository).findAllByUserIdAndDateRange(user.getId(), TODAY.minusDays(56), YESTERDAY);
+        verify(metricsRepository).findAllByUserIdAndDateRange(user.getId(), TODAY.minusDays(56), YESTERDAY);
     }
 
     @Test
     void recalculateFallsBackToProfileWeightWithoutWeighIns() {
-        service.recalculate(user);
+        service.recalculate(user, false);
 
         assertThat(user.getGoalCalories()).isGreaterThan(0);
         assertThat(user.getGoalProtein()).isEqualTo((int) Math.round(180 / 2.205 * 2));
@@ -244,7 +254,7 @@ class NutrientsServiceImplTest {
         user.setGoalCalories(2200);
         stubDailyLogs(28, 180.0, 3000);
 
-        service.recalculate(user);
+        service.recalculate(user, false);
 
         assertThat(user.getGoalCalories()).isEqualTo(3000);
     }
@@ -272,5 +282,78 @@ class NutrientsServiceImplTest {
         assertThat(updated).isFalse();
         assertThat(user.getGoalCalories()).isEqualTo(2200);
         verify(metricsService, never()).updateTodaysGoals(any(), any());
+    }
+
+    @Test
+    void settingsSaveLimitsCalorieChangeWhenAsked() {
+        user.setGoalCalories(2200);
+        stubDailyLogs(28, 180.0, 3000);
+
+        service.recalculate(user, true);
+
+        assertThat(user.getGoalCalories()).isEqualTo(2350);
+    }
+
+    // --- Body-fat check on a bulk ---
+
+    @Test
+    void bulkHoldsCaloriesWhileFatMassRises() {
+        user.setMainGoal(MainGoal.BUILD_MUSCLE);
+        user.setWeightChangeAmount(0.5);
+        user.setGoalCalories(2692);
+        // Flat weight on 2700 kcal says "eat 2950 to gain", but body fat went from 6% to 8%
+        stubDailyLogs(56, 133.0, 2700, 6.0, 8.0);
+
+        service.recalculate(user, false);
+
+        assertThat(user.getGoalCalories()).isEqualTo(2692);
+    }
+
+    @Test
+    void bulkRaisesCaloriesWhenFatMassIsFlat() {
+        user.setMainGoal(MainGoal.BUILD_MUSCLE);
+        user.setWeightChangeAmount(0.5);
+        user.setGoalCalories(2692);
+        stubDailyLogs(56, 133.0, 2700, 7.0, 7.0);
+
+        service.recalculate(user, false);
+
+        assertThat(user.getGoalCalories()).isEqualTo(2950);
+    }
+
+    @Test
+    void bodyFatReadingsSpanningUnderFourWeeksAreIgnored() {
+        Map<LocalDate, Double> weights = flatWeight(133.0); // 28 days, so under 4 weeks apart
+        Map<LocalDate, Double> bodyFat = new HashMap<>();
+        weights.keySet().forEach(date -> bodyFat.put(date, 6.0 + ChronoUnit.DAYS.between(START, date) * 0.1));
+
+        assertThat(fatMassRising(weights, bodyFat)).isFalse();
+    }
+
+    // --- Custom calorie goal ---
+
+    @Test
+    void customCalorieGoalKeepsCaloriesAndRebuildsMacros() {
+        user.setCustomCalorieGoal(2600);
+        stubDailyLogs(28, 180.0, 3000);
+
+        service.recalculate(user, false);
+
+        assertThat(user.getGoalCalories()).isEqualTo(2600);
+        assertThat(user.getGoalProtein()).isEqualTo((int) Math.round(180 / 2.205 * 2));
+        int macroCalories = user.getGoalProtein() * 4 + user.getGoalCarbohydrates() * 4 + user.getGoalFat() * 9;
+        assertThat(macroCalories).isBetween(2600 - 12, 2600);
+    }
+
+    @Test
+    void scheduledRunNeverMovesCustomCalories() {
+        user.setGoalCalories(2600);
+        user.setCustomCalorieGoal(2600);
+        stubDailyLogs(28, 180.0, 3000);
+
+        boolean updated = service.recalculateScheduled(user);
+
+        assertThat(updated).isTrue();
+        assertThat(user.getGoalCalories()).isEqualTo(2600);
     }
 }

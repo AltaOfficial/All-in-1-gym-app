@@ -20,24 +20,32 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class NutrientsServiceImpl implements NutrientsService {
 
-    private static final int HISTORY_DAYS = 28;
+    // 8 weeks, so normal 1-2 lb water swings can't pass for a real weight trend
+    private static final int HISTORY_DAYS = 56;
     private static final int MAX_CALORIE_CHANGE_PER_RUN = 150;
 
     private static final int MIN_WEIGHT_POINTS_FOR_INFERENCE = 14;
     private static final int MIN_CALORIE_DAYS_FOR_INFERENCE = 7;
     private static final int DEFAULT_INCOMPLETE_LOG_THRESHOLD = 800;
 
-    // Common minimum daily intake without medical supervision
-    private static final int MIN_CALORIES_FEMALE = 1200;
-    private static final int MIN_CALORIES_MALE = 1500;
+    // Body-fat scale readings are noisy, so only trust a fat trend with plenty of readings
+    private static final int MIN_BODY_FAT_READINGS = 14;
+    private static final double MIN_BODY_FAT_SPAN_WEEKS = 4;
+    // Fat gain slower than this share of body weight per week (about 0.3 lb a month at
+    // 140 lb) is within scale noise, so it doesn't count as rising
+    private static final double MIN_FAT_GAIN_PER_WEEK = 0.0005;
+
+    private static final double PROTEIN_GRAMS_PER_KG = 2.0;
 
     private final BodyMetricsRepository bodyMetricsRepository;
     private final MetricsRepository metricsRepository;
@@ -45,28 +53,29 @@ public class NutrientsServiceImpl implements NutrientsService {
     private final NutrientGoalsMapper nutrientGoalsMapper;
 
     @Override
-    public void recalculate(UserEntity user) {
-        Map<LocalDate, Double> weights = recentWeights(user);
+    public void recalculate(UserEntity user, boolean limitCalorieChange) {
+        List<BodyMetricsLogEntity> bodyMetrics = recentBodyMetrics(user);
+        Map<LocalDate, Double> weights = weightsFrom(bodyMetrics);
         if (weights.isEmpty() && user.getWeight() != null) {
             weights = Map.of(LocalDate.now(), user.getWeight().doubleValue());
         }
-        apply(user, calculateFor(user, weights));
+        apply(user, user.getCustomCalorieGoal() != null
+                ? goalsForCustomCalories(user, weights)
+                : automaticGoals(user, weights, bodyFatFrom(bodyMetrics), limitCalorieChange));
     }
 
     @Override
     public boolean recalculateScheduled(UserEntity user) {
         if (!hasCompleteProfile(user)) return false;
 
-        Map<LocalDate, Double> weights = recentWeights(user);
+        List<BodyMetricsLogEntity> bodyMetrics = recentBodyMetrics(user);
+        Map<LocalDate, Double> weights = weightsFrom(bodyMetrics);
         if (!hasSufficientWeightData(weights.keySet())) return false;
 
-        NutrientGoalsDto goals = calculateFor(user, weights);
-        int limitedCalories = limitCalorieChange(user.getGoalCalories(), goals.getGoalCalories());
-        if (limitedCalories != goals.getGoalCalories()) {
-            // Rebuild macros around the limited calorie goal so they still add up to it
-            goals = buildGoalsForCalories(limitedCalories, goals.getGoalProtein(), user.getSexType(), user.getAge());
-        }
-        apply(user, goals);
+        // A calorie goal the user set stays put; only the macros follow their weight
+        apply(user, user.getCustomCalorieGoal() != null
+                ? goalsForCustomCalories(user, weights)
+                : automaticGoals(user, weights, bodyFatFrom(bodyMetrics), true));
         return true;
     }
 
@@ -82,12 +91,20 @@ public class NutrientsServiceImpl implements NutrientsService {
         return windowEnd().minusDays(HISTORY_DAYS - 1);
     }
 
-    private Map<LocalDate, Double> recentWeights(UserEntity user) {
-        return bodyMetricsRepository
-                .findAllByUserIdAndDateRange(user.getId(), windowStart(), windowEnd())
-                .stream()
+    private List<BodyMetricsLogEntity> recentBodyMetrics(UserEntity user) {
+        return bodyMetricsRepository.findAllByUserIdAndDateRange(user.getId(), windowStart(), windowEnd());
+    }
+
+    private static Map<LocalDate, Double> weightsFrom(List<BodyMetricsLogEntity> bodyMetrics) {
+        return bodyMetrics.stream()
                 .filter(log -> log.getWeight() != null)
                 .collect(Collectors.toMap(log -> log.getId().getDate(), BodyMetricsLogEntity::getWeight));
+    }
+
+    private static Map<LocalDate, Double> bodyFatFrom(List<BodyMetricsLogEntity> bodyMetrics) {
+        return bodyMetrics.stream()
+                .filter(log -> log.getBodyFat() != null && log.getBodyFat() > 0)
+                .collect(Collectors.toMap(log -> log.getId().getDate(), BodyMetricsLogEntity::getBodyFat));
     }
 
     private Map<LocalDate, Integer> recentCalories(UserEntity user) {
@@ -96,6 +113,32 @@ public class NutrientsServiceImpl implements NutrientsService {
                 .stream()
                 .filter(day -> day.getCurrentCalories() != null && day.getCurrentCalories() > 0)
                 .collect(Collectors.toMap(day -> day.getId().getDate(), MetricsEntity::getCurrentCalories));
+    }
+
+    // --- Turning history into goals ---
+
+    private NutrientGoalsDto automaticGoals(UserEntity user, Map<LocalDate, Double> weights,
+                                            Map<LocalDate, Double> bodyFat, boolean limitChange) {
+        NutrientGoalsDto goals = calculateFor(user, weights);
+        Integer currentGoal = user.getGoalCalories();
+        if (currentGoal == null) return goals;
+
+        int calories = goals.getGoalCalories();
+        // On a bulk, fat mass going up means there's already a surplus, so eating more would
+        // mostly add fat. Hold calories instead of raising them.
+        if (user.getMainGoal() == MainGoal.BUILD_MUSCLE
+                && calories > currentGoal
+                && fatMassRising(weights, bodyFat)) {
+            calories = currentGoal;
+        }
+        if (limitChange) {
+            calories = limitCalorieChange(currentGoal, calories);
+        }
+        if (calories == goals.getGoalCalories()) return goals;
+
+        // Rebuild macros around the adjusted calorie goal so they still add up to it
+        return buildGoalsForCalories(
+                calories, proteinGrams(weights, user.getWeightType()), user.getSexType(), user.getAge());
     }
 
     private NutrientGoalsDto calculateFor(UserEntity user, Map<LocalDate, Double> weights) {
@@ -112,6 +155,12 @@ public class NutrientsServiceImpl implements NutrientsService {
                 user.getTrainingExperience());
     }
 
+    private static NutrientGoalsDto goalsForCustomCalories(UserEntity user, Map<LocalDate, Double> weights) {
+        return buildGoalsForCalories(
+                user.getCustomCalorieGoal(), proteinGrams(weights, user.getWeightType()),
+                user.getSexType(), user.getAge());
+    }
+
     private void apply(UserEntity user, NutrientGoalsDto goals) {
         nutrientGoalsMapper.updateUserWithGoals(goals, user);
         user.setGoalsUpdatedAt(LocalDate.now());
@@ -119,10 +168,11 @@ public class NutrientsServiceImpl implements NutrientsService {
     }
 
     /**
-     * Checks that at least 3 of the 4 weeks in the window have 4 or more days of weight data.
+     * Checks that at least 3 of the last 4 weeks have 4 or more days of weight data, so the
+     * scheduler only moves goals for people who are still weighing in.
      */
     private static boolean hasSufficientWeightData(Collection<LocalDate> weighInDates) {
-        LocalDate start = windowStart();
+        LocalDate start = windowEnd().minusDays(27);
         int weeksPassing = 0;
         for (int week = 0; week < 4; week++) {
             LocalDate weekStart = start.plusDays((long) week * 7);
@@ -135,8 +185,7 @@ public class NutrientsServiceImpl implements NutrientsService {
         return weeksPassing >= 3;
     }
 
-    private static int limitCalorieChange(Integer currentGoal, int newGoal) {
-        if (currentGoal == null) return newGoal;
+    private static int limitCalorieChange(int currentGoal, int newGoal) {
         int change = Math.clamp(newGoal - currentGoal, -MAX_CALORIE_CHANGE_PER_RUN, MAX_CALORIE_CHANGE_PER_RUN);
         return currentGoal + change;
     }
@@ -169,42 +218,15 @@ public class NutrientsServiceImpl implements NutrientsService {
                 ? (weightChangeAmount * caloriesPerUnit / 7.0)
                 : 0.0;
 
-        // Use the most recent 14 days as the weight baseline for protein/macro calculations
-        LocalDate latestDate = weightHistory.keySet().stream().max(LocalDate::compareTo).orElse(LocalDate.now());
-        LocalDate cutoff = latestDate.minusDays(14);
-        double avgRecentWeight = weightHistory.entrySet().stream()
-                .filter(e -> !e.getKey().isBefore(cutoff))
-                .mapToDouble(Map.Entry::getValue)
-                .average()
-                .orElseGet(() -> weightHistory.values().stream().mapToDouble(Double::doubleValue).average().orElse(0));
-
-        double weightKg = weightType == WeightType.LBS ? avgRecentWeight / 2.205 : avgRecentWeight;
+        double weightKg = recentWeightKg(weightHistory, weightType);
 
         // Fit a straight line through every weigh-in to get the weekly trend. Using each day
         // (rather than weekly averages) keeps a single weigh-in, like one that lands alone in a
-        // partial last week, from pulling the trend much harder than the others.
-        double actualWeeklyChange = 0;
-        boolean hasTrend = false;
-        if (weightHistory.size() >= 2) {
-            LocalDate firstDate = Collections.min(weightHistory.keySet());
-            int n = weightHistory.size();
-            double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, spanWeeks = 0;
-            for (Map.Entry<LocalDate, Double> entry : weightHistory.entrySet()) {
-                double x = ChronoUnit.DAYS.between(firstDate, entry.getKey()) / 7.0; // weeks since first weigh-in
-                double y = entry.getValue();
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumXX += x * x;
-                spanWeeks = Math.max(spanWeeks, x);
-            }
-            double denom = n * sumXX - sumX * sumX;
-            // Need at least a week between the first and last weigh-in for a meaningful trend
-            if (spanWeeks >= 1 && denom != 0) {
-                actualWeeklyChange = (n * sumXY - sumX * sumY) / denom; // weight units per week
-                hasTrend = true;
-            }
-        }
+        // partial last week, from pulling the trend much harder than the others. It needs at
+        // least a week between the first and last weigh-in to mean anything.
+        OptionalDouble trend = weeklyTrend(weightHistory, 1);
+        boolean hasTrend = trend.isPresent();
+        double actualWeeklyChange = trend.orElse(0); // weight units per week
 
         // Days under half the current goal are probably incomplete logs, so leave them out.
         // There's no current goal yet during onboarding, so use a fixed cutoff then.
@@ -265,8 +287,64 @@ public class NutrientsServiceImpl implements NutrientsService {
             }
         }
 
-        int proteinGrams = (int) Math.round(weightKg * 2);
-        return buildGoalsForCalories((int) Math.round(goalCalories), proteinGrams, sex, age);
+        return buildGoalsForCalories((int) Math.round(goalCalories), proteinGrams(weightHistory, weightType), sex, age);
+    }
+
+    /**
+     * Slope of a least-squares line through the points, in units per week. Empty when the
+     * points span less than minSpanWeeks.
+     */
+    static OptionalDouble weeklyTrend(Map<LocalDate, Double> points, double minSpanWeeks) {
+        if (points.size() < 2) return OptionalDouble.empty();
+
+        LocalDate firstDate = Collections.min(points.keySet());
+        int n = points.size();
+        double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, spanWeeks = 0;
+        for (Map.Entry<LocalDate, Double> entry : points.entrySet()) {
+            double x = ChronoUnit.DAYS.between(firstDate, entry.getKey()) / 7.0; // weeks since the first point
+            double y = entry.getValue();
+            sumX += x;
+            sumY += y;
+            sumXY += x * y;
+            sumXX += x * x;
+            spanWeeks = Math.max(spanWeeks, x);
+        }
+        double denom = n * sumXX - sumX * sumX;
+        if (spanWeeks < minSpanWeeks || denom == 0) return OptionalDouble.empty();
+        return OptionalDouble.of((n * sumXY - sumX * sumY) / denom);
+    }
+
+    /**
+     * Whether fat mass (weight × body-fat %) is trending up, using days with both readings.
+     * False when there aren't enough readings to tell.
+     */
+    static boolean fatMassRising(Map<LocalDate, Double> weights, Map<LocalDate, Double> bodyFatPercent) {
+        Map<LocalDate, Double> fatMass = new HashMap<>();
+        bodyFatPercent.forEach((date, percent) -> {
+            Double weight = weights.get(date);
+            if (weight != null) fatMass.put(date, weight * percent / 100);
+        });
+        if (fatMass.size() < MIN_BODY_FAT_READINGS) return false;
+
+        double averageWeight = fatMass.keySet().stream().mapToDouble(weights::get).average().orElse(0);
+        return weeklyTrend(fatMass, MIN_BODY_FAT_SPAN_WEEKS).orElse(0) > averageWeight * MIN_FAT_GAIN_PER_WEEK;
+    }
+
+    private static int proteinGrams(Map<LocalDate, Double> weightHistory, WeightType weightType) {
+        return (int) Math.round(recentWeightKg(weightHistory, weightType) * PROTEIN_GRAMS_PER_KG);
+    }
+
+    /** Average of the last 14 days of weigh-ins, in kg. The baseline for protein and the BMR formula. */
+    private static double recentWeightKg(Map<LocalDate, Double> weightHistory, WeightType weightType) {
+        LocalDate latestDate = weightHistory.keySet().stream().max(LocalDate::compareTo).orElse(LocalDate.now());
+        LocalDate cutoff = latestDate.minusDays(14);
+        double avgRecentWeight = weightHistory.entrySet().stream()
+                .filter(e -> !e.getKey().isBefore(cutoff))
+                .mapToDouble(Map.Entry::getValue)
+                .average()
+                .orElseGet(() -> weightHistory.values().stream().mapToDouble(Double::doubleValue).average().orElse(0));
+
+        return weightType == WeightType.LBS ? avgRecentWeight / 2.205 : avgRecentWeight;
     }
 
     /**
@@ -274,8 +352,7 @@ public class NutrientsServiceImpl implements NutrientsService {
      * to a safe minimum if needed, so the returned goalCalories can be higher than requested.
      */
     static NutrientGoalsDto buildGoalsForCalories(int goalCalories, int proteinGrams, GenderType sex, Integer age) {
-        int minCalories = (sex == GenderType.MALE) ? MIN_CALORIES_MALE : MIN_CALORIES_FEMALE;
-        int calories = Math.max(goalCalories, minCalories);
+        int calories = Math.max(goalCalories, NutrientsService.minimumCalories(sex));
 
         // --- Macronutrients ---
         int fatCalories = (int) (calories * 0.25);

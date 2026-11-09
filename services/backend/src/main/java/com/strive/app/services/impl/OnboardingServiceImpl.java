@@ -66,7 +66,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
             if (onboardingFinished) {
                 nextOnboardingStep = 0;
-                nutrientsService.recalculate(existingUser);
+                nutrientsService.recalculate(existingUser, false);
             }
             existingUser.setOnBoardingStep(nextOnboardingStep);
 

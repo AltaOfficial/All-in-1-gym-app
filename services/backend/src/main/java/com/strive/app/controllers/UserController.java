@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ public class UserController {
     // Same choices the app offers during onboarding (lbs or kg per week, in the user's unit)
     private static final double DEFAULT_WEEKLY_CHANGE = 0.5;
     private static final double MAX_WEEKLY_CHANGE = 1.0;
+    private static final int MAX_CUSTOM_CALORIES = 6000;
 
     private final UserService userService;
     private final Mapper<UserEntity, UserDto> userMapper;
@@ -98,7 +100,19 @@ public class UserController {
 
             UserDetails userDetails = authenticationService.validateToken(jwtToken.substring(7));
             UserEntity userEntity = userService.findByEmail(userDetails.getUsername());
+
+            Integer customCalories = settingsUpdateRequestDto.getCustomCalorieGoal();
+            int minCalories = NutrientsService.minimumCalories(userEntity.getSexType());
+            if (customCalories != null && customCalories != 0
+                    && (customCalories < minCalories || customCalories > MAX_CUSTOM_CALORIES)) {
+                return new ResponseEntity<>(
+                        "customCalorieGoal must be between " + minCalories + " and " + MAX_CUSTOM_CALORIES,
+                        HttpStatus.BAD_REQUEST);
+            }
+
             MainGoal previousGoal = userEntity.getMainGoal();
+            Double previousWeeklyChange = userEntity.getWeightChangeAmount();
+            Integer previousCustomCalories = userEntity.getCustomCalorieGoal();
 
             // Update user fields if provided
             if (settingsUpdateRequestDto.getMainGoal() != null) {
@@ -114,11 +128,20 @@ public class UserController {
                 userEntity.setAge(settingsUpdateRequestDto.getAge());
             }
 
+            if (customCalories != null) {
+                userEntity.setCustomCalorieGoal(customCalories == 0 ? null : customCalories);
+            }
+
             updateWeeklyChange(userEntity, previousGoal, weeklyChange);
 
             // Recalculate from the user's recent logs, so a calorie estimate learned from
-            // their logs isn't replaced by the generic formula
-            nutrientsService.recalculate(userEntity);
+            // their logs isn't replaced by the generic formula. Unless the user changed what
+            // they're aiming for, move calories gradually like the scheduler does, so editing
+            // something like their age can't swing the goal by hundreds of calories.
+            boolean planChanged = userEntity.getMainGoal() != previousGoal
+                    || !Objects.equals(userEntity.getWeightChangeAmount(), previousWeeklyChange)
+                    || !Objects.equals(userEntity.getCustomCalorieGoal(), previousCustomCalories);
+            nutrientsService.recalculate(userEntity, !planChanged);
             userService.save(userEntity);
 
             return new ResponseEntity<>("Settings updated successfully", HttpStatus.OK);
