@@ -15,4 +15,5 @@ public class SettingsUpdateRequestDto {
     private Integer weight;
     private Integer heightInInches;
     private Integer age;
+    private Double weightChangeAmount;
 }

@@ -1,24 +1,19 @@
 package com.strive.app.services.impl;
 
-import com.strive.app.domain.dto.NutrientGoalsDto;
 import com.strive.app.domain.dto.OnboardingUpdateRequestDto;
 import com.strive.app.domain.entities.UserEntity;
-import com.strive.app.mappers.NutrientGoalsMapper;
+import com.strive.app.enums.MainGoal;
 import com.strive.app.repositories.UserRepository;
 import com.strive.app.services.NutrientsService;
 import com.strive.app.services.OnboardingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class OnboardingServiceImpl implements OnboardingService {
     private final UserRepository userRepository;
     private final NutrientsService nutrientsService;
-    private final NutrientGoalsMapper nutrientGoalsMapper;
 
     @Override
     public UserEntity updateOnboardingStep(String email, OnboardingUpdateRequestDto onboardingUpdateRequestDto) {
@@ -48,16 +43,30 @@ public class OnboardingServiceImpl implements OnboardingService {
                 nextOnboardingStep = 6;
             }
 
+            boolean onboardingFinished = false;
+
             if (onboardingUpdateRequestDto.getMainGoal() != null) {
                 existingUser.setMainGoal(onboardingUpdateRequestDto.getMainGoal());
                 nextOnboardingStep = 7;
+                // Maintain has no weekly rate, so the app skips that screen and onboarding ends here
+                if (existingUser.getMainGoal() == MainGoal.MAINTAIN) {
+                    existingUser.setWeightChangeAmount(null);
+                    onboardingFinished = true;
+                }
             }
 
             if (onboardingUpdateRequestDto.getWeightChangeAmount() != null) {
-                existingUser.setWeightChangeAmount(onboardingUpdateRequestDto.getWeightChangeAmount());
+                // Users who picked Maintain on an older app version can still land on the weekly
+                // rate screen. Let them finish, but don't store a rate that Maintain doesn't use.
+                existingUser.setWeightChangeAmount(existingUser.getMainGoal() == MainGoal.MAINTAIN
+                        ? null
+                        : onboardingUpdateRequestDto.getWeightChangeAmount());
+                onboardingFinished = true;
+            }
+
+            if (onboardingFinished) {
                 nextOnboardingStep = 0;
-                NutrientGoalsDto nutrientGoalsDto = nutrientsService.calculateNutrientGoals(existingUser.getGoalCalories(), existingUser.getAge(), Map.of(LocalDate.now(), existingUser.getWeight().doubleValue()), Map.of(), existingUser.getWeightType(), existingUser.getSexType(), existingUser.getHeightInInches(), existingUser.getWeightChangeAmount(), existingUser.getMainGoal(), existingUser.getTrainingExperience());
-                nutrientGoalsMapper.updateUserWithGoals(nutrientGoalsDto, existingUser);
+                nutrientsService.recalculate(existingUser);
             }
             existingUser.setOnBoardingStep(nextOnboardingStep);
 

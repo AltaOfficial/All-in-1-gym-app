@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -75,6 +76,9 @@ public class UserEntity {
     private Integer goalCholesterol;
     private Integer goalSodium;
     private Integer goalPotassium;
+
+    // When goals were last calculated, so the scheduler knows when they're due again
+    private LocalDate goalsUpdatedAt;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "meals")

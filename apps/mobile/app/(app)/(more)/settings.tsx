@@ -7,13 +7,32 @@ import { router } from "expo-router";
 import GenericButton from "../../../components/GenericButton";
 import { MetricsContext } from "../../../context/MetricsContext";
 
+// Same choices as onboarding's weekly change screen
+const WEEKLY_CHANGE_OPTIONS = [0.2, 0.5, 0.8, 1.0];
+const DEFAULT_WEEKLY_CHANGE = 0.5;
+
 export default function Settings() {
   const { refreshMetrics } = useContext(MetricsContext);
   const [mainGoal, setMainGoal] = useState("LOSE_FAT");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [age, setAge] = useState("");
+  const [weightType, setWeightType] = useState("LBS");
+  const [weeklyChange, setWeeklyChange] = useState(DEFAULT_WEEKLY_CHANGE);
+  // What's saved on the server, so switching back to the saved goal restores its rate
+  const [savedGoal, setSavedGoal] = useState<string | null>(null);
+  const [savedWeeklyChange, setSavedWeeklyChange] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleGoalChange = (newGoal: string) => {
+    setMainGoal(newGoal);
+    // A rate picked for losing shouldn't carry over to gaining, so reset it on a goal switch
+    setWeeklyChange(
+      newGoal === savedGoal && savedWeeklyChange
+        ? savedWeeklyChange
+        : DEFAULT_WEEKLY_CHANGE
+    );
+  };
 
   useEffect(() => {
     // Fetch current user data on mount
@@ -35,7 +54,15 @@ export default function Settings() {
 
         if (response.ok) {
           const userData = await response.json();
-          if (userData.mainGoal) setMainGoal(userData.mainGoal);
+          if (userData.mainGoal) {
+            setMainGoal(userData.mainGoal);
+            setSavedGoal(userData.mainGoal);
+          }
+          if (userData.weightChangeAmount) {
+            setWeeklyChange(userData.weightChangeAmount);
+            setSavedWeeklyChange(userData.weightChangeAmount);
+          }
+          if (userData.weightType) setWeightType(userData.weightType);
           if (userData.weight) setWeight(userData.weight.toString());
           if (userData.heightInInches)
             setHeight(userData.heightInInches.toString());
@@ -60,9 +87,11 @@ export default function Settings() {
         weight?: number;
         heightInInches?: number;
         age?: number;
+        weightChangeAmount?: number;
       } = {};
 
       if (mainGoal) requestBody.mainGoal = mainGoal;
+      if (mainGoal !== "MAINTAIN") requestBody.weightChangeAmount = weeklyChange;
       if (weight) requestBody.weight = parseInt(weight);
       if (height) requestBody.heightInInches = parseInt(height);
       if (age) requestBody.age = parseInt(age);
@@ -119,7 +148,7 @@ export default function Settings() {
             >
               <Picker
                 selectedValue={mainGoal}
-                onValueChange={(itemValue) => setMainGoal(itemValue)}
+                onValueChange={(itemValue) => handleGoalChange(itemValue)}
                 style={{
                   color: "white",
                   backgroundColor: "black",
@@ -145,6 +174,39 @@ export default function Settings() {
               </Picker>
             </View>
           </View>
+
+          {/* Weekly Change Dropdown (Maintain has no rate) */}
+          {mainGoal !== "MAINTAIN" && (
+            <View className="flex-col gap-2 mt-4">
+              <Text className="text-white text-lg font-[HelveticaNeue]">
+                Weekly Change
+              </Text>
+              <View
+                className="border-gray2 border rounded-2xl overflow-hidden h-14 justify-center"
+                style={{ backgroundColor: "black" }}
+              >
+                <Picker
+                  selectedValue={weeklyChange}
+                  onValueChange={(itemValue) => setWeeklyChange(itemValue)}
+                  style={{
+                    color: "white",
+                    backgroundColor: "black",
+                  }}
+                  dropdownIconColor="white"
+                  mode="dropdown"
+                >
+                  {WEEKLY_CHANGE_OPTIONS.map((option) => (
+                    <Picker.Item
+                      key={option}
+                      label={`${mainGoal === "LOSE_FAT" ? "Lose" : "Gain"} ${option.toFixed(1)} ${weightType === "KGS" ? "Kgs" : "Lbs"} per week`}
+                      value={option}
+                      style={{ backgroundColor: "black", color: "white" }}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          )}
 
           {/* Weight Input */}
           <View className="flex-col gap-2 mt-4">

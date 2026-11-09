@@ -76,7 +76,15 @@ export async function checkAccountNeedsOnboarding(
         break;
       case 7:
         setOnboardingStepCategory(OnboardingStepCategory.Goals);
-        router.push("/(loginFlow)/(onboardingFlow)/weeklyWeightChangeFlow");
+        if (account.mainGoal === "MAINTAIN") {
+          // Maintain has no weekly rate. Older versions left these users stuck at this step,
+          // so send them back to the goal screen, which now finishes onboarding for Maintain.
+          router.push("/(loginFlow)/(onboardingFlow)/mainGoalFlow");
+        } else {
+          router.push(
+            `/(loginFlow)/(onboardingFlow)/weeklyWeightChangeFlow?mainGoal=${account.mainGoal}`
+          );
+        }
         break;
     }
   } else if (account.onBoardingStep > 0) {
