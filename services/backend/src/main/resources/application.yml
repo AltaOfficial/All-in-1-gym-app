@@ -72,6 +72,8 @@ app:
   # Public host name (no scheme). Used for the OAuth issuer and image URLs.
   # Railway sets RAILWAY_PUBLIC_DOMAIN; APP_HOST overrides it (e.g. a custom domain).
   host: ${APP_HOST:${RAILWAY_PUBLIC_DOMAIN:localhost:8000}}
+  # One-off copy of Azure Blob images into the S3 bucket at startup.
+  migrate-azure-images: ${MIGRATE_AZURE_IMAGES:false}
 storage:
   s3:
     endpoint: ${S3_ENDPOINT}

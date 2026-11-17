@@ -1,6 +1,6 @@
 package com.strive.app.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.strive.app.domain.dto.UsdaFoodNutrientDetails;
 import com.strive.app.domain.dto.UsdaResponseDto;
 import com.strive.app.domain.dto.UsdaSearchRequestDto;

@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 @EnableScheduling
 public class AppApplication implements CommandLineRunner {
 
-    @Value("${SERVER_PORT}")
+    @Value("${server.port}")
     private int serverPort;
 
 	public static void main(String[] args) {
