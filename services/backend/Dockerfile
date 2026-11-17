@@ -1,15 +1,22 @@
-# Stage 1: Build the application
+# Stage 1: build
 FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /home/app
 
+# Used by sentry-maven-plugin to upload the source bundle during package
 ARG SENTRY_AUTH_TOKEN
-ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
-COPY . /home/app
-RUN mvn -f /home/app/pom.xml clean package -DskipTests
+# Dependency layer: cached until pom.xml changes
+COPY pom.xml .
+RUN mvn -B -q dependency:go-offline || true
 
-# Stage 2: Run the application
-FROM amazoncorretto:21
-COPY --from=build /home/app/target/*.jar /usr/local/lib/app.jar
+COPY src ./src
+RUN mvn -B clean package -DskipTests
+
+# Stage 2: run
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /home/app/target/*.jar app.jar
+
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 EXPOSE 8000
-ENTRYPOINT ["java","-jar","/usr/local/lib/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

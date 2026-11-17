@@ -43,8 +43,8 @@ public class SecurityConfig {
     @Value("${RSA_JWK}")
     private String jwkJson;
 
-    // azure autopopulates WEBSITE_HOSTNAME
-    @Value("${WEBSITE_HOSTNAME:localhost:8000}")
+    // public host name; resolved in application.yml (app.host)
+    @Value("${app.host}")
     private String hostname;
 
     private String serverHost() {
@@ -123,7 +123,7 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthenticationService authenticationService) throws Exception {
         httpSecurity.authorizeHttpRequests(auth -> auth
-                                .requestMatchers( "/auth/**").permitAll()
+                                .requestMatchers("/auth/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
         )
                 .csrf(csrf -> csrf.disable())
